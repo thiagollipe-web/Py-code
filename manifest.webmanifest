@@ -6,5 +6,5 @@
   "display":"standalone",
   "background_color":"#000000",
   "theme_color":"#050505",
-  "description":"Editor Python educacional executado no navegador."
+  "description":"Ambiente educacional para programar em Python com blocos, HTML e Canvas."
 }
