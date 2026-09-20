@@ -245,3 +245,6 @@ def reiniciar_programa():
     cenas = {}
     cena_atual = None
     pontuacao = 0
+
+
+__pycode_engine_names.add("reiniciar_programa")
