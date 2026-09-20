@@ -17,8 +17,8 @@ async function boot(){
   importScripts("https://cdn.jsdelivr.net/pyodide/v0.28.2/full/pyodide.js");
   pyodide=await loadPyodide({
     indexURL:"https://cdn.jsdelivr.net/pyodide/v0.28.2/full/",
-    stdout:{raw:true,batched:lines=>send("stdout",{value:String(lines||"")})},
-    stderr:{raw:true,batched:lines=>send("stderr",{value:String(lines||"")})}
+    stdout:{batched:lines=>send("stdout",{value:String(lines||"")})},
+    stderr:{batched:lines=>send("stderr",{value:String(lines||"")})}
   });
   const engine=await fetch("./pycode_worker.py").then(r=>{if(!r.ok)throw Error("Engine Py-Code não encontrada.");return r.text()});
   pyodide.runPython(engine);
