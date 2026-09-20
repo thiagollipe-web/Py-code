@@ -141,7 +141,7 @@ document.querySelectorAll(".touch").forEach(btn=>{
   btn.addEventListener("pointerdown",down);
 });
 
-function setOutput(t){output.textContent=String(t??"")}
+function setOutput(t){output.textContent=String(t??"")}\nfunction appendOutput(value){const text=String(value??"");if(!text)return;output.textContent+=(output.textContent?"\\n":"")+text}\nfunction appendErrorOutput(value){const text=String(value??"");if(!text)return;output.textContent+=(output.textContent?"\\n":"")+"ERRO: "+text}
 function setStatus(t){status.textContent=t}
 function clearCanvas(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle="#000";ctx.fillRect(0,0,canvas.width,canvas.height)}
 function salvar(){localStorage.setItem("pycode_codigo",editor.value)}
@@ -299,7 +299,7 @@ async function carregarPython(){
   try{
     for(let i=0;i<100&&typeof loadPyodide!=="function";i++)await new Promise(r=>setTimeout(r,100));
     if(typeof loadPyodide!=="function")throw new Error("O carregador do Python não foi encontrado.");
-    pyodide=await loadPyodide({indexURL:"https://cdn.jsdelivr.net/pyodide/v0.28.2/full/"});
+    pyodide=await loadPyodide({\n      indexURL:"https://cdn.jsdelivr.net/pyodide/v0.28.2/full/",\n      stdout:{raw:true,batched:lines=>appendOutput(lines)},\n      stderr:{raw:true,batched:lines=>appendErrorOutput(lines)}\n    });
     const engine=await fetch("./pycode.py").then(r=>{if(!r.ok)throw new Error("Não foi possível carregar a engine do Py-Code.");return r.text()});
     pyodide.runPython(engine);
     setOutput("PY-CODE ONLINE\nPython + blocos + HTML + Canvas prontos.");
