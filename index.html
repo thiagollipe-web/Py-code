@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#050505">
-<meta name="description" content="Py-Code — editor Python executado no navegador com Pyodide.">
+<meta name="description" content="Py-Code — terminal Python executado no navegador com Pyodide.">
 <meta name="application-name" content="Py-Code">
 <link rel="manifest" href="./manifest.webmanifest">
-<title>Py-Code | Python no navegador</title>
+<title>Py-Code | Terminal Python</title>
 <style>
 :root{--bg:#000;--panel:#050505;--fg:#00ff66;--muted:#74a98b;--border:#00ff66;--editor:#001407}
 *{box-sizing:border-box}
@@ -23,8 +23,6 @@ header{background:var(--panel);border-bottom:2px solid var(--border);padding:10p
 main{height:calc(100dvh - 89px);display:grid;grid-template-rows:minmax(260px,1fr) minmax(220px,.85fr);min-height:0}
 #code:focus{box-shadow:inset 0 0 0 1px var(--border)}
 #editor-container{min-height:0;border-bottom:2px solid var(--border);background:var(--editor);display:flex;flex-direction:column}
-#editor-toolbar{display:flex;gap:8px;align-items:center;padding:6px 8px;border-bottom:1px solid var(--border);font-size:11px}
-#editor-toolbar select{min-height:34px;background:#000;color:var(--fg);border:1px solid var(--border);border-radius:5px;font:inherit;padding:5px 8px}
 #code{flex:1;width:100%;resize:none;border:0;outline:none;padding:12px;background:#001407;color:#00ff66;font:14px/1.5 "Courier New",monospace;tab-size:4;white-space:pre}
 #code.light-editor{background:#fff;color:#161616}
 #display{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,42%);background:#000}
@@ -40,7 +38,7 @@ canvas{display:block;width:min(100%,500px);height:auto;max-height:100%;aspect-ra
  #output{border-right:0;border-bottom:1px solid var(--border)}#game{min-height:180px}
 }
 @media (max-width:480px){
- #editor-toolbar{flex-wrap:wrap}#code{font-size:13px;min-height:280px}
+ #code{font-size:13px;min-height:280px}
  header{padding:8px}.brand{font-size:17px}.controls{width:100%}
  button{padding:9px 10px;font-size:12px;flex:1}.top{align-items:flex-start}
 }
@@ -48,7 +46,7 @@ canvas{display:block;width:min(100%,500px);height:auto;max-height:100%;aspect-ra
 </head>
 <body>
 <header><div class="top">
-<div><div class="brand">PY-CODE</div><div id="status" class="status">Inicializando editor…</div></div>
+<div><div class="brand">PY-CODE TERMINAL</div><div id="status" class="status">Inicializando editor…</div></div>
 <div id="online" class="status" aria-live="polite">● ONLINE</div>
 <div class="controls">
 <button id="theme-btn" type="button">TEMA: PRETO</button>
@@ -58,10 +56,6 @@ canvas{display:block;width:min(100%,500px);height:auto;max-height:100%;aspect-ra
 </div></div></header>
 <main>
 <section id="editor-container" aria-label="Editor Python">
-  <div id="editor-toolbar">
-    <label for="example-select">EXEMPLO</label>
-    <select id="example-select"><option value="">— escolher —</option></select>
-  </div>
   <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Código Python"></textarea>
 </section>
 <section id="display"><pre id="output" aria-live="polite">Preparando o ambiente Python…</pre>
@@ -76,8 +70,6 @@ const output=$("output"),status=$("status"),run=$("run-btn"),themeBtn=$("theme-b
 const canvas=$("canvas"),ctx=canvas.getContext("2d");
 let pyodide=null,dark=true,executando=false;
 
-const EXEMPLOS={"Olá mundo":"print(\"Olá, Py-Code!\")","Desenho":"from js import document\\ncanvas = document.getElementById(\"canvas\")\\nctx = canvas.getContext(\"2d\")\\nctx.fillStyle = \"#00ff66\"\\nctx.fillRect(70, 70, 160, 160)","Pong simples":"import random\\nprint(\"PONG\")\\nprint(\"Use este exemplo para testar Python no navegador.\")","Laço":"for i in range(1, 11):\\n    print(\"Número:\", i)"};
-
 function setOutput(t){output.textContent=String(t??"")}
 function setStatus(t){status.textContent=t}
 function clearCanvas(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle="#000";ctx.fillRect(0,0,canvas.width,canvas.height)}
@@ -85,12 +77,6 @@ function salvar(){localStorage.setItem("pycode_codigo",editor.value)}
 function carregar(){const s=localStorage.getItem("pycode_codigo");editor.value=s??"# Bem-vindo ao Py-Code\nprint(\"Olá, Py-Code!\")\n\n# Experimente:\nfor i in range(5):\n    print(\"Número:\", i)\n"}
 function resetarCodigo(){editor.value="# Bem-vindo ao Py-Code\nprint(\"Olá, Py-Code!\")\n\n# Experimente:\nfor i in range(5):\n    print(\"Número:\", i)\n";salvar()}
 
-function iniciarExemplos(){
-  Object.keys(EXEMPLOS).forEach(nome=>{
-    const o=document.createElement("option");o.value=nome;o.textContent=nome;example.appendChild(o);
-  });
-}
-example.onchange=()=>{if(EXEMPLOS[example.value]){editor.value=EXEMPLOS[example.value];salvar();setOutput("Exemplo carregado: "+example.value)}};
 editor.addEventListener("input",salvar);
 editor.addEventListener("keydown",e=>{
   if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();if(!run.disabled)run.click()}
@@ -163,6 +149,6 @@ function atualizarRede(){online.textContent=navigator.onLine?"● ONLINE":"● O
 addEventListener("online",atualizarRede);addEventListener("offline",atualizarRede);
 atualizarRede();
 if("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(()=>{});
-carregar();iniciarExemplos();clearCanvas();carregarPython();
+carregar();clearCanvas();carregarPython();
 
 </script></body></html>
