@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#020402"/>
+    <stop offset="1" stop-color="#06200d"/>
+  </linearGradient>
+  <filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<rect width="1200" height="420" rx="28" fill="url(#bg)"/>
+<rect x="35" y="35" width="1130" height="350" rx="18" fill="#000" stroke="#00ff66" stroke-width="3"/>
+<circle cx="75" cy="75" r="8" fill="#00ff66"/>
+<circle cx="103" cy="75" r="8" fill="#00aa44"/>
+<circle cx="131" cy="75" r="8" fill="#006f2d"/>
+<text x="72" y="145" fill="#00ff66" font-family="monospace" font-size="64" font-weight="700" filter="url(#glow)">PY-CODE</text>
+<text x="72" y="195" fill="#9fe8b4" font-family="monospace" font-size="25">PYTHON • BROWSER • EDUCATION • CANVAS</text>
+<text x="72" y="255" fill="#00ff66" font-family="monospace" font-size="24">&gt; escreva()  →  execute()  →  crie()</text>
+<text x="72" y="300" fill="#74a98b" font-family="monospace" font-size="21">Um laboratório de programação que roda online.</text>
+<g transform="translate(850 112)" stroke="#00ff66" fill="none" stroke-width="3">
+  <rect x="0" y="0" width="240" height="150" rx="12"/>
+  <path d="M25 32h190M38 68l35 27-35 27M93 122h65"/>
+</g>
+</svg>
