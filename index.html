@@ -107,29 +107,29 @@ window.__pycode_keys=new Set();
 
 const BLOCOS={
 Movimento:[
-["CRIAR SPRITE","jogador = Sprite(40, 120, 24, 24, \\"#00ff66\\")","block-mov"],
+["CRIAR SPRITE","jogador = Sprite(40, 120, 24, 24, \"#00ff66\")","block-mov"],
 ["MOVER","jogador.mover(2, 0)","block-mov"],
 ["VELOCIDADE","jogador.velocidade(2, 0)","block-mov"]],
 Controle:[
-["ATUALIZAR JOGO","def atualizar():\\n    limpar(\\"#081018\\")\\n    jogador.desenhar()","block-ctrl"],
-["SE TECLA","if pressionado(\\"ArrowRight\\"):\\n    jogador.mover(2, 0)","block-ctrl"],
+["ATUALIZAR JOGO","def atualizar():\\n    limpar(\"#081018\")\\n    jogador.desenhar()","block-ctrl"],
+["SE TECLA","if pressionado(\"ArrowRight\"):\\n    jogador.mover(2, 0)","block-ctrl"],
 ["REPETIR","for i in range(10):\\n    print(i)","block-ctrl"]],
 HTML:[
-["STATUS","definir_status(\\"Jogo iniciado!\\")","block-ent"],
-["TEXTO HTML","mostrar_texto_html(\\"Olá!\\")","block-ent"]],
+["STATUS","definir_status(\"Jogo iniciado!\")","block-ent"],
+["TEXTO HTML","mostrar_texto_html(\"Olá!\")","block-ent"]],
 Aparência:[
-["LIMPAR TELA","limpar(\\"#081018\\")","block-apa"],
-["RETÂNGULO","retangulo(100, 60, 30, 30, \\"#00ff66\\")","block-apa"],
-["CÍRCULO","circulo(160, 90, 15, \\"#ffcc00\\")","block-apa"],
-["TEXTO","texto(\\"Olá!\\", 10, 20)","block-apa"]],
+["LIMPAR TELA","limpar(\"#081018\")","block-apa"],
+["RETÂNGULO","retangulo(100, 60, 30, 30, \"#00ff66\")","block-apa"],
+["CÍRCULO","circulo(160, 90, 15, \"#ffcc00\")","block-apa"],
+["TEXTO","texto(\"Olá!\", 10, 20)","block-apa"]],
 Física:[
 ["GRAVIDADE","jogador.gravidade(0.5)\\njogador.no_chao(165)","block-fis"],
-["PULAR","if pressionado(\\"ArrowUp\\"):\\n    jogador.pular(8)","block-fis"],
+["PULAR","if pressionado(\"ArrowUp\"):\\n    jogador.pular(8)","block-fis"],
 ["COLISÃO","if jogador.colide(alvo):\\n    somar_pontos(1)","block-fis"]],
 Entrada:[
-["SE DIREITA","if pressionado(\\"ArrowRight\\"):\\n    jogador.mover(2, 0)","block-ent"],
-["SE ESQUERDA","if pressionado(\\"ArrowLeft\\"):\\n    jogador.mover(-2, 0)","block-ent"],
-["AÇÃO X","if pressionado(\\"x\\"):\\n    tocar(660, 0.08)","block-ent"]],
+["SE DIREITA","if pressionado(\"ArrowRight\"):\\n    jogador.mover(2, 0)","block-ent"],
+["SE ESQUERDA","if pressionado(\"ArrowLeft\"):\\n    jogador.mover(-2, 0)","block-ent"],
+["AÇÃO X","if pressionado(\"x\"):\\n    tocar(660, 0.08)","block-ent"]],
 Som:[
 ["TOCAR SOM","tocar(440, 0.12)","block-som"],
 ["SOM DE PONTO","tocar(880, 0.08)\\nsomar_pontos(1)","block-som"]],
@@ -138,8 +138,8 @@ Pontuação:[
 ["ZERAR PONTOS","zerar_pontos()","block-pont"],
 ["MOSTRAR PONTOS","mostrar_pontos()","block-pont"]],
 Cenas:[
-["CRIAR CENA","def atualizar_jogo():\\n    limpar(\\"#081018\\")\\n    jogador.desenhar()\\ncena(\\"jogo\\", atualizar=atualizar_jogo)\\nmudar_cena(\\"jogo\\")","block-cen"],
-["MUDAR CENA","mudar_cena(\\"jogo\\")","block-cen"],
+["CRIAR CENA","def atualizar_jogo():\\n    limpar(\"#081018\")\\n    jogador.desenhar()\\ncena(\"jogo\", atualizar=atualizar_jogo)\\nmudar_cena(\"jogo\")","block-cen"],
+["MUDAR CENA","mudar_cena(\"jogo\")","block-cen"],
 ["NOME DA CENA","print(cena_atual_nome())","block-cen"]
 ]};
 
