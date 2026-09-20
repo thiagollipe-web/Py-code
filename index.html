@@ -407,22 +407,16 @@ dl.onclick=()=>{
 };
 
 window.addEventListener("error",e=>{
-  if(e?.message){setStatus("Erro no navegador");output.textContent+="
-
-ERRO DO NAVEGADOR:
-"+e.message}
+  if(e?.message){setStatus("Erro no navegador");appendErrorOutput("ERRO DO NAVEGADOR: "+e.message)}
 });
 window.addEventListener("unhandledrejection",e=>{
-  const r=String(e?.reason??"Erro assíncrono");setStatus("Erro assíncrono");output.textContent+="
-
-ERRO ASSÍNCRONO:
-"+r
+  const r=String(e?.reason??"Erro assíncrono");setStatus("Erro assíncrono");appendErrorOutput("ERRO ASSÍNCRONO: "+r);
 });
 const online=$("online");
 function atualizarRede(){online.textContent=navigator.onLine?"REDE ● ONLINE":"REDE ● OFFLINE"}
 addEventListener("online",atualizarRede);addEventListener("offline",atualizarRede);atualizarRede();
 if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
-carregar();clearCanvas();carregarPython();
+carregar();clearCanvas();iniciarWorker();
 </script>
 </body>
 </html>
