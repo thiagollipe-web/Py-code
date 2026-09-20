@@ -333,7 +333,11 @@ run.onclick=async()=>{
   executando=true;run.disabled=true;run.textContent="EXECUTANDO…";
   await pararAnimacao();setOutput("");clearCanvas();
   try{
-    salvar();\n    pyodide.runPython("reiniciar_programa()");\n    window.__pycode_keys.clear();\n    await pyodide.runPythonAsync(editor.value);\n    await iniciarAnimacao();
+    salvar();
+    pyodide.runPython("reiniciar_programa()");
+    window.__pycode_keys.clear();
+    await pyodide.runPythonAsync(editor.value);
+    await iniciarAnimacao();
     output.textContent+=(output.textContent?"\n\n":"")+"OK";
   }catch(e){
     console.error(e);output.textContent+=(output.textContent?"\n\n":"")+"ERRO:\n"+String(e);
