@@ -198,7 +198,7 @@ function renderMensagem(m){
  else if(m.type==="line"){ctx.strokeStyle=m.color;ctx.lineWidth=m.width;ctx.beginPath();ctx.moveTo(m.x1,m.y1);ctx.lineTo(m.x2,m.y2);ctx.stroke()}
  else if(m.type==="text"){ctx.fillStyle=m.color;ctx.font=m.size+"px monospace";ctx.fillText(m.value,m.x,m.y)}
  else if(m.type==="html_status"||m.type==="html_text"){setStatus(m.value)}
- else if(m.type==="sound")tocarSom(m.frequency,m.duration,m.type,m.volume);
+ else if(m.type==="sound")tocarSom(m.frequency,m.duration,m.waveform||"square",m.volume);
  else if(m.type==="image")desenharImagem(m);
 }
 function pararLoop(){if(animationId)cancelAnimationFrame(animationId);animationId=0;frameBusy=false}
