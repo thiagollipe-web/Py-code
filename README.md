@@ -33,7 +33,6 @@ O **Pyodide** permite executar Python no ambiente do navegador. A aplicação ta
 | HTML5 | Estrutura da aplicação |
 | CSS3 | Interface e responsividade |
 | JavaScript | Controle da aplicação |
-| CodeMirror | Editor com realce de sintaxe |
 | Pyodide | Execução de Python no navegador |
 | HTML Canvas | Área gráfica |
 | GitHub Pages | Hospedagem |
@@ -41,7 +40,10 @@ O **Pyodide** permite executar Python no ambiente do navegador. A aplicação ta
 ## ✨ Recursos
 
 ### Editor Python
-Editor no navegador com realce de sintaxe para escrever programas em Python.
+Editor leve no navegador, sem dependência externa de editor, com salvamento automático no navegador.
+
+### Exemplos
+Exemplos prontos de “Olá mundo”, desenho, laços e introdução ao Pong podem ser carregados pelo seletor.
 
 ### Execução de código
 O botão **EXECUTAR** executa o conteúdo do editor usando Pyodide.
@@ -71,7 +73,10 @@ O código pode ser baixado como arquivo `.py`.
 A interface possui tema escuro e tema claro.
 
 ### Mobile
-O layout foi ajustado para utilização também em smartphones e telas pequenas.
+O layout foi ajustado para utilização também em smartphones e telas pequenas. O editor também aceita **Ctrl + Enter** para executar.
+
+### PWA e offline
+O shell da aplicação é armazenado em cache e pode abrir sem conexão depois do primeiro acesso. A execução de Python continua exigindo que os arquivos do Pyodide estejam disponíveis no navegador.
 
 ## 🎨 Identidade visual
 
@@ -131,6 +136,8 @@ A execução depende do navegador e do carregamento dos recursos do Pyodide. Alg
 ```
 Py-code/
 ├── index.html
+├── manifest.webmanifest
+├── sw.js
 ├── assets/
 │   └── py-code-banner.svg
 └── README.md
