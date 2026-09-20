@@ -20,7 +20,17 @@ header{background:var(--panel);border-bottom:2px solid var(--border);padding:10p
 .brand{font-size:20px;font-weight:800;letter-spacing:2px}.status{font-size:12px;color:var(--muted);min-height:18px}
 #online{white-space:nowrap}.controls{display:flex;gap:8px;flex-wrap:wrap}
 main{height:calc(100dvh - 310px);display:grid;grid-template-rows:minmax(240px,1fr) minmax(220px,.85fr);min-height:0}
-#blocks{background:#020602;border-bottom:1px solid var(--border);padding:8px;overflow:auto;max-height:205px}\n#blocks-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;font-size:12px;letter-spacing:1px}\n.block-tabs{display:flex;gap:5px;overflow:auto;padding-bottom:6px}\n.block-tab{min-height:30px;padding:5px 9px;font-size:11px;flex:0 0 auto}\n.block-tab.active{background:#064d1b}\n.block-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:6px}\n.code-block{border:0;border-radius:7px;color:#fff;text-align:left;padding:8px 9px;min-height:52px;cursor:grab;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15);font:700 12px/1.2 "Courier New",monospace}\n.code-block:active{cursor:grabbing}\n.code-block small{display:block;margin-top:4px;font-weight:400;opacity:.8}\n.block-mov{background:#146c2e}.block-fis{background:#7a4f10}.block-ctrl{background:#6b2a82}.block-ent{background:#175f78}.block-apa{background:#9a3a16}.block-som{background:#7b1d4b}.block-cen{background:#3f3f3f}.block-pont{background:#8a7200}\n#editor-container{min-height:0;border-bottom:2px solid var(--border);background:var(--editor);display:flex}
+#blocks{background:#020602;border-bottom:1px solid var(--border);padding:8px;overflow:auto;max-height:205px}
+#blocks-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;font-size:12px;letter-spacing:1px}
+.block-tabs{display:flex;gap:5px;overflow:auto;padding-bottom:6px}
+.block-tab{min-height:30px;padding:5px 9px;font-size:11px;flex:0 0 auto}
+.block-tab.active{background:#064d1b}
+.block-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:6px}
+.code-block{border:0;border-radius:7px;color:#fff;text-align:left;padding:8px 9px;min-height:52px;cursor:grab;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15);font:700 12px/1.2 "Courier New",monospace}
+.code-block:active{cursor:grabbing}
+.code-block small{display:block;margin-top:4px;font-weight:400;opacity:.8}
+.block-mov{background:#146c2e}.block-fis{background:#7a4f10}.block-ctrl{background:#6b2a82}.block-ent{background:#175f78}.block-apa{background:#9a3a16}.block-som{background:#7b1d4b}.block-cen{background:#3f3f3f}.block-pont{background:#8a7200}
+#editor-container{min-height:0;border-bottom:2px solid var(--border);background:var(--editor);display:flex}
 #code{flex:1;width:100%;height:100%;resize:none;border:0;outline:none;padding:12px;background:#001407;color:#00ff66;font:14px/1.5 "Courier New",monospace;tab-size:4;white-space:pre}
 #code:focus{box-shadow:inset 0 0 0 1px var(--border)}#code.light-editor{background:#fff;color:#161616}
 #display{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,42%);background:#000}
@@ -57,7 +67,7 @@ canvas{display:block;width:min(100%,560px);height:auto;max-height:calc(100% - 78
 <button id="download-btn" type="button">BAIXAR .PY</button>
 <button id="run-btn" type="button" disabled>CARREGANDO…</button>
 </div></div></header>
-<main>\n<section id="blocks" aria-label="Blocos do Py-Code">\n<div id="blocks-head"><strong>BLOCOS</strong><span>clique ou arraste para o editor</span></div>\n<div class="block-tabs" id="block-tabs"></div>\n<div class="block-grid" id="block-grid"></div>\n</section>
+<section id="blocks" aria-label="Blocos do Py-Code">\n<div id="blocks-head"><strong>BLOCOS</strong><span>clique ou arraste para o editor</span></div>\n<div class="block-tabs" id="block-tabs"></div>\n<div class="block-grid" id="block-grid"></div>\n</section>
 <main>
 <section id="editor-container" aria-label="Editor Python">
 <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Código Python"></textarea>
@@ -86,7 +96,8 @@ canvas{display:block;width:min(100%,560px);height:auto;max-height:calc(100% - 78
 const $=id=>document.getElementById(id);
 const output=$("output"),status=$("status"),run=$("run-btn"),themeBtn=$("theme-btn"),
       clearBtn=$("clear-btn"),dl=$("download-btn"),editor=$("code");
-const canvas=$("canvas"),ctx=canvas.getContext("2d");\nconst blockTabs=$("block-tabs"),blockGrid=$("block-grid");
+const canvas=$("canvas"),ctx=canvas.getContext("2d");
+const blockTabs=$("block-tabs"),blockGrid=$("block-grid");
 let pyodide=null,dark=true,executando=false,animationId=0;
 
 window.__pycode_keys=new Set();
