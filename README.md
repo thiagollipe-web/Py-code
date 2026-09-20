@@ -130,12 +130,10 @@ A execução depende do navegador e do carregamento dos recursos do Pyodide. Alg
 
 ```
 Py-code/
-├── Index.html
+├── index.html
 ├── assets/
 │   └── py-code-banner.svg
-└── .github/
-    └── workflows/
-        └── pages.yml
+└── README.md
 ```
 
 ## 🔮 Próximas evoluções
