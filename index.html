@@ -196,7 +196,8 @@ function renderMensagem(m){
  else if(m.type==="rect"){ctx.fillStyle=m.color;ctx.fillRect(m.x,m.y,m.w,m.h)}
  else if(m.type==="circle"){ctx.fillStyle=m.color;ctx.beginPath();ctx.arc(m.x,m.y,m.r,0,Math.PI*2);ctx.fill()}
  else if(m.type==="line"){ctx.strokeStyle=m.color;ctx.lineWidth=m.width;ctx.beginPath();ctx.moveTo(m.x1,m.y1);ctx.lineTo(m.x2,m.y2);ctx.stroke()}
- else if(m.type==="text"){ctx.fillStyle=m.color;ctx.font=m.size+"px monospace";ctx.fillText(m.value,m.x,m.y)}\n else if(m.type==="html_status"||m.type==="html_text"){setStatus(m.value)}
+ else if(m.type==="text"){ctx.fillStyle=m.color;ctx.font=m.size+"px monospace";ctx.fillText(m.value,m.x,m.y)}
+ else if(m.type==="html_status"||m.type==="html_text"){setStatus(m.value)}
  else if(m.type==="sound")tocarSom(m.frequency,m.duration,m.type,m.volume);
  else if(m.type==="image")desenharImagem(m);
 }
@@ -220,7 +221,8 @@ function criarWorker(){
   if(m.type==="stdout"){appendOutput(m.value);return}
   if(m.type==="stderr"){appendError(m.value);return}
   if(["fill","rect","circle","line","text","sound","image"].includes(m.type)){renderMensagem(m);return}
-  if(m.type==="frame_done"){frameBusy=false;return}\n  if(m.type==="done"){if(execTimeout)clearTimeout(execTimeout);execTimeout=null;executando=false;jogoAtivo=true;run.disabled=false;stop.disabled=false;run.textContent="EXECUTAR";appendOutput("✓ Execução concluída");iniciarLoop();return}
+  if(m.type==="frame_done"){frameBusy=false;return}
+   if(m.type==="done"){if(execTimeout)clearTimeout(execTimeout);execTimeout=null;executando=false;jogoAtivo=true;run.disabled=false;stop.disabled=false;run.textContent="EXECUTAR";appendOutput("✓ Execução concluída");iniciarLoop();return}
   if(m.type==="error"||m.type==="fatal"){executando=false;jogoAtivo=false;stop.disabled=true;run.disabled=false;run.textContent="EXECUTAR";pararLoop();appendError(m.value);setStatus("Erro Python")}
  };
  worker.onerror=e=>{executando=false;jogoAtivo=false;workerPronto=false;pararLoop();stop.disabled=true;run.disabled=true;appendError(e.message||"Falha no Worker");setStatus("Falha no runtime")};
@@ -230,7 +232,8 @@ function executar(){
  if(!workerPronto||executando)return;
  salvar();clearCanvas();setOutput("");window.__pycode_keys.clear();
  executando=true;jogoAtivo=false;run.disabled=true;stop.disabled=false;run.textContent="EXECUTANDO…";setStatus("Executando Python…");
- worker.postMessage({type:"keys",keys:[]});worker.postMessage({type:"run",code:editor.value});\n execTimeout=setTimeout(()=>{if(executando)parar()},8000);
+ worker.postMessage({type:"keys",keys:[]});worker.postMessage({type:"run",code:editor.value});
+ execTimeout=setTimeout(()=>{if(executando)parar()},8000);
 }
 function parar(){
  jogoAtivo=false;pararLoop();window.__pycode_keys.clear();
