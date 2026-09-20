@@ -14,7 +14,7 @@
 
 O **Py-Code** foi criado para tornar o aprendizado e a experimentação com Python mais simples e acessíveis.
 
-A proposta é oferecer um pequeno ambiente de programação que funciona **diretamente no navegador**, permitindo escrever código Python, executar o programa e visualizar a saída textual e os desenhos produzidos no Canvas.
+A proposta é oferecer um pequeno ambiente de programação que funciona **diretamente no navegador**, combinando **Python para a lógica** com **HTML/Canvas para a parte visual**. O aluno escreve Python, executa o programa e observa o resultado no terminal e na tela gráfica.
 
 O projeto é especialmente voltado para atividades educacionais, introdução à lógica de programação, experimentação com Python e criação de pequenos protótipos e jogos 2D.
 
@@ -22,9 +22,9 @@ O projeto é especialmente voltado para atividades educacionais, introdução à
 
 O fluxo do projeto é simples:
 
-**Editor de código → Pyodide → Python no navegador → Console + Canvas**
+**Editor → Python → HTML/DOM + Canvas → Resultado**
 
-O **Pyodide** permite executar Python no ambiente do navegador. A aplicação também cria uma ponte entre Python e elementos HTML/JavaScript, possibilitando que os programas manipulem o Canvas.
+O **Pyodide** fornece o runtime Python no navegador. O Py-Code cria uma ponte simples para elementos HTML e Canvas, permitindo que o aluno use Python para controlar a página e criar experiências gráficas.
 
 ## 🛠️ Tecnologias
 
@@ -42,17 +42,14 @@ O **Pyodide** permite executar Python no ambiente do navegador. A aplicação ta
 ### Editor Python
 Editor leve no navegador, sem dependência externa de editor, com salvamento automático no navegador.
 
-### Exemplos
-Exemplos prontos de “Olá mundo”, desenho, laços e introdução ao Pong podem ser carregados pelo seletor.
-
 ### Execução de código
 O botão **EXECUTAR** executa o conteúdo do editor usando Pyodide.
 
 ### Console
 Mensagens produzidas por `print()`, avisos e erros aparecem na área de saída.
 
-### Canvas
-Python pode acessar a tela gráfica por meio de JavaScript.
+### Python + HTML + Canvas
+Python pode acessar elementos HTML e a tela gráfica por meio da ponte `js`. Isso permite criar interfaces, animações e jogos 2D simples usando Python para a lógica.
 
 Exemplo:
 
@@ -92,7 +89,7 @@ O Py-Code é uma aplicação web estática e pode ser publicado no **GitHub Page
 
 O usuário acessa a página, o navegador carrega o Pyodide e o código Python é executado no próprio ambiente do navegador.
 
-Para os exemplos básicos, não é necessário manter um servidor Python executando no backend.
+Não é necessário manter um servidor Python executando no backend para os programas básicos.
 
 ## 📱 Uso educacional
 
@@ -145,7 +142,7 @@ Py-code/
 
 ## 🔮 Próximas evoluções
 
-Entre as evoluções planejadas estão exemplos prontos, biblioteca de exercícios, salvamento local de projetos, projetos gráficos e recursos voltados para aulas de programação.
+Entre as evoluções planejadas estão biblioteca de exercícios, salvamento local de projetos, APIs educativas para jogos 2D, eventos de teclado/toque e componentes visuais controlados por Python.
 
 ## 📄 Licença
 
