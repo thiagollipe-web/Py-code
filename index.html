@@ -54,12 +54,12 @@ canvas{display:block;width:min(100%,560px);height:auto;max-height:calc(100% - 78
 <header>
 <div class="top">
 <div><div class="brand">PY-CODE</div><div id="status" class="status">Inicializando…</div></div>
-<div id="online" class="status" aria-live="polite">● ONLINE</div>
+<div id="online" class="status" aria-live="polite">REDE ● ONLINE</div>
 <div class="controls">
 <button id="theme-btn" type="button">TEMA: PRETO</button>
-<button id="clear-btn" type="button">LIMPAR</button>
+<button id="clear-btn" type="button">LIMPAR SAÍDA</button>
 <button id="download-btn" type="button">BAIXAR .PY</button>
-<button id="run-btn" type="button" disabled>CARREGANDO…</button>
+<button id="run-btn" type="button" disabled>CARREGANDO…</button><button id="stop-btn" type="button" disabled>PARAR</button>
 </div>
 </div>
 </header>
@@ -94,7 +94,6 @@ canvas{display:block;width:min(100%,560px);height:auto;max-height:calc(100% - 78
 </section>
 </main>
 
-<script src="https://cdn.jsdelivr.net/pyodide/v0.28.2/full/pyodide.js"></script>
 <script>
 const $=id=>document.getElementById(id);
 const output=$("output"),status=$("status"),run=$("run-btn"),themeBtn=$("theme-btn"),
@@ -102,7 +101,7 @@ const output=$("output"),status=$("status"),run=$("run-btn"),themeBtn=$("theme-b
       blockTabs=$("block-tabs"),blockGrid=$("block-grid");
 const canvas=$("canvas"),ctx=canvas.getContext("2d");
 
-let pyodide=null,dark=true,executando=false,animationId=0,frameEmExecucao=false;
+let worker=null,dark=true,executando=false,animationId=0,frameEmExecucao=false,workerPronto=false,jogoAtivo=false;\nconst stop=$("stop-btn");
 
 window.__pycode_keys=new Set();
 window.pycode_pressed=key=>{
@@ -129,8 +128,8 @@ window.pycode_sound=(frequency,duration,type,volume)=>{
 
 function teclaDown(key){window.__pycode_keys.add(String(key))}
 function teclaUp(key){window.__pycode_keys.delete(String(key))}
-addEventListener("keydown",e=>{teclaDown(e.key);teclaDown(e.key.toLowerCase())});
-addEventListener("keyup",e=>{teclaUp(e.key);teclaUp(e.key.toLowerCase())});
+addEventListener("keydown",e=>{if(document.activeElement===editor)return;teclaDown(e.key);teclaDown(e.key.toLowerCase())});
+addEventListener("keyup",e=>{if(document.activeElement===editor)return;teclaUp(e.key);teclaUp(e.key.toLowerCase())});
 addEventListener("blur",()=>window.__pycode_keys.clear());
 
 document.querySelectorAll(".touch").forEach(btn=>{
@@ -304,70 +303,114 @@ dl.onclick=()=>{
   setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 };
 
-async function carregarPython(){
-  setStatus("Carregando Python…");setOutput("PY-CODE
+function appendOutput(value){const text=String(value??"");if(!text)return;output.textContent+=(output.textContent?"\n":"")+text}
+function appendErrorOutput(value){const text=String(value??"");if(!text)return;output.textContent+=(output.textContent?"\n":"")+"ERRO: "+text}
+function setStatus(t){status.textContent=t}
+function clearCanvas(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle="#000";ctx.fillRect(0,0,canvas.width,canvas.height)}
+function salvar(){localStorage.setItem("pycode_codigo",editor.value)}
+function carregar(){
+  const salvo=localStorage.getItem("pycode_codigo");
+  editor.value=salvo??\`# Py-Code — Scratch em Python
+# Blocos, Python e Canvas.
 
-Baixando o ambiente Python…");
+jogador = Sprite(40, 120, 24, 24, "#00ff66")
+
+def atualizar():
+    limpar("#081018")
+    if pressionado("ArrowRight"):
+        jogador.mover(2, 0)
+    if pressionado("ArrowLeft"):
+        jogador.mover(-2, 0)
+    jogador.limite()
+    jogador.desenhar()
+    mostrar_pontos()
+\`;
+}
+
+function iniciarWorker(){
+  if(worker){worker.terminate();worker=null}
+  workerPronto=false;executando=false;jogoAtivo=false;
+  stop.disabled=true;run.disabled=true;run.textContent="CARREGANDO…";
+  setStatus("Inicializando Python…");setOutput("PY-CODE\n\nCarregando runtime Python isolado…");
+  worker=new Worker("./pycode-worker.js");
+  worker.onmessage=evento=>{
+    const m=evento.data||{};
+    if(m.type==="status"){setStatus(m.value);return}
+    if(m.type==="ready"){
+      workerPronto=true;run.disabled=false;run.textContent="EXECUTAR";setStatus("Python pronto");appendOutput("Python + blocos + Canvas prontos.");return
+    }
+    if(m.type==="stdout"){appendOutput(m.value);return}
+    if(m.type==="stderr"){appendErrorOutput(m.value);return}
+    if(m.type==="fill"){ctx.fillStyle=m.color;ctx.fillRect(0,0,canvas.width,canvas.height);return}
+    if(m.type==="rect"){ctx.fillStyle=m.color;ctx.fillRect(m.x,m.y,m.w,m.h);return}
+    if(m.type==="circle"){ctx.fillStyle=m.color;ctx.beginPath();ctx.arc(m.x,m.y,m.r,0,Math.PI*2);ctx.fill();return}
+    if(m.type==="line"){ctx.strokeStyle=m.color;ctx.lineWidth=m.width;ctx.beginPath();ctx.moveTo(m.x1,m.y1);ctx.lineTo(m.x2,m.y2);ctx.stroke();return}
+    if(m.type==="text"){ctx.fillStyle=m.color;ctx.font=m.size+"px monospace";ctx.fillText(m.value,m.x,m.y);return}
+    if(m.type==="sound"){tocarSom(m.frequency,m.duration,m.type,m.volume);return}
+    if(m.type==="image"){desenharImagem(m);return}
+    if(m.type==="done"){appendOutput("✓ Execução concluída");jogoAtivo=true;stop.disabled=false;executando=false;run.disabled=false;run.textContent="EXECUTAR";iniciarLoop();return}
+    if(m.type==="error"||m.type==="fatal"){appendErrorOutput(m.value);setStatus("Erro Python");executando=false;jogoAtivo=false;stop.disabled=true;run.disabled=false;run.textContent="EXECUTAR";pararLoop();return}
+  };
+  worker.onerror=e=>{appendErrorOutput(e.message||"Falha no Worker Python");setStatus("Falha no runtime");executando=false;jogoAtivo=false;stop.disabled=true;run.disabled=!workerPronto;pararLoop()};
+  worker.postMessage({type:"boot"});
+}
+let imagens={};
+function desenharImagem(m){
+  const key=m.url;
+  let img=imagens[key];
+  if(!img){img=new Image();img.onload=()=>{ctx.drawImage(img,m.x,m.y,m.w,m.h)};img.src=key;imagens[key]=img}
+  if(img.complete)ctx.drawImage(img,m.x,m.y,m.w,m.h)
+}
+let audioContext=null;
+function tocarSom(frequency,duration,type,volume){
   try{
-    for(let i=0;i<100&&typeof loadPyodide!=="function";i++)await new Promise(r=>setTimeout(r,100));
-    if(typeof loadPyodide!=="function")throw new Error("O carregador do Python não foi encontrado.");
-    pyodide=await loadPyodide({
-      indexURL:"https://cdn.jsdelivr.net/pyodide/v0.28.2/full/",
-      stdout:{raw:true,batched:lines=>appendOutput(lines)},
-      stderr:{raw:true,batched:lines=>appendErrorOutput(lines)}
+    audioContext??=new (window.AudioContext||window.webkitAudioContext)();
+    if(audioContext.state==="suspended")audioContext.resume();
+    const osc=audioContext.createOscillator(),gain=audioContext.createGain(),d=Math.max(.02,Number(duration)||.12),v=Math.max(.0001,Math.min(.3,Number(volume)||.05));
+    osc.type=type||"square";osc.frequency.value=Number(frequency)||440;gain.gain.setValueAtTime(v,audioContext.currentTime);gain.gain.exponentialRampToValueAtTime(.0001,audioContext.currentTime+d);
+    osc.connect(gain);gain.connect(audioContext.destination);osc.start();osc.stop(audioContext.currentTime+d);
+  }catch(e){console.warn("Áudio:",e)}
+}
+function pararLoop(){if(animationId)cancelAnimationFrame(animationId);animationId=0;frameEmExecucao=false}
+function iniciarLoop(){
+  pararLoop();
+  let ultimo=performance.now();
+  const frame=agora=>{
+    if(!jogoAtivo||!workerPronto)return;
+    const dt=agora-ultimo;
+    if(dt>=33&&!frameEmExecucao){
+      ultimo=agora;frameEmExecucao=true;
+      worker.postMessage({type:"keys",keys:[...window.__pycode_keys]});
+      worker.postMessage({type:"frame"});
+    }
+    animationId=requestAnimationFrame(t=>{
+      frameEmExecucao=false;frame(t)
     });
-    const engine=await fetch("./pycode.py").then(r=>{if(!r.ok)throw new Error("Não foi possível carregar a engine do Py-Code.");return r.text()});
-    pyodide.runPython(engine);
-    setOutput("PY-CODE ONLINE
-Python + blocos + HTML + Canvas prontos.");
-    setStatus("Python pronto");run.disabled=false;run.textContent="EXECUTAR";
-  }catch(e){
-    console.error(e);setOutput("NÃO FOI POSSÍVEL INICIAR O PYTHON
-
-"+String(e));setStatus("Falha ao carregar Python");
-  }
-}
-async function pararAnimacao(){
-  if(animationId)cancelAnimationFrame(animationId);
-  animationId=0;frameEmExecucao=false;
-}
-async function iniciarAnimacao(){
-  await pararAnimacao();
-  let ativo=false;
-  try{ativo=Boolean(pyodide.runPython("callable(globals().get('__pycode_frame__'))"))}catch(_){}
-  if(!ativo)return;
-  const frame=async()=>{
-    if(!pyodide)return;
-    if(frameEmExecucao){animationId=requestAnimationFrame(frame);return}
-    frameEmExecucao=true;
-    try{await pyodide.runPythonAsync("__pycode_frame__()")}
-    catch(e){setOutput("ERRO NO JOGO:
-"+String(e));setStatus("Erro na atualização");await pararAnimacao();return}
-    finally{frameEmExecucao=false}
-    animationId=requestAnimationFrame(frame);
   };
   animationId=requestAnimationFrame(frame);
 }
-run.onclick=async()=>{
-  if(!pyodide||executando)return;
-  executando=true;run.disabled=true;run.textContent="EXECUTANDO…";
-  await pararAnimacao();setOutput("");clearCanvas();
-  try{
-    salvar();
-    pyodide.runPython("reiniciar_programa()");
-    window.__pycode_keys.clear();
-    await pyodide.runPythonAsync(editor.value);
-    await iniciarAnimacao();
-    output.textContent+=(output.textContent?"
-
-":"")+"OK";
-  }catch(e){
-    console.error(e);output.textContent+=(output.textContent?"
-
-":"")+"ERRO:
-"+String(e);
-  }finally{executando=false;run.disabled=false;run.textContent="EXECUTAR"}
+function pararExecucao(mensagem="Execução interrompida pelo usuário."){
+  jogoAtivo=false;pararLoop();window.__pycode_keys.clear();
+  if(worker){worker.terminate();worker=null}
+  workerPronto=false;executando=false;stop.disabled=true;run.disabled=true;run.textContent="CARREGANDO…";
+  appendOutput(mensagem);setStatus("Execução parada");iniciarWorker();
+}
+function executar(){
+  if(!workerPronto||executando)return;
+  executando=true;jogoAtivo=false;pararLoop();window.__pycode_keys.clear();clearCanvas();setOutput("");
+  stop.disabled=false;run.disabled=true;run.textContent="EXECUTANDO…";setStatus("Executando Python…");
+  worker.postMessage({type:"keys",keys:[]});
+  worker.postMessage({type:"run",code:editor.value});
+}
+run.onclick=executar;
+stop.onclick=()=>pararExecucao();
+clearBtn.onclick=()=>{setOutput("");clearCanvas()};
+dl.onclick=()=>{
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([editor.value],{type:"text/x-python;charset=utf-8"}));
+  a.download="programa.py";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 };
+
 window.addEventListener("error",e=>{
   if(e?.message){setStatus("Erro no navegador");output.textContent+="
 
@@ -381,7 +424,7 @@ ERRO ASSÍNCRONO:
 "+r
 });
 const online=$("online");
-function atualizarRede(){online.textContent=navigator.onLine?"● ONLINE":"● OFFLINE"}
+function atualizarRede(){online.textContent=navigator.onLine?"REDE ● ONLINE":"REDE ● OFFLINE"}
 addEventListener("online",atualizarRede);addEventListener("offline",atualizarRede);atualizarRede();
 if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
 carregar();clearCanvas();carregarPython();
