@@ -1,0 +1,162 @@
+PE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Py-code Terminal Editor</title>
+    <style>
+        :root {
+            --bg-main: #000000;
+            --bg-header: #050505;
+            --text-color: #00ff00;
+            --border-color: #00ff00;
+            --shadow-color: rgba(0, 255, 0, 0.5);
+            --btn-active: #00ff00;
+            --btn-active-txt: #000000;
+        }
+
+        .light-theme {
+            --bg-main: #ffffff;
+            --bg-header: #f0f0f0;
+            --text-color: #1e1e1e;
+            --border-color: #1e1e1e;
+            --shadow-color: rgba(0, 0, 0, 0.15);
+            --btn-active: #1e1e1e;
+            --btn-active-txt: #ffffff;
+        }
+
+        body { margin: 0; background-color: var(--bg-main); color: var(--text-color); font-family: 'Courier New', monospace; display: flex; flex-direction: column; height: 100vh; overflow: hidden; transition: background 0.3s, color 0.3s; }
+        header { background: var(--bg-header); border-bottom: 2px solid var(--border-color); padding: 10px; display: flex; flex-direction: column; box-shadow: 0 0 10px var(--shadow-color); }
+        .controls-container { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 5px; flex-wrap: wrap; gap: 8px; }
+        .button-group { display: flex; gap: 6px; }
+        .ascii-snake { font-size: 7px; line-height: 1.1; white-space: pre; color: var(--text-color); text-shadow: 0 0 3px var(--shadow-color); font-weight: bold; align-self: flex-start; overflow-x: auto; max-width: 100%; margin-bottom: 5px; }
+        h1 { margin: 0; font-size: 1.3rem; text-shadow: 0 0 5px var(--shadow-color); letter-spacing: 2px; font-weight: bold; }
+        button { background: transparent; color: var(--text-color); border: 1px solid var(--border-color); padding: 6px 10px; font-family: 'Courier New', monospace; font-weight: bold; cursor: pointer; text-shadow: 0 0 3px var(--shadow-color); box-shadow: 0 0 3px var(--shadow-color); border-radius: 4px; font-size: 0.75rem; }
+        button:active { background: var(--btn-active); color: var(--btn-active-txt); }
+        button:disabled { opacity: 0.3; cursor: not-allowed; text-shadow: none; box-shadow: none; }
+        #main-container { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+        #editor-container { flex: 1; min-height: 45%; border-bottom: 2px solid var(--border-color); background-color: var(--bg-main); }
+        #output-container { flex: 1; background: var(--bg-main); padding: 15px; overflow-y: auto; box-sizing: border-box; font-size: 0.9rem; line-height: 1.4; border-top: 1px solid var(--border-color); font-family: 'Courier New', monospace; }
+        .cm-editor { height: 100% !important; font-family: 'Courier New', monospace !important; font-size: 15px !important; }
+        .cm-scroller { overflow: auto; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <!-- Nova arte ASCII explícita de uma cobra rastejando ao lado do nome -->
+        <div class="ascii-snake">  
+          ___                   ___               _        
+         (  _`\                (  _`\            ( )       
+         | |_) ) _   _  ______ | ( (_)   _      _| |   __  
+         | ,__/'( ) ( )(______)| |  _  /'_`\  /'_` | /'__`\
+         | |    | (_) |        | (_( )( (_) )( (_| |(  ___/
+         (_)    `\__, |        (____/'`\___/'`\__,_)`\____)
+                ( )_| |                                    
+                `\___/'                                                                             
+        </div>
+        <div class="controls-container">
+            <h1>Py-Code:</h1>
+            <div class="button-group">
+                <button id="theme-btn">TEMA: PRETO</button>
+                <button id="download-btn">BAIXAR .PY</button>
+                <button id="run-btn" disabled>LOADING...</button>
+            </div>
+        </div>
+    </header>
+
+    <div id="main-container">
+        <div id="editor-container"></div>
+        <div id="output-container">INITIALIZING ENVIRONMENT... PLEASE WAIT.</div>
+    </div>
+
+    <script src="https://jsdelivr.net"></script>
+
+    <script type="module">
+        import { EditorView, basicSetup } from "https://esm.sh";
+        import { python } from "https://esm.sh";
+
+        const outputDiv = document.getElementById("output-container");
+        const runBtn = document.getElementById("run-btn");
+        const themeBtn = document.getElementById("theme-btn");
+        const downloadBtn = document.getElementById("download-btn");
+
+        import { Compartment } from "https://esm.sh";
+        const themeCompartment = new Compartment();
+
+        const terminalTheme = EditorView.theme({
+            "&": { backgroundColor: "#000000", color: "#00ff00" },
+            ".cm-cursor": { borderLeftColor: "#00ff00" },
+            ".cm-gutters": { backgroundColor: "#000000", color: "#005500", borderRight: "1px solid #00ff00" },
+            "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": { backgroundColor: "#002200" }
+        }, { dark: true });
+
+        const lightCodeTheme = EditorView.theme({
+            "&": { backgroundColor: "#ffffff", color: "#1e1e1e" },
+            ".cm-cursor": { borderLeftColor: "#1e1e1e" },
+            ".cm-gutters": { backgroundColor: "#f0f0f0", color: "#777777", borderRight: "1px solid #1e1e1e" },
+            "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": { backgroundColor: "#e0e0e0" }
+        }, { dark: false });
+
+        const view = new EditorView({
+            doc: "# Digite seu script Python aqui\nprint('PY-CODE OPERATIONAL')\n\nfor i in range(1, 4):\n    print(f'Testando engine... {i}')",
+            extensions: [
+                basicSetup, 
+                python(), 
+                themeCompartment.of(terminalTheme)
+            ],
+            parent: document.getElementById("editor-container")
+        });
+
+        // Alternador de Temas
+        let isDark = true;
+        themeBtn.addEventListener("click", () => {
+            isDark = !isDark;
+            if (isDark) {
+                document.body.classList.remove("light-theme");
+                themeBtn.innerText = "TEMA: PRETO";
+                view.dispatch({ effects: themeCompartment.reconfigure(terminalTheme) });
+            } else {
+                document.body.classList.add("light-theme");
+                themeBtn.innerText = "TEMA: CLARO";
+                view.dispatch({ effects: themeCompartment.reconfigure(lightCodeTheme) });
+            }
+        });
+
+        // Mecanismo de download nativo compatível com navegadores mobile
+        downloadBtn.addEventListener("click", () => {
+            const codeText = view.state.doc.toString();
+            const blob = new Blob([codeText], { type: "text/plain;charset=utf-8" });
+            const link = document.createElement("a");
+            
+            link.href = URL.createObjectURL(blob);
+            link.download = "script.py"; // Nome padrão do arquivo salvo
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        let pyodide;
+        async function initPython() {
+            outputDiv.innerText = "LOADING PYTHON ENGINE (PYODIDE)...";
+            pyodide = await loadPyodide({
+                stdout: (text) => { outputDiv.innerText += text + "\n"; }
+            });
+            outputDiv.innerText = "SYSTEM ACTIVE.\nPRESS RUN_CODE TO EXECUTE SCRIPTS.\n";
+            runBtn.disabled = false;
+            runBtn.innerText = "RUN_CODE >";
+        }
+        initPython();
+
+        runBtn.addEventListener("click", async () => {
+            outputDiv.innerText = "EXECUTING SCRIPT...\n\n";
+            const codeToRun = view.state.doc.toString();
+            try {
+                await pyodide.runPythonAsync(codeToRun);
+            } catch (err) {
+                outputDiv.innerText += `\n[COMPILE ERROR]:\n${err}`;
+            }
+        });
+    </script>
+</body>
+</html>
