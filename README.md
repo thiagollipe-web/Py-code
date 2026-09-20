@@ -24,7 +24,7 @@ O fluxo do projeto é simples:
 
 **Editor → Python → HTML/DOM + Canvas → Resultado**
 
-O **Pyodide** fornece o runtime Python no navegador. O Py-Code cria uma ponte simples para elementos HTML e Canvas, permitindo que o aluno use Python para controlar a página e criar experiências gráficas.
+O **Pyodide** fornece o runtime Python no navegador. Sobre ele, o Py-Code adiciona uma pequena **mini-engine educacional** em `pycode.py`, criando comandos simples para desenho, personagens, colisão e teclado. Assim, o aluno pode usar Python para controlar HTML/Canvas sem precisar aprender JavaScript primeiro.
 
 ## 🛠️ Tecnologias
 
@@ -49,7 +49,30 @@ O botão **EXECUTAR** executa o conteúdo do editor usando Pyodide.
 Mensagens produzidas por `print()`, avisos e erros aparecem na área de saída.
 
 ### Python + HTML + Canvas
-Python pode acessar elementos HTML e a tela gráfica por meio da ponte `js`. Isso permite criar interfaces, animações e jogos 2D simples usando Python para a lógica.
+Python controla a lógica e o Canvas apresenta o resultado. A engine disponibiliza `limpar()`, `retangulo()`, `circulo()`, `linha()`, `texto()`, `pressionado()` e `Personagem`.
+
+Exemplo mínimo:
+
+```python
+limpar("#111")
+
+jogador = Personagem(40, 70, 30, 30, "#00ff66")
+jogador.desenhar()
+```
+
+Para animação, basta criar uma função `atualizar()`. O Py-Code a chama automaticamente a cada frame:
+
+```python
+def atualizar():
+    limpar("#111")
+
+    if pressionado("ArrowRight"):
+        jogador.mover(2, 0)
+    if pressionado("ArrowLeft"):
+        jogador.mover(-2, 0)
+
+    jogador.desenhar()
+```
 
 Exemplo:
 
@@ -74,6 +97,12 @@ O layout foi ajustado para utilização também em smartphones e telas pequenas.
 
 ### PWA e offline
 O shell da aplicação é armazenado em cache e pode abrir sem conexão depois do primeiro acesso. A execução de Python continua exigindo que os arquivos do Pyodide estejam disponíveis no navegador.
+
+## 🧩 Conceito pedagógico
+
+O objetivo do Py-Code é funcionar como um **"Scratch em Python"**: manter a simplicidade de criar algo visual, mas usando programação textual. A camada visual fica no HTML/Canvas e a lógica fica no Python.
+
+O aluno pode começar com desenho e movimento e evoluir para personagens, controles, colisões, animações e jogos 2D.
 
 ## 🎨 Identidade visual
 
@@ -135,6 +164,7 @@ Py-code/
 ├── index.html
 ├── manifest.webmanifest
 ├── sw.js
+├── pycode.py
 ├── assets/
 │   └── py-code-banner.svg
 └── README.md
