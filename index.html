@@ -243,10 +243,7 @@ function escaparHtml(valor){
 function inserirBloco(codigo){
   const inicio=editor.selectionStart,fim=editor.selectionEnd;
   const antes=editor.value.slice(0,inicio),depois=editor.value.slice(fim);
-  const prefixo=antes&&!antes.endsWith("
-")?"
-
-":"";
+  const prefixo=antes&&!antes.endsWith("\n")?"\n\n":"";
   const sufixo=depois&&!depois.startsWith("\n")?"\n":"";
   editor.value=antes+prefixo+codigo+sufixo+depois;
   const pos=(antes+prefixo+codigo).length;
@@ -284,7 +281,8 @@ renderBlocos();
 
 editor.addEventListener("input",salvar);
 editor.addEventListener("keydown",e=>{
-  if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();if(!run.disabled)run.click()}\n  if(e.key==="Tab"){e.preventDefault();const a=this.selectionStart,b=this.selectionEnd;this.setRangeText("    ",a,b,"end");salvar()}
+  if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();if(!run.disabled)run.click()}
+  if(e.key==="Tab"){e.preventDefault();const a=editor.selectionStart,b=editor.selectionEnd;editor.setRangeText("    ",a,b,"end");salvar()}
 });
 
 themeBtn.onclick=()=>{
