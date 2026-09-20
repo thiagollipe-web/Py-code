@@ -201,7 +201,7 @@ function renderMensagem(m){
  else if(m.type==="sound")tocarSom(m.frequency,m.duration,m.type,m.volume);
  else if(m.type==="image")desenharImagem(m);
 }
-function pararLoop(){if(animationId)cancelAnimationFrame(animationId);animationId=0}
+function pararLoop(){if(animationId)cancelAnimationFrame(animationId);animationId=0;frameBusy=false}
 function iniciarLoop(){
  pararLoop();lastFrame=performance.now();
  function frame(now){
