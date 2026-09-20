@@ -230,3 +230,18 @@ def __pycode_frame__():
     funcao = globals().get("atualizar")
     if callable(funcao) and funcao is not __pycode_frame__:
         funcao()
+
+
+__pycode_engine_names = set(globals())
+
+
+def reiniciar_programa():
+    global cenas, cena_atual, pontuacao
+
+    for nome in list(globals()):
+        if nome not in __pycode_engine_names:
+            del globals()[nome]
+
+    cenas = {}
+    cena_atual = None
+    pontuacao = 0
