@@ -9,7 +9,7 @@ function pressed(k){return keys.has(String(k))||keys.has(String(k).toLowerCase()
 
 self.pycode_pressed=pressed;
 self.pycode_sound=(frequency,duration,type,volume)=>{
-  send("sound",{frequency:Number(frequency),duration:Number(duration),type:String(type||"square"),volume:Number(volume||0.05)});
+  send("sound",{frequency:Number(frequency),duration:Number(duration),waveform:String(type||"square"),volume:Number(volume||0.05)});
 };
 
 async function boot(){
