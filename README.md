@@ -54,25 +54,20 @@ Python controla a lógica e o Canvas apresenta o resultado. A engine disponibili
 Exemplo mínimo:
 
 ```python
-limpar("#111")
+jogador = Sprite(40, 70, 30, 30, "#00ff66")
 
-jogador = Personagem(40, 70, 30, 30, "#00ff66")
-jogador.desenhar()
-```
 
-Para animação, basta criar uma função `atualizar()`. O Py-Code a chama automaticamente a cada frame:
-
-```python
 def atualizar():
     limpar("#111")
-
     if pressionado("ArrowRight"):
         jogador.mover(2, 0)
-    if pressionado("ArrowLeft"):
-        jogador.mover(-2, 0)
-
+    jogador.limite()
     jogador.desenhar()
 ```
+
+A engine também oferece `aplicar_gravidade()`, `jogador.gravidade()`, `jogador.pular()`, `colisao()`, `somar_pontos()`, `mostrar_pontos()`, `tocar()` e uma API de cenas com `cena()` e `mudar_cena()`.
+
+Os controles de toque na tela simulam as setas e as teclas `X`/`Z`, permitindo testar jogos no celular sem escrever JavaScript.
 
 Exemplo:
 
@@ -97,6 +92,22 @@ O layout foi ajustado para utilização também em smartphones e telas pequenas.
 
 ### PWA e offline
 O shell da aplicação é armazenado em cache e pode abrir sem conexão depois do primeiro acesso. A execução de Python continua exigindo que os arquivos do Pyodide estejam disponíveis no navegador.
+
+## 🎮 Mini-engine de jogos
+
+O Py-Code agora tem uma camada própria para jogos 2D. A intenção é esconder a complexidade do JavaScript sem esconder a lógica de programação: o aluno escreve Python e a engine cuida da ligação com Canvas, teclado, toque e áudio.
+
+### Recursos
+
+- `Sprite` para personagens e objetos;
+- gravidade, velocidade e pulo;
+- teclado e controles de toque;
+- colisão AABB;
+- pontuação;
+- sons simples via Web Audio;
+- cenas com `cena()` e `mudar_cena()`;
+- imagens opcionais via URL;
+- função `atualizar()` executada a cada frame.
 
 ## 🧩 Conceito pedagógico
 
