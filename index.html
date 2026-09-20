@@ -141,7 +141,11 @@ document.querySelectorAll(".touch").forEach(btn=>{
   btn.addEventListener("pointerdown",down);
 });
 
-function setOutput(t){output.textContent=String(t??"")}\nfunction appendOutput(value){const text=String(value??"");if(!text)return;output.textContent+=(output.textContent?"\\n":"")+text}\nfunction appendErrorOutput(value){const text=String(value??"");if(!text)return;output.textContent+=(output.textContent?"\\n":"")+"ERRO: "+text}
+function setOutput(t){output.textContent=String(t??"")}
+function appendOutput(value){const text=String(value??"");if(!text)return;output.textContent+=(output.textContent?"\
+":"")+text}
+function appendErrorOutput(value){const text=String(value??"");if(!text)return;output.textContent+=(output.textContent?"\
+":"")+"ERRO: "+text}
 function setStatus(t){status.textContent=t}
 function clearCanvas(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle="#000";ctx.fillRect(0,0,canvas.width,canvas.height)}
 function salvar(){localStorage.setItem("pycode_codigo",editor.value)}
@@ -240,8 +244,13 @@ function escaparHtml(valor){
 function inserirBloco(codigo){
   const inicio=editor.selectionStart,fim=editor.selectionEnd;
   const antes=editor.value.slice(0,inicio),depois=editor.value.slice(fim);
-  const prefixo=antes&&!antes.endsWith("\n")?"\n\n":"";
-  const sufixo=depois&&!depois.startsWith("\n")?"\n":"";
+  const prefixo=antes&&!antes.endsWith("
+")?"
+
+":"";
+  const sufixo=depois&&!depois.startsWith("
+")?"
+":"";
   editor.value=antes+prefixo+codigo+sufixo+depois;
   const pos=(antes+prefixo+codigo).length;
   editor.focus();editor.setSelectionRange(pos,pos);salvar();
@@ -257,7 +266,8 @@ function renderBlocos(){
   BLOCOS[blocoCategoria].forEach(([titulo,codigo,classe])=>{
     const b=document.createElement("button");
     b.type="button";b.draggable=true;b.className="code-block "+classe;
-    b.innerHTML=escaparHtml(titulo)+"<small>"+escaparHtml(codigo.replaceAll("\n"," ↵ "))+"</small>";
+    b.innerHTML=escaparHtml(titulo)+"<small>"+escaparHtml(codigo.replaceAll("
+"," ↵ "))+"</small>";
     b.title="Inserir bloco Python";
     b.onclick=()=>inserirBloco(codigo);
     b.addEventListener("dragstart",e=>{
@@ -295,17 +305,26 @@ dl.onclick=()=>{
 };
 
 async function carregarPython(){
-  setStatus("Carregando Python…");setOutput("PY-CODE\n\nBaixando o ambiente Python…");
+  setStatus("Carregando Python…");setOutput("PY-CODE
+
+Baixando o ambiente Python…");
   try{
     for(let i=0;i<100&&typeof loadPyodide!=="function";i++)await new Promise(r=>setTimeout(r,100));
     if(typeof loadPyodide!=="function")throw new Error("O carregador do Python não foi encontrado.");
-    pyodide=await loadPyodide({\n      indexURL:"https://cdn.jsdelivr.net/pyodide/v0.28.2/full/",\n      stdout:{raw:true,batched:lines=>appendOutput(lines)},\n      stderr:{raw:true,batched:lines=>appendErrorOutput(lines)}\n    });
+    pyodide=await loadPyodide({
+      indexURL:"https://cdn.jsdelivr.net/pyodide/v0.28.2/full/",
+      stdout:{raw:true,batched:lines=>appendOutput(lines)},
+      stderr:{raw:true,batched:lines=>appendErrorOutput(lines)}
+    });
     const engine=await fetch("./pycode.py").then(r=>{if(!r.ok)throw new Error("Não foi possível carregar a engine do Py-Code.");return r.text()});
     pyodide.runPython(engine);
-    setOutput("PY-CODE ONLINE\nPython + blocos + HTML + Canvas prontos.");
+    setOutput("PY-CODE ONLINE
+Python + blocos + HTML + Canvas prontos.");
     setStatus("Python pronto");run.disabled=false;run.textContent="EXECUTAR";
   }catch(e){
-    console.error(e);setOutput("NÃO FOI POSSÍVEL INICIAR O PYTHON\n\n"+String(e));setStatus("Falha ao carregar Python");
+    console.error(e);setOutput("NÃO FOI POSSÍVEL INICIAR O PYTHON
+
+"+String(e));setStatus("Falha ao carregar Python");
   }
 }
 async function pararAnimacao(){
@@ -322,7 +341,8 @@ async function iniciarAnimacao(){
     if(frameEmExecucao){animationId=requestAnimationFrame(frame);return}
     frameEmExecucao=true;
     try{await pyodide.runPythonAsync("__pycode_frame__()")}
-    catch(e){setOutput("ERRO NO JOGO:\n"+String(e));setStatus("Erro na atualização");await pararAnimacao();return}
+    catch(e){setOutput("ERRO NO JOGO:
+"+String(e));setStatus("Erro na atualização");await pararAnimacao();return}
     finally{frameEmExecucao=false}
     animationId=requestAnimationFrame(frame);
   };
@@ -338,16 +358,27 @@ run.onclick=async()=>{
     window.__pycode_keys.clear();
     await pyodide.runPythonAsync(editor.value);
     await iniciarAnimacao();
-    output.textContent+=(output.textContent?"\n\n":"")+"OK";
+    output.textContent+=(output.textContent?"
+
+":"")+"OK";
   }catch(e){
-    console.error(e);output.textContent+=(output.textContent?"\n\n":"")+"ERRO:\n"+String(e);
+    console.error(e);output.textContent+=(output.textContent?"
+
+":"")+"ERRO:
+"+String(e);
   }finally{executando=false;run.disabled=false;run.textContent="EXECUTAR"}
 };
 window.addEventListener("error",e=>{
-  if(e?.message){setStatus("Erro no navegador");output.textContent+="\n\nERRO DO NAVEGADOR:\n"+e.message}
+  if(e?.message){setStatus("Erro no navegador");output.textContent+="
+
+ERRO DO NAVEGADOR:
+"+e.message}
 });
 window.addEventListener("unhandledrejection",e=>{
-  const r=String(e?.reason??"Erro assíncrono");setStatus("Erro assíncrono");output.textContent+="\n\nERRO ASSÍNCRONO:\n"+r
+  const r=String(e?.reason??"Erro assíncrono");setStatus("Erro assíncrono");output.textContent+="
+
+ERRO ASSÍNCRONO:
+"+r
 });
 const online=$("online");
 function atualizarRede(){online.textContent=navigator.onLine?"● ONLINE":"● OFFLINE"}
