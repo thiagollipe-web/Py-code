@@ -144,7 +144,7 @@ function clearCanvas(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillSty
 function salvar(){localStorage.setItem("pycode_codigo",editor.value)}
 function carregar(){
   const s=localStorage.getItem("pycode_codigo");
-  editor.value=s??\`# Py-Code — Scratch em Python
+  editor.value=s??`# Py-Code — Scratch em Python
 # Python controla a lógica e o Canvas mostra o jogo.
 
 jogador = Sprite(40, 70, 24, 24, "#00ff66")
@@ -164,7 +164,7 @@ def atualizar():
     jogador.limite()
     jogador.desenhar()
     mostrar_pontos()
-\`;
+`;
 }
 
 const BLOCOS={
