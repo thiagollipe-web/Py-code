@@ -25,18 +25,25 @@ main{height:calc(100dvh - 89px);display:grid;grid-template-rows:minmax(260px,1fr
 #code:focus{box-shadow:inset 0 0 0 1px var(--border)}#code.light-editor{background:#fff;color:#161616}
 #display{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,42%);background:#000}
 #output{min-width:0;overflow:auto;margin:0;padding:12px;white-space:pre-wrap;word-break:break-word;border-right:1px solid var(--border);font-size:14px;line-height:1.45}
-#game{min-width:0;display:flex;align-items:center;justify-content:center;padding:10px;background:#020202}
-canvas{display:block;width:min(100%,560px);height:auto;max-height:100%;aspect-ratio:16/9;border:1px dashed var(--border);background:#000;image-rendering:pixelated}
+#game{min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:10px;background:#020202}
+canvas{display:block;width:min(100%,560px);height:auto;max-height:calc(100% - 78px);aspect-ratio:16/9;border:1px dashed var(--border);background:#000;image-rendering:pixelated;touch-action:none}
+#touch-controls{display:grid;grid-template-columns:42px 42px 42px 42px 42px;gap:5px;align-items:center;justify-content:center;user-select:none}
+#touch-controls .empty{visibility:hidden}.touch{width:42px;height:42px;min-height:42px;padding:0;touch-action:none;-webkit-user-select:none;user-select:none}
+.touch.action{font-size:12px}
 .light{--bg:#f5f5f5;--panel:#fff;--fg:#161616;--muted:#666;--border:#333;--editor:#fff}
 .light #output,.light #game{background:#fff}
 @media (max-width:800px){
  body{overflow:auto}main{height:auto;min-height:calc(100dvh - 120px);grid-template-rows:52dvh 48dvh}
- #display{grid-template-columns:1fr;grid-template-rows:1fr minmax(180px,36dvh)}
- #output{border-right:0;border-bottom:1px solid var(--border)}#game{min-height:180px}
+ #display{grid-template-columns:1fr;grid-template-rows:1fr minmax(210px,38dvh)}
+ #output{border-right:0;border-bottom:1px solid var(--border)}#game{min-height:210px}
+ #touch-controls{transform:scale(.95);transform-origin:center}
 }
 @media (max-width:480px){
  #code{font-size:13px;min-height:280px}header{padding:8px}.brand{font-size:17px}.controls{width:100%}
  button{padding:9px 10px;font-size:12px;flex:1}.top{align-items:flex-start}
+ canvas{width:100%;max-height:calc(100% - 72px)}
+ #touch-controls{grid-template-columns:38px 38px 38px 38px 38px;gap:4px}
+ .touch{width:38px;height:38px}
 }
 </style>
 </head>
@@ -56,7 +63,21 @@ canvas{display:block;width:min(100%,560px);height:auto;max-height:100%;aspect-ra
 </section>
 <section id="display">
 <pre id="output" aria-live="polite">Preparando o ambiente Python…</pre>
-<div id="game"><canvas id="canvas" width="320" height="180" aria-label="Tela gráfica"></canvas></div>
+<div id="game">
+<canvas id="canvas" width="320" height="180" aria-label="Tela gráfica"></canvas>
+<div id="touch-controls" aria-label="Controles de toque">
+<button class="touch empty" tabindex="-1" aria-hidden="true"></button>
+<button class="touch" data-key="ArrowUp">▲</button>
+<button class="touch empty" tabindex="-1" aria-hidden="true"></button>
+<button class="touch action" data-key="x">X</button>
+<button class="touch action" data-key="z">Z</button>
+<button class="touch" data-key="ArrowLeft">◀</button>
+<button class="touch" data-key="ArrowDown">▼</button>
+<button class="touch" data-key="ArrowRight">▶</button>
+<button class="touch empty" tabindex="-1" aria-hidden="true"></button>
+<button class="touch empty" tabindex="-1" aria-hidden="true"></button>
+</div>
+</div>
 </section>
 </main>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.28.2/full/pyodide.js"></script>
@@ -67,11 +88,43 @@ const output=$("output"),status=$("status"),run=$("run-btn"),themeBtn=$("theme-b
 const canvas=$("canvas"),ctx=canvas.getContext("2d");
 let pyodide=null,dark=true,executando=false,animationId=0;
 
-window.pycode_pressed=key=>window.__pycode_keys?.has(key)??false;
 window.__pycode_keys=new Set();
-addEventListener("keydown",e=>window.__pycode_keys.add(e.key));
-addEventListener("keyup",e=>window.__pycode_keys.delete(e.key));
+window.pycode_pressed=key=>{
+  const k=String(key);
+  return window.__pycode_keys.has(k)||window.__pycode_keys.has(k.toLowerCase());
+};
+window.pycode_image=url=>{const image=new Image();image.src=String(url);return image};
+
+let audioContext=null;
+window.pycode_sound=(frequency,duration,type,volume)=>{
+  try{
+    audioContext??=new (window.AudioContext||window.webkitAudioContext)();
+    if(audioContext.state==="suspended")audioContext.resume();
+    const osc=audioContext.createOscillator(),gain=audioContext.createGain();
+    const v=Math.max(0.0001,Math.min(0.3,Number(volume)||0.05));
+    osc.type=type||"square";osc.frequency.value=Number(frequency)||440;
+    gain.gain.setValueAtTime(v,audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001,audioContext.currentTime+(Number(duration)||0.12));
+    osc.connect(gain);gain.connect(audioContext.destination);
+    osc.start();osc.stop(audioContext.currentTime+(Number(duration)||0.12));
+  }catch(_){}
+};
+
+function teclaDown(key){window.__pycode_keys.add(String(key))}
+function teclaUp(key){window.__pycode_keys.delete(String(key))}
+addEventListener("keydown",e=>{teclaDown(e.key);teclaDown(e.key.toLowerCase())});
+addEventListener("keyup",e=>{teclaUp(e.key);teclaUp(e.key.toLowerCase())});
 addEventListener("blur",()=>window.__pycode_keys.clear());
+
+document.querySelectorAll(".touch").forEach(btn=>{
+  const key=btn.dataset.key;if(!key)return;
+  const down=e=>{e.preventDefault();teclaDown(key);btn.setPointerCapture?.(e.pointerId)};
+  const up=e=>{e.preventDefault();teclaUp(key)};
+  btn.addEventListener("pointerdown",down);
+  btn.addEventListener("pointerup",up);
+  btn.addEventListener("pointercancel",up);
+  btn.addEventListener("lostpointercapture",up);
+});
 
 function setOutput(t){output.textContent=String(t??"")}
 function setStatus(t){status.textContent=t}
@@ -79,13 +132,32 @@ function clearCanvas(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillSty
 function salvar(){localStorage.setItem("pycode_codigo",editor.value)}
 function carregar(){
   const s=localStorage.getItem("pycode_codigo");
-  editor.value=s??"# Py-Code\n# Python + HTML + Canvas\n\nprint(\"Olá, Py-Code!\")\n\nlimpar()\nretangulo(120, 60, 60, 60, \"#00ff66\")\ntexto(\"Python!\", 128, 155)\n";
+  editor.value=s??\`# Py-Code — Scratch em Python
+# Python controla a lógica e o Canvas mostra o jogo.
+
+jogador = Sprite(40, 70, 24, 24, "#00ff66")
+
+def atualizar():
+    limpar("#081018")
+
+    if pressionado("ArrowRight"):
+        jogador.mover(2, 0)
+    if pressionado("ArrowLeft"):
+        jogador.mover(-2, 0)
+    if pressionado("ArrowUp"):
+        jogador.mover(0, -2)
+    if pressionado("ArrowDown"):
+        jogador.mover(0, 2)
+
+    jogador.limite()
+    jogador.desenhar()
+    mostrar_pontos()
+\`;
 }
 editor.addEventListener("input",salvar);
 editor.addEventListener("keydown",e=>{
   if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();if(!run.disabled)run.click()}
 });
-
 themeBtn.onclick=()=>{
   dark=!dark;document.body.classList.toggle("light",!dark);
   themeBtn.textContent=dark?"TEMA: PRETO":"TEMA: CLARO";
@@ -100,71 +172,54 @@ dl.onclick=()=>{
 };
 
 async function carregarPython(){
-  setStatus("Carregando Python…");
-  setOutput("PY-CODE\n\nBaixando o ambiente Python…");
+  setStatus("Carregando Python…");setOutput("PY-CODE\\n\\nBaixando o ambiente Python…");
   try{
     for(let i=0;i<100&&typeof loadPyodide!=="function";i++)await new Promise(r=>setTimeout(r,100));
     if(typeof loadPyodide!=="function")throw new Error("O carregador do Python não foi encontrado.");
     pyodide=await loadPyodide({indexURL:"https://cdn.jsdelivr.net/pyodide/v0.28.2/full/"});
     const engine=await fetch("./pycode.py").then(r=>{if(!r.ok)throw new Error("Não foi possível carregar a engine do Py-Code.");return r.text()});
     pyodide.runPython(engine);
-    setOutput("PY-CODE ONLINE\nPython + HTML + Canvas prontos.");
-    setStatus("Python pronto");
-    run.disabled=false;run.textContent="EXECUTAR";
+    setOutput("PY-CODE ONLINE\\nPython + HTML + Canvas prontos.\\n\\nEngine: sprites, física, teclas, toque, colisão, pontuação, sons e cenas.");
+    setStatus("Python pronto");run.disabled=false;run.textContent="EXECUTAR";
   }catch(e){
-    console.error(e);
-    setOutput("NÃO FOI POSSÍVEL INICIAR O PYTHON\n\n"+String(e));
-    setStatus("Falha ao carregar Python");
+    console.error(e);setOutput("NÃO FOI POSSÍVEL INICIAR O PYTHON\\n\\n"+String(e));setStatus("Falha ao carregar Python");
   }
 }
-
-async function pararAnimacao(){
-  if(animationId){cancelAnimationFrame(animationId);animationId=0}
-}
+async function pararAnimacao(){if(animationId){cancelAnimationFrame(animationId);animationId=0}}
 async function iniciarAnimacao(){
   await pararAnimacao();
   let ativo=false;
-  try{ativo=Boolean(pyodide.runPython("callable(globals().get('atualizar'))"))}catch(_){}
+  try{ativo=Boolean(pyodide.runPython("callable(globals().get('__pycode_frame__'))"))}catch(_){}
   if(!ativo)return;
   const frame=async()=>{
     if(!pyodide)return;
-    try{await pyodide.runPythonAsync("atualizar()")}
-    catch(e){setOutput("ERRO NO JOGO:\n"+String(e));setStatus("Erro na atualização");await pararAnimacao();return}
+    try{await pyodide.runPythonAsync("__pycode_frame__()")}
+    catch(e){setOutput("ERRO NO JOGO:\\n"+String(e));setStatus("Erro na atualização");await pararAnimacao();return}
     animationId=requestAnimationFrame(frame);
   };
   animationId=requestAnimationFrame(frame);
 }
-
 run.onclick=async()=>{
   if(!pyodide||executando)return;
   executando=true;run.disabled=true;run.textContent="EXECUTANDO…";
   await pararAnimacao();setOutput("");clearCanvas();
   try{
-    salvar();
-    await pyodide.runPythonAsync(editor.value);
-    await iniciarAnimacao();
-    output.textContent+=(output.textContent?"\n\n":"")+"OK";
+    salvar();await pyodide.runPythonAsync(editor.value);await iniciarAnimacao();
+    output.textContent+=(output.textContent?"\\n\\n":"")+"OK";
   }catch(e){
-    console.error(e);
-    output.textContent+=(output.textContent?"\n\n":"")+"ERRO:\n"+String(e);
-  }finally{
-    executando=false;run.disabled=false;run.textContent="EXECUTAR";
-  }
+    console.error(e);output.textContent+=(output.textContent?"\\n\\n":"")+"ERRO:\\n"+String(e);
+  }finally{executando=false;run.disabled=false;run.textContent="EXECUTAR"}
 };
-
 window.addEventListener("error",e=>{
-  if(e?.message){setStatus("Erro no navegador");output.textContent+="\n\nERRO DO NAVEGADOR:\n"+e.message}
+  if(e?.message){setStatus("Erro no navegador");output.textContent+="\\n\\nERRO DO NAVEGADOR:\\n"+e.message}
 });
 window.addEventListener("unhandledrejection",e=>{
-  const r=String(e?.reason??"Erro assíncrono");
-  setStatus("Erro assíncrono");output.textContent+="\n\nERRO ASSÍNCRONO:\n"+r
+  const r=String(e?.reason??"Erro assíncrono");setStatus("Erro assíncrono");output.textContent+="\\n\\nERRO ASSÍNCRONO:\\n"+r
 });
-
 const online=$("online");
 function atualizarRede(){online.textContent=navigator.onLine?"● ONLINE":"● OFFLINE"}
-addEventListener("online",atualizarRede);addEventListener("offline",atualizarRede);
-atualizarRede();
-if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
+addEventListener("online",atualizarRede);addEventListener("offline",atualizarRede);atualizarRede();
+if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
 carregar();clearCanvas();carregarPython();
 </script>
 </body>
