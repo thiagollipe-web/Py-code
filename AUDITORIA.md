@@ -15,14 +15,14 @@ A auditoria cobre estrutura do repositório, HTML, CSS, JavaScript, runtime Pyth
 | Sintaxe Python | OK — validada com `python -m py_compile` |
 | Estrutura HTML principal | OK — uma abertura e um fechamento de `main` |
 | Paleta de blocos | OK — categorias e inserção presentes |
-| Drag & drop | OK no desktop; depende do suporte do navegador |
-| Teclado | OK |
-| Controles de toque | OK |
+| Drag & drop | Implementado no código; teste manual em navegador não executado nesta auditoria |
+| Teclado | Implementado; teste manual em navegador não executado nesta auditoria |
+| Controles de toque | Implementados; teste manual em dispositivo não executado nesta auditoria |
 | Áudio Web Audio | Implementado |
-| Canvas | OK |
-| Loop de jogo | Implementado com proteção contra sobreposição |
+| Canvas | Integração implementada; teste visual em navegador não executado nesta auditoria |
+| Loop de jogo | Implementado com proteção contra sobreposição; teste de execução real não executado |
 | Reset entre execuções | Implementado |
-| Service Worker | OK estruturalmente |
+| Service Worker | Validado por inspeção estrutural; instalação/atualização não foi testada em navegador real |
 | Cache da engine | OK — `pycode.py` está no shell |
 | Referências antigas a CodeMirror | Removidas |
 | Referências antigas a Personagem | Removidas |
