@@ -53,8 +53,7 @@ canvas{display:block;width:min(100%,500px);height:auto;max-height:100%;aspect-ra
 </main>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.28.2/full/pyodide.js"></script>
 <script type="module">
-import {EditorView} from "https://esm.sh/@codemirror/view@6.36.5";
-import {basicSetup} from "https://esm.sh/codemirror@6.0.1";
+import {EditorView,basicSetup} from "https://esm.sh/codemirror@6.0.1";
 import {python} from "https://esm.sh/@codemirror/lang-python@6.1.7";
 import {Compartment} from "https://esm.sh/@codemirror/state@6.5.2";
 import {EditorView as View} from "https://esm.sh/@codemirror/view@6.36.5";
@@ -85,8 +84,13 @@ themeBtn.onclick=()=>{dark=!dark;document.body.classList.toggle("light",!dark);t
 clearBtn.onclick=()=>{setOutput("");clearCanvas()};
 dl.onclick=()=>{const blob=new Blob([editor.state.doc.toString()],{type:"text/x-python;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="game.py";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
 async function init(){setStatus("Carregando Pyodide…");try{
-if(typeof loadPyodide!=="function")throw new Error("Pyodide não carregou.");
-pyodide=await loadPyodide({indexURL:"https://cdn.jsdelivr.net/pyodide/v0.28.2/full/",stdout:s=>{output.textContent+=(output.textContent?"\n":"")+s},stderr:s=>{output.textContent+=(output.textContent?"\n":"")+s}});
+for(let i=0;i<50 && typeof loadPyodide!=="function";i++)await new Promise(r=>setTimeout(r,100));
+if(typeof loadPyodide!=="function")throw new Error("Pyodide não carregou. Verifique a conexão com a CDN.");
+pyodide=await loadPyodide({
+  indexURL:"https://cdn.jsdelivr.net/pyodide/v0.28.2/full/",
+  stdout:s=>{output.textContent+=(output.textContent?"\n":"")+s},
+  stderr:s=>{output.textContent+=(output.textContent?"\n":"")+s}
+});
 setOutput("PY-CODE ONLINE\nPython pronto para executar no navegador.");setStatus("Ambiente pronto");run.disabled=false;run.textContent="EXECUTAR";
 }catch(err){console.error(err);setOutput("ERRO AO INICIAR PYTHON\n\n"+String(err));setStatus("Falha ao carregar Python")}}
 run.onclick=async()=>{if(!pyodide)return;run.disabled=true;run.textContent="EXECUTANDO…";setOutput("EXECUTANDO…\n");try{clearCanvas();await pyodide.runPythonAsync(editor.state.doc.toString());output.textContent+="\n\nOK"}catch(err){console.error(err);output.textContent+="\n\nERRO:\n"+String(err)}finally{run.disabled=false;run.textContent="EXECUTAR"}};
