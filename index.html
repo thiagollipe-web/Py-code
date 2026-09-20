@@ -101,7 +101,8 @@ const output=$("output"),status=$("status"),run=$("run-btn"),themeBtn=$("theme-b
       blockTabs=$("block-tabs"),blockGrid=$("block-grid");
 const canvas=$("canvas"),ctx=canvas.getContext("2d");
 
-let worker=null,dark=true,executando=false,animationId=0,frameEmExecucao=false,workerPronto=false,jogoAtivo=false;\nconst stop=$("stop-btn");
+let worker=null,dark=true,executando=false,animationId=0,frameEmExecucao=false,workerPronto=false,jogoAtivo=false;
+const stop=$("stop-btn");
 
 window.__pycode_keys=new Set();
 window.pycode_pressed=key=>{
@@ -141,10 +142,8 @@ document.querySelectorAll(".touch").forEach(btn=>{
 });
 
 function setOutput(t){output.textContent=String(t??"")}
-function appendOutput(value){const text=String(value??"");if(!text)return;output.textContent+=(output.textContent?"\
-":"")+text}
-function appendErrorOutput(value){const text=String(value??"");if(!text)return;output.textContent+=(output.textContent?"\
-":"")+"ERRO: "+text}
+function appendOutput(value){const text=String(value??"");if(!text)return;output.textContent+=(output.textContent?"\\n":"")+text}
+function appendErrorOutput(value){const text=String(value??"");if(!text)return;output.textContent+=(output.textContent?"\\n":"")+"ERRO: "+text}
 function setStatus(t){status.textContent=t}
 function clearCanvas(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle="#000";ctx.fillRect(0,0,canvas.width,canvas.height)}
 function salvar(){localStorage.setItem("pycode_codigo",editor.value)}
