@@ -147,7 +147,7 @@ function clearCanvas(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillSty
 function salvar(){localStorage.setItem("pycode_codigo",editor.value)}
 function carregar(){
   const salvo=localStorage.getItem("pycode_codigo");
-  editor.value=salvo??\`# Py-Code — Scratch em Python
+  editor.value=salvo??`# Py-Code — Scratch em Python
 # Blocos, Python e Canvas.
 
 jogador = Sprite(40, 120, 24, 24, "#00ff66")
@@ -163,72 +163,72 @@ def atualizar():
     jogador.limite()
     jogador.desenhar()
     mostrar_pontos()
-\`;
+`;
 }
 
 const BLOCOS={
   "Movimento":[
-    ["CRIAR SPRITE",\`jogador = Sprite(40, 120, 24, 24, "#00ff66")\`,"block-mov"],
-    ["MOVER",\`jogador.mover(2, 0)\`,"block-mov"],
-    ["VELOCIDADE",\`jogador.velocidade(2, 0)\`,"block-mov"]
+    ["CRIAR SPRITE",`jogador = Sprite(40, 120, 24, 24, "#00ff66")`,"block-mov"],
+    ["MOVER",`jogador.mover(2, 0)`,"block-mov"],
+    ["VELOCIDADE",`jogador.velocidade(2, 0)`,"block-mov"]
   ],
   "Controle":[
-    ["ATUALIZAR JOGO",\`def atualizar():
+    ["ATUALIZAR JOGO",`def atualizar():
     limpar("#081018")
-    jogador.desenhar()\`,"block-ctrl"],
-    ["SE TECLA",\`if pressionado("ArrowRight"):
-    jogador.mover(2, 0)\`,"block-ctrl"],
-    ["REPETIR",\`for i in range(10):
-    print(i)\`,"block-ctrl"]
+    jogador.desenhar()`,"block-ctrl"],
+    ["SE TECLA",`if pressionado("ArrowRight"):
+    jogador.mover(2, 0)`,"block-ctrl"],
+    ["REPETIR",`for i in range(10):
+    print(i)`,"block-ctrl"]
   ],
   "HTML":[
-    ["PEGAR CANVAS",\`elemento = document.getElementById("canvas")\`,"block-ent"],
-    ["MUDAR STATUS",\`document.getElementById("status").textContent = "Jogo iniciado!"\`,"block-ent"]
+    ["PEGAR CANVAS",`elemento = document.getElementById("canvas")`,"block-ent"],
+    ["MUDAR STATUS",`document.getElementById("status").textContent = "Jogo iniciado!"`,"block-ent"]
   ],
   "Aparência":[
-    ["LIMPAR TELA",\`limpar("#081018")\`,"block-apa"],
-    ["RETÂNGULO",\`retangulo(100, 60, 30, 30, "#00ff66")\`,"block-apa"],
-    ["CÍRCULO",\`circulo(160, 90, 15, "#ffcc00")\`,"block-apa"],
-    ["TEXTO",\`texto("Olá!", 10, 20)\`,"block-apa"]
+    ["LIMPAR TELA",`limpar("#081018")`,"block-apa"],
+    ["RETÂNGULO",`retangulo(100, 60, 30, 30, "#00ff66")`,"block-apa"],
+    ["CÍRCULO",`circulo(160, 90, 15, "#ffcc00")`,"block-apa"],
+    ["TEXTO",`texto("Olá!", 10, 20)`,"block-apa"]
   ],
   "Física":[
-    ["GRAVIDADE",\`jogador.gravidade(0.5)
-jogador.no_chao(165)\`,"block-fis"],
-    ["PULAR",\`jogador.no_chao(165)
+    ["GRAVIDADE",`jogador.gravidade(0.5)
+jogador.no_chao(165)`,"block-fis"],
+    ["PULAR",`jogador.no_chao(165)
 if pressionado("ArrowUp"):
-    jogador.pular(8)\`,"block-fis"],
-    ["COLISÃO",\`alvo = Sprite(220, 120, 24, 24, "#ff3333")
+    jogador.pular(8)`,"block-fis"],
+    ["COLISÃO",`alvo = Sprite(220, 120, 24, 24, "#ff3333")
 if jogador.colide(alvo):
-    somar_pontos(1)\`,"block-fis"]
+    somar_pontos(1)`,"block-fis"]
   ],
   "Entrada":[
-    ["SE DIREITA",\`if pressionado("ArrowRight"):
-    jogador.mover(2, 0)\`,"block-ent"],
-    ["SE ESQUERDA",\`if pressionado("ArrowLeft"):
-    jogador.mover(-2, 0)\`,"block-ent"],
-    ["SE AÇÃO X",\`if pressionado("x"):
-    tocar(660, 0.08)\`,"block-ent"]
+    ["SE DIREITA",`if pressionado("ArrowRight"):
+    jogador.mover(2, 0)`,"block-ent"],
+    ["SE ESQUERDA",`if pressionado("ArrowLeft"):
+    jogador.mover(-2, 0)`,"block-ent"],
+    ["SE AÇÃO X",`if pressionado("x"):
+    tocar(660, 0.08)`,"block-ent"]
   ],
   "Som":[
-    ["TOCAR SOM",\`tocar(440, 0.12)\`,"block-som"],
-    ["SOM DE PONTO",\`tocar(880, 0.08)
-somar_pontos(1)\`,"block-som"]
+    ["TOCAR SOM",`tocar(440, 0.12)`,"block-som"],
+    ["SOM DE PONTO",`tocar(880, 0.08)
+somar_pontos(1)`,"block-som"]
   ],
   "Pontuação":[
-    ["+1 PONTO",\`somar_pontos(1)\`,"block-pont"],
-    ["ZERAR PONTOS",\`zerar_pontos()\`,"block-pont"],
-    ["MOSTRAR PONTOS",\`mostrar_pontos()\`,"block-pont"]
+    ["+1 PONTO",`somar_pontos(1)`,"block-pont"],
+    ["ZERAR PONTOS",`zerar_pontos()`,"block-pont"],
+    ["MOSTRAR PONTOS",`mostrar_pontos()`,"block-pont"]
   ],
   "Cenas":[
-    ["CRIAR CENA",\`def atualizar_jogo():
+    ["CRIAR CENA",`def atualizar_jogo():
     limpar("#081018")
     if "jogador" in globals():
         jogador.desenhar()
 
 cena("jogo", atualizar=atualizar_jogo)
-mudar_cena("jogo")\`,"block-cen"],
-    ["MUDAR CENA",\`mudar_cena("jogo")\`,"block-cen"],
-    ["NOME DA CENA",\`print(cena_atual_nome())\`,"block-cen"]
+mudar_cena("jogo")`,"block-cen"],
+    ["MUDAR CENA",`mudar_cena("jogo")`,"block-cen"],
+    ["NOME DA CENA",`print(cena_atual_nome())`,"block-cen"]
   ]
 };
 
