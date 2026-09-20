@@ -95,327 +95,178 @@ canvas{display:block;width:min(100%,560px);height:auto;max-height:calc(100% - 78
 </main>
 
 <script>
+"use strict";
 const $=id=>document.getElementById(id);
-const output=$("output"),status=$("status"),run=$("run-btn"),themeBtn=$("theme-btn"),
-      clearBtn=$("clear-btn"),dl=$("download-btn"),editor=$("code"),
-      blockTabs=$("block-tabs"),blockGrid=$("block-grid");
+const output=$("output"),status=$("status"),run=$("run-btn"),stop=$("stop-btn");
+const themeBtn=$("theme-btn"),clearBtn=$("clear-btn"),dl=$("download-btn"),editor=$("code");
+const blockTabs=$("block-tabs"),blockGrid=$("block-grid");
 const canvas=$("canvas"),ctx=canvas.getContext("2d");
-
-let worker=null,dark=true,executando=false,animationId=0,frameEmExecucao=false,workerPronto=false,jogoAtivo=false;
-const stop=$("stop-btn");
-
+let worker=null,workerPronto=false,executando=false,jogoAtivo=false,animationId=0,lastFrame=0;
+let dark=true,blocoCategoria="Movimento",imagens={},audioContext=null;
 window.__pycode_keys=new Set();
-window.pycode_pressed=key=>{
-  const k=String(key);
-  return window.__pycode_keys.has(k)||window.__pycode_keys.has(k.toLowerCase());
-};
-window.pycode_image=url=>{const image=new Image();image.src=String(url);return image};
-
-let audioContext=null;
-window.pycode_sound=(frequency,duration,type,volume)=>{
-  try{
-    audioContext??=new (window.AudioContext||window.webkitAudioContext)();
-    if(audioContext.state==="suspended")audioContext.resume();
-    const osc=audioContext.createOscillator(),gain=audioContext.createGain();
-    const v=Math.max(0.0001,Math.min(0.3,Number(volume)||0.05));
-    const d=Math.max(0.02,Number(duration)||0.12);
-    osc.type=type||"square";osc.frequency.value=Number(frequency)||440;
-    gain.gain.setValueAtTime(v,audioContext.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.0001,audioContext.currentTime+d);
-    osc.connect(gain);gain.connect(audioContext.destination);
-    osc.start();osc.stop(audioContext.currentTime+d);
-  }catch(_){}
-};
-
-function teclaDown(key){window.__pycode_keys.add(String(key))}
-function teclaUp(key){window.__pycode_keys.delete(String(key))}
-addEventListener("keydown",e=>{if(document.activeElement===editor)return;teclaDown(e.key);teclaDown(e.key.toLowerCase())});
-addEventListener("keyup",e=>{if(document.activeElement===editor)return;teclaUp(e.key);teclaUp(e.key.toLowerCase())});
-addEventListener("blur",()=>window.__pycode_keys.clear());
-
-document.querySelectorAll(".touch").forEach(btn=>{
-  const key=btn.dataset.key;if(!key)return;
-  const down=e=>{e.preventDefault();teclaDown(key);btn.setPointerCapture?.(e.pointerId)};
-  const up=e=>{e.preventDefault();teclaUp(key)};
-  ["pointerup","pointercancel","lostpointercapture"].forEach(type=>btn.addEventListener(type,up));
-  btn.addEventListener("pointerdown",down);
-});
-
-function setOutput(t){output.textContent=String(t??"")}
-function appendOutput(value){const text=String(value??"");if(!text)return;output.textContent+=(output.textContent?"\\n":"")+text}
-function appendErrorOutput(value){const text=String(value??"");if(!text)return;output.textContent+=(output.textContent?"\\n":"")+"ERRO: "+text}
-function setStatus(t){status.textContent=t}
-function clearCanvas(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle="#000";ctx.fillRect(0,0,canvas.width,canvas.height)}
-function salvar(){localStorage.setItem("pycode_codigo",editor.value)}
-function carregar(){
-  const salvo=localStorage.getItem("pycode_codigo");
-  editor.value=salvo??`# Py-Code — Scratch em Python
-# Blocos, Python e Canvas.
-
-jogador = Sprite(40, 120, 24, 24, "#00ff66")
-
-def atualizar():
-    limpar("#081018")
-
-    if pressionado("ArrowRight"):
-        jogador.mover(2, 0)
-    if pressionado("ArrowLeft"):
-        jogador.mover(-2, 0)
-
-    jogador.limite()
-    jogador.desenhar()
-    mostrar_pontos()
-`;
-}
 
 const BLOCOS={
-  "Movimento":[
-    ["CRIAR SPRITE",`jogador = Sprite(40, 120, 24, 24, "#00ff66")`,"block-mov"],
-    ["MOVER",`jogador.mover(2, 0)`,"block-mov"],
-    ["VELOCIDADE",`jogador.velocidade(2, 0)`,"block-mov"]
-  ],
-  "Controle":[
-    ["ATUALIZAR JOGO",`def atualizar():
-    limpar("#081018")
-    jogador.desenhar()`,"block-ctrl"],
-    ["SE TECLA",`if pressionado("ArrowRight"):
-    jogador.mover(2, 0)`,"block-ctrl"],
-    ["REPETIR",`for i in range(10):
-    print(i)`,"block-ctrl"]
-  ],
-  "HTML":[
-    ["PEGAR CANVAS",`elemento = document.getElementById("canvas")`,"block-ent"],
-    ["MUDAR STATUS",`document.getElementById("status").textContent = "Jogo iniciado!"`,"block-ent"]
-  ],
-  "Aparência":[
-    ["LIMPAR TELA",`limpar("#081018")`,"block-apa"],
-    ["RETÂNGULO",`retangulo(100, 60, 30, 30, "#00ff66")`,"block-apa"],
-    ["CÍRCULO",`circulo(160, 90, 15, "#ffcc00")`,"block-apa"],
-    ["TEXTO",`texto("Olá!", 10, 20)`,"block-apa"]
-  ],
-  "Física":[
-    ["GRAVIDADE",`jogador.gravidade(0.5)
-jogador.no_chao(165)`,"block-fis"],
-    ["PULAR",`jogador.no_chao(165)
-if pressionado("ArrowUp"):
-    jogador.pular(8)`,"block-fis"],
-    ["COLISÃO",`alvo = Sprite(220, 120, 24, 24, "#ff3333")
-if jogador.colide(alvo):
-    somar_pontos(1)`,"block-fis"]
-  ],
-  "Entrada":[
-    ["SE DIREITA",`if pressionado("ArrowRight"):
-    jogador.mover(2, 0)`,"block-ent"],
-    ["SE ESQUERDA",`if pressionado("ArrowLeft"):
-    jogador.mover(-2, 0)`,"block-ent"],
-    ["SE AÇÃO X",`if pressionado("x"):
-    tocar(660, 0.08)`,"block-ent"]
-  ],
-  "Som":[
-    ["TOCAR SOM",`tocar(440, 0.12)`,"block-som"],
-    ["SOM DE PONTO",`tocar(880, 0.08)
-somar_pontos(1)`,"block-som"]
-  ],
-  "Pontuação":[
-    ["+1 PONTO",`somar_pontos(1)`,"block-pont"],
-    ["ZERAR PONTOS",`zerar_pontos()`,"block-pont"],
-    ["MOSTRAR PONTOS",`mostrar_pontos()`,"block-pont"]
-  ],
-  "Cenas":[
-    ["CRIAR CENA",`def atualizar_jogo():
-    limpar("#081018")
-    if "jogador" in globals():
-        jogador.desenhar()
+Movimento:[
+["CRIAR SPRITE","jogador = Sprite(40, 120, 24, 24, \\"#00ff66\\")","block-mov"],
+["MOVER","jogador.mover(2, 0)","block-mov"],
+["VELOCIDADE","jogador.velocidade(2, 0)","block-mov"]],
+Controle:[
+["ATUALIZAR JOGO","def atualizar():\\n    limpar(\\"#081018\\")\\n    jogador.desenhar()","block-ctrl"],
+["SE TECLA","if pressionado(\\"ArrowRight\\"):\\n    jogador.mover(2, 0)","block-ctrl"],
+["REPETIR","for i in range(10):\\n    print(i)","block-ctrl"]],
+HTML:[
+["STATUS","definir_status(\\"Jogo iniciado!\\")","block-ent"],
+["TEXTO HTML","mostrar_texto_html(\\"Olá!\\")","block-ent"]],
+Aparência:[
+["LIMPAR TELA","limpar(\\"#081018\\")","block-apa"],
+["RETÂNGULO","retangulo(100, 60, 30, 30, \\"#00ff66\\")","block-apa"],
+["CÍRCULO","circulo(160, 90, 15, \\"#ffcc00\\")","block-apa"],
+["TEXTO","texto(\\"Olá!\\", 10, 20)","block-apa"]],
+Física:[
+["GRAVIDADE","jogador.gravidade(0.5)\\njogador.no_chao(165)","block-fis"],
+["PULAR","if pressionado(\\"ArrowUp\\"):\\n    jogador.pular(8)","block-fis"],
+["COLISÃO","if jogador.colide(alvo):\\n    somar_pontos(1)","block-fis"]],
+Entrada:[
+["SE DIREITA","if pressionado(\\"ArrowRight\\"):\\n    jogador.mover(2, 0)","block-ent"],
+["SE ESQUERDA","if pressionado(\\"ArrowLeft\\"):\\n    jogador.mover(-2, 0)","block-ent"],
+["AÇÃO X","if pressionado(\\"x\\"):\\n    tocar(660, 0.08)","block-ent"]],
+Som:[
+["TOCAR SOM","tocar(440, 0.12)","block-som"],
+["SOM DE PONTO","tocar(880, 0.08)\\nsomar_pontos(1)","block-som"]],
+Pontuação:[
+["+1 PONTO","somar_pontos(1)","block-pont"],
+["ZERAR PONTOS","zerar_pontos()","block-pont"],
+["MOSTRAR PONTOS","mostrar_pontos()","block-pont"]],
+Cenas:[
+["CRIAR CENA","def atualizar_jogo():\\n    limpar(\\"#081018\\")\\n    jogador.desenhar()\\ncena(\\"jogo\\", atualizar=atualizar_jogo)\\nmudar_cena(\\"jogo\\")","block-cen"],
+["MUDAR CENA","mudar_cena(\\"jogo\\")","block-cen"],
+["NOME DA CENA","print(cena_atual_nome())","block-cen"]
+]};
 
-cena("jogo", atualizar=atualizar_jogo)
-mudar_cena("jogo")`,"block-cen"],
-    ["MUDAR CENA",`mudar_cena("jogo")`,"block-cen"],
-    ["NOME DA CENA",`print(cena_atual_nome())`,"block-cen"]
-  ]
-};
-
-let blocoCategoria="Movimento";
-
-function escaparHtml(valor){
-  return String(valor).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+function setOutput(v){output.textContent=String(v==null?"":v)}
+function appendOutput(v){const s=String(v==null?"":v);if(s)output.textContent+=(output.textContent?"\n":"")+s}
+function appendError(v){const s=String(v==null?"":v);if(s)output.textContent+=(output.textContent?"\n":"")+"ERRO: "+s}
+function setStatus(v){status.textContent=String(v)}
+function clearCanvas(){ctx.fillStyle="#000";ctx.fillRect(0,0,canvas.width,canvas.height)}
+function salvar(){localStorage.setItem("pycode_codigo",editor.value)}
+function carregar(){
+ const salvo=localStorage.getItem("pycode_codigo");
+ editor.value=salvo||'# Py-Code — Scratch em Python\n# Python + blocos + Canvas\n\njogador = Sprite(40, 120, 24, 24, "#00ff66")\n\ndef atualizar():\n    limpar("#081018")\n    if pressionado("ArrowRight"):\n        jogador.mover(2, 0)\n    if pressionado("ArrowLeft"):\n        jogador.mover(-2, 0)\n    jogador.limite()\n    jogador.desenhar()\n    mostrar_pontos()\n';
 }
+function escapar(v){return String(v).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;")}
 function inserirBloco(codigo){
-  const inicio=editor.selectionStart,fim=editor.selectionEnd;
-  const antes=editor.value.slice(0,inicio),depois=editor.value.slice(fim);
-  const prefixo=antes&&!antes.endsWith("\n")?"\n\n":"";
-  const sufixo=depois&&!depois.startsWith("\n")?"\n":"";
-  editor.value=antes+prefixo+codigo+sufixo+depois;
-  const pos=(antes+prefixo+codigo).length;
-  editor.focus();editor.setSelectionRange(pos,pos);salvar();
+ const a=editor.selectionStart,b=editor.selectionEnd;
+ const antes=editor.value.slice(0,a),depois=editor.value.slice(b);
+ const prefixo=antes&&!antes.endsWith("\n")?"\n\n":"";
+ const sufixo=depois&&!depois.startsWith("\n")?"\n":"";
+ editor.value=antes+prefixo+codigo+sufixo+depois;
+ const pos=(antes+prefixo+codigo).length;
+ editor.focus();editor.setSelectionRange(pos,pos);salvar();
 }
 function renderBlocos(){
-  blockTabs.innerHTML="";blockGrid.innerHTML="";
-  Object.keys(BLOCOS).forEach(nome=>{
-    const tab=document.createElement("button");
-    tab.type="button";tab.className="block-tab"+(nome===blocoCategoria?" active":"");
-    tab.textContent=nome;tab.onclick=()=>{blocoCategoria=nome;renderBlocos()};
-    blockTabs.appendChild(tab);
-  });
-  BLOCOS[blocoCategoria].forEach(([titulo,codigo,classe])=>{
-    const b=document.createElement("button");
-    b.type="button";b.draggable=true;b.className="code-block "+classe;
-    b.innerHTML=escaparHtml(titulo)+"<small>"+escaparHtml(codigo.replaceAll("\n"," ↵ "))+"</small>";
-    b.title="Inserir bloco Python";
-    b.onclick=()=>inserirBloco(codigo);
-    b.addEventListener("dragstart",e=>{
-      e.dataTransfer.setData("text/plain",codigo);
-      e.dataTransfer.effectAllowed="copy";
-    });
-    blockGrid.appendChild(b);
-  });
+ blockTabs.innerHTML="";blockGrid.innerHTML="";
+ Object.keys(BLOCOS).forEach(nome=>{
+  const t=document.createElement("button");t.type="button";t.className="block-tab"+(nome===blocoCategoria?" active":"");
+  t.textContent=nome;t.onclick=()=>{blocoCategoria=nome;renderBlocos()};blockTabs.appendChild(t);
+ });
+ BLOCOS[blocoCategoria].forEach(([titulo,codigo,classe])=>{
+  const b=document.createElement("button");b.type="button";b.className="code-block "+classe;b.draggable=true;
+  b.innerHTML=escapar(titulo)+"<small>"+escapar(codigo.replaceAll("\n"," ↵ "))+"</small>";
+  b.onclick=()=>inserirBloco(codigo);
+  b.addEventListener("dragstart",e=>e.dataTransfer.setData("text/plain",codigo));
+  blockGrid.appendChild(b);
+ });
 }
-editor.addEventListener("dragover",e=>{e.preventDefault();e.dataTransfer.dropEffect="copy"});
-editor.addEventListener("drop",e=>{
-  e.preventDefault();
-  const codigo=e.dataTransfer.getData("text/plain");
-  if(!codigo)return;
-  inserirBloco(codigo);
-});
-renderBlocos();
+function tocarSom(f,d,t,v){
+ try{
+  audioContext=audioContext||new(window.AudioContext||window.webkitAudioContext)();
+  if(audioContext.state==="suspended")audioContext.resume();
+  const o=audioContext.createOscillator(),g=audioContext.createGain(),dur=Math.max(.02,Number(d)||.12);
+  o.type=t||"square";o.frequency.value=Number(f)||440;g.gain.value=Math.min(.3,Number(v)||.05);
+  o.connect(g);g.connect(audioContext.destination);o.start();o.stop(audioContext.currentTime+dur);
+ }catch(e){console.warn("Áudio:",e)}
+}
+function desenharImagem(m){
+ const img=imagens[m.url]||(imagens[m.url]=new Image());
+ if(!img.src)img.src=m.url;
+ if(img.complete)ctx.drawImage(img,m.x,m.y,m.w,m.h);
+}
+function renderMensagem(m){
+ if(m.type==="fill"){ctx.fillStyle=m.color;ctx.fillRect(0,0,canvas.width,canvas.height)}
+ else if(m.type==="rect"){ctx.fillStyle=m.color;ctx.fillRect(m.x,m.y,m.w,m.h)}
+ else if(m.type==="circle"){ctx.fillStyle=m.color;ctx.beginPath();ctx.arc(m.x,m.y,m.r,0,Math.PI*2);ctx.fill()}
+ else if(m.type==="line"){ctx.strokeStyle=m.color;ctx.lineWidth=m.width;ctx.beginPath();ctx.moveTo(m.x1,m.y1);ctx.lineTo(m.x2,m.y2);ctx.stroke()}
+ else if(m.type==="text"){ctx.fillStyle=m.color;ctx.font=m.size+"px monospace";ctx.fillText(m.value,m.x,m.y)}
+ else if(m.type==="sound")tocarSom(m.frequency,m.duration,m.type,m.volume);
+ else if(m.type==="image")desenharImagem(m);
+}
+function pararLoop(){if(animationId)cancelAnimationFrame(animationId);animationId=0}
+function iniciarLoop(){
+ pararLoop();lastFrame=performance.now();
+ function frame(now){
+  if(!jogoAtivo||!workerPronto)return;
+  if(now-lastFrame>=33){lastFrame=now;worker.postMessage({type:"keys",keys:[...window.__pycode_keys]});worker.postMessage({type:"frame"})}
+  animationId=requestAnimationFrame(frame);
+ }
+ animationId=requestAnimationFrame(frame);
+}
+function criarWorker(){
+ if(worker)worker.terminate();
+ worker=new Worker("./pycode-worker.js");
+ worker.onmessage=e=>{
+  const m=e.data||{};
+  if(m.type==="status"){setStatus(m.value);return}
+  if(m.type==="ready"){workerPronto=true;run.disabled=false;run.textContent="EXECUTAR";setStatus("Python pronto");return}
+  if(m.type==="stdout"){appendOutput(m.value);return}
+  if(m.type==="stderr"){appendError(m.value);return}
+  if(["fill","rect","circle","line","text","sound","image"].includes(m.type)){renderMensagem(m);return}
+  if(m.type==="done"){executando=false;jogoAtivo=true;run.disabled=false;stop.disabled=false;run.textContent="EXECUTAR";appendOutput("✓ Execução concluída");iniciarLoop();return}
+  if(m.type==="error"||m.type==="fatal"){executando=false;jogoAtivo=false;stop.disabled=true;run.disabled=false;run.textContent="EXECUTAR";pararLoop();appendError(m.value);setStatus("Erro Python")}
+ };
+ worker.onerror=e=>{executando=false;jogoAtivo=false;workerPronto=false;pararLoop();stop.disabled=true;run.disabled=true;appendError(e.message||"Falha no Worker");setStatus("Falha no runtime")};
+ worker.postMessage({type:"boot"});
+}
+function executar(){
+ if(!workerPronto||executando)return;
+ salvar();clearCanvas();setOutput("");window.__pycode_keys.clear();
+ executando=true;jogoAtivo=false;run.disabled=true;stop.disabled=false;run.textContent="EXECUTANDO…";setStatus("Executando Python…");
+ worker.postMessage({type:"keys",keys:[]});worker.postMessage({type:"run",code:editor.value});
+}
+function parar(){
+ jogoAtivo=false;pararLoop();window.__pycode_keys.clear();
+ if(worker)worker.terminate();worker=null;workerPronto=false;executando=false;stop.disabled=true;
+ appendOutput("Execução interrompida pelo usuário.");setStatus("Execução parada");run.disabled=true;run.textContent="CARREGANDO…";criarWorker();
+}
+function atualizarRede(){$("online").textContent=navigator.onLine?"REDE ● ONLINE":"REDE ● OFFLINE"}
 
 editor.addEventListener("input",salvar);
 editor.addEventListener("keydown",e=>{
-  if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();if(!run.disabled)run.click()}
-  if(e.key==="Tab"){e.preventDefault();const a=editor.selectionStart,b=editor.selectionEnd;editor.setRangeText("    ",a,b,"end");salvar()}
+ if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();executar()}
+ if(e.key==="Tab"){e.preventDefault();const a=editor.selectionStart,b=editor.selectionEnd;editor.setRangeText("    ",a,b,"end");salvar()}
+});
+editor.addEventListener("dragover",e=>e.preventDefault());
+editor.addEventListener("drop",e=>{e.preventDefault();const c=e.dataTransfer.getData("text/plain");if(c)inserirBloco(c)});
+addEventListener("keydown",e=>{if(document.activeElement===editor)return;window.__pycode_keys.add(e.key);window.__pycode_keys.add(e.key.toLowerCase())});
+addEventListener("keyup",e=>{if(document.activeElement===editor)return;window.__pycode_keys.delete(e.key);window.__pycode_keys.delete(e.key.toLowerCase())});
+addEventListener("blur",()=>window.__pycode_keys.clear());
+
+document.querySelectorAll(".touch").forEach(btn=>{
+ const key=btn.dataset.key;if(!key)return;
+ const down=e=>{e.preventDefault();window.__pycode_keys.add(key);btn.setPointerCapture?.(e.pointerId)};
+ const up=e=>{e.preventDefault();window.__pycode_keys.delete(key)};
+ btn.addEventListener("pointerdown",down);
+ ["pointerup","pointercancel","lostpointercapture"].forEach(x=>btn.addEventListener(x,up));
 });
 
-themeBtn.onclick=()=>{
-  dark=!dark;document.body.classList.toggle("light",!dark);
-  themeBtn.textContent=dark?"TEMA: PRETO":"TEMA: CLARO";
-  editor.classList.toggle("light-editor",!dark);
-};
+themeBtn.onclick=()=>{dark=!dark;document.body.classList.toggle("light",!dark);editor.classList.toggle("light-editor",!dark);themeBtn.textContent=dark?"TEMA: PRETO":"TEMA: CLARO"};
 clearBtn.onclick=()=>{setOutput("");clearCanvas()};
-dl.onclick=()=>{
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([editor.value],{type:"text/x-python;charset=utf-8"}));
-  a.download="programa.py";a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-};
-
-function appendOutput(value){const text=String(value??"");if(!text)return;output.textContent+=(output.textContent?"\n":"")+text}
-function appendErrorOutput(value){const text=String(value??"");if(!text)return;output.textContent+=(output.textContent?"\n":"")+"ERRO: "+text}
-function setStatus(t){status.textContent=t}
-function clearCanvas(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle="#000";ctx.fillRect(0,0,canvas.width,canvas.height)}
-function salvar(){localStorage.setItem("pycode_codigo",editor.value)}
-function carregar(){
-  const salvo=localStorage.getItem("pycode_codigo");
-  editor.value=salvo??\`# Py-Code — Scratch em Python
-# Blocos, Python e Canvas.
-
-jogador = Sprite(40, 120, 24, 24, "#00ff66")
-
-def atualizar():
-    limpar("#081018")
-    if pressionado("ArrowRight"):
-        jogador.mover(2, 0)
-    if pressionado("ArrowLeft"):
-        jogador.mover(-2, 0)
-    jogador.limite()
-    jogador.desenhar()
-    mostrar_pontos()
-\`;
-}
-
-function iniciarWorker(){
-  if(worker){worker.terminate();worker=null}
-  workerPronto=false;executando=false;jogoAtivo=false;
-  stop.disabled=true;run.disabled=true;run.textContent="CARREGANDO…";
-  setStatus("Inicializando Python…");setOutput("PY-CODE\n\nCarregando runtime Python isolado…");
-  worker=new Worker("./pycode-worker.js");
-  worker.onmessage=evento=>{
-    const m=evento.data||{};
-    if(m.type==="status"){setStatus(m.value);return}
-    if(m.type==="ready"){
-      workerPronto=true;run.disabled=false;run.textContent="EXECUTAR";setStatus("Python pronto");appendOutput("Python + blocos + Canvas prontos.");return
-    }
-    if(m.type==="stdout"){appendOutput(m.value);return}
-    if(m.type==="stderr"){appendErrorOutput(m.value);return}
-    if(m.type==="fill"){ctx.fillStyle=m.color;ctx.fillRect(0,0,canvas.width,canvas.height);return}
-    if(m.type==="rect"){ctx.fillStyle=m.color;ctx.fillRect(m.x,m.y,m.w,m.h);return}
-    if(m.type==="circle"){ctx.fillStyle=m.color;ctx.beginPath();ctx.arc(m.x,m.y,m.r,0,Math.PI*2);ctx.fill();return}
-    if(m.type==="line"){ctx.strokeStyle=m.color;ctx.lineWidth=m.width;ctx.beginPath();ctx.moveTo(m.x1,m.y1);ctx.lineTo(m.x2,m.y2);ctx.stroke();return}
-    if(m.type==="text"){ctx.fillStyle=m.color;ctx.font=m.size+"px monospace";ctx.fillText(m.value,m.x,m.y);return}
-    if(m.type==="sound"){tocarSom(m.frequency,m.duration,m.type,m.volume);return}
-    if(m.type==="image"){desenharImagem(m);return}
-    if(m.type==="done"){appendOutput("✓ Execução concluída");jogoAtivo=true;stop.disabled=false;executando=false;run.disabled=false;run.textContent="EXECUTAR";iniciarLoop();return}
-    if(m.type==="error"||m.type==="fatal"){appendErrorOutput(m.value);setStatus("Erro Python");executando=false;jogoAtivo=false;stop.disabled=true;run.disabled=false;run.textContent="EXECUTAR";pararLoop();return}
-  };
-  worker.onerror=e=>{appendErrorOutput(e.message||"Falha no Worker Python");setStatus("Falha no runtime");executando=false;jogoAtivo=false;stop.disabled=true;run.disabled=!workerPronto;pararLoop()};
-  worker.postMessage({type:"boot"});
-}
-let imagens={};
-function desenharImagem(m){
-  const key=m.url;
-  let img=imagens[key];
-  if(!img){img=new Image();img.onload=()=>{ctx.drawImage(img,m.x,m.y,m.w,m.h)};img.src=key;imagens[key]=img}
-  if(img.complete)ctx.drawImage(img,m.x,m.y,m.w,m.h)
-}
-let audioContext=null;
-function tocarSom(frequency,duration,type,volume){
-  try{
-    audioContext??=new (window.AudioContext||window.webkitAudioContext)();
-    if(audioContext.state==="suspended")audioContext.resume();
-    const osc=audioContext.createOscillator(),gain=audioContext.createGain(),d=Math.max(.02,Number(duration)||.12),v=Math.max(.0001,Math.min(.3,Number(volume)||.05));
-    osc.type=type||"square";osc.frequency.value=Number(frequency)||440;gain.gain.setValueAtTime(v,audioContext.currentTime);gain.gain.exponentialRampToValueAtTime(.0001,audioContext.currentTime+d);
-    osc.connect(gain);gain.connect(audioContext.destination);osc.start();osc.stop(audioContext.currentTime+d);
-  }catch(e){console.warn("Áudio:",e)}
-}
-function pararLoop(){if(animationId)cancelAnimationFrame(animationId);animationId=0;frameEmExecucao=false}
-function iniciarLoop(){
-  pararLoop();
-  let ultimo=performance.now();
-  const frame=agora=>{
-    if(!jogoAtivo||!workerPronto)return;
-    const dt=agora-ultimo;
-    if(dt>=33&&!frameEmExecucao){
-      ultimo=agora;frameEmExecucao=true;
-      worker.postMessage({type:"keys",keys:[...window.__pycode_keys]});
-      worker.postMessage({type:"frame"});
-    }
-    animationId=requestAnimationFrame(t=>{
-      frameEmExecucao=false;frame(t)
-    });
-  };
-  animationId=requestAnimationFrame(frame);
-}
-function pararExecucao(mensagem="Execução interrompida pelo usuário."){
-  jogoAtivo=false;pararLoop();window.__pycode_keys.clear();
-  if(worker){worker.terminate();worker=null}
-  workerPronto=false;executando=false;stop.disabled=true;run.disabled=true;run.textContent="CARREGANDO…";
-  appendOutput(mensagem);setStatus("Execução parada");iniciarWorker();
-}
-function executar(){
-  if(!workerPronto||executando)return;
-  executando=true;jogoAtivo=false;pararLoop();window.__pycode_keys.clear();clearCanvas();setOutput("");
-  stop.disabled=false;run.disabled=true;run.textContent="EXECUTANDO…";setStatus("Executando Python…");
-  worker.postMessage({type:"keys",keys:[]});
-  worker.postMessage({type:"run",code:editor.value});
-}
+dl.onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([editor.value],{type:"text/x-python"}));a.download="programa.py";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
 run.onclick=executar;
-stop.onclick=()=>pararExecucao();
-clearBtn.onclick=()=>{setOutput("");clearCanvas()};
-dl.onclick=()=>{
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([editor.value],{type:"text/x-python;charset=utf-8"}));
-  a.download="programa.py";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-};
-
-window.addEventListener("error",e=>{
-  if(e?.message){setStatus("Erro no navegador");appendErrorOutput("ERRO DO NAVEGADOR: "+e.message)}
-});
-window.addEventListener("unhandledrejection",e=>{
-  const r=String(e?.reason??"Erro assíncrono");setStatus("Erro assíncrono");appendErrorOutput("ERRO ASSÍNCRONO: "+r);
-});
-const online=$("online");
-function atualizarRede(){online.textContent=navigator.onLine?"REDE ● ONLINE":"REDE ● OFFLINE"}
-addEventListener("online",atualizarRede);addEventListener("offline",atualizarRede);atualizarRede();
+stop.onclick=parar;
+addEventListener("online",atualizarRede);addEventListener("offline",atualizarRede);
+addEventListener("error",e=>{if(e.message)appendError("NAVEGADOR: "+e.message)});
 if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
-carregar();clearCanvas();iniciarWorker();
+renderBlocos();carregar();clearCanvas();atualizarRede();criarWorker();
 </script>
 </body>
 </html>
