@@ -1,4 +1,4 @@
-const CACHE="py-code-v7";
+const CACHE="py-code-v8";
 const SHELL=["./","./index.html","./manifest.webmanifest","./pycode.py","./pycode-worker.js","./pycode_worker.py","./assets/py-code-banner.svg"];
 
 self.addEventListener("install",event=>{
