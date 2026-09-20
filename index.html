@@ -66,7 +66,7 @@ canvas{display:block;width:min(100%,500px);height:auto;max-height:100%;aspect-ra
 
 const $=id=>document.getElementById(id);
 const output=$("output"),status=$("status"),run=$("run-btn"),themeBtn=$("theme-btn"),
-      clearBtn=$("clear-btn"),dl=$("download-btn"),example=$("example-select"),editor=$("code");
+      clearBtn=$("clear-btn"),dl=$("download-btn"),editor=$("code");
 const canvas=$("canvas"),ctx=canvas.getContext("2d");
 let pyodide=null,dark=true,executando=false;
 
