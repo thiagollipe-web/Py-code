@@ -12,7 +12,7 @@
 
 ## 🎯 Finalidade
 
-O **Py-Code** foi criado para tornar o aprendizado e a experimentação com Python mais simples e acessíveis.
+O **Py-Code** foi criado para tornar o aprendizado de programação mais simples e acessível, aproximando a experiência de blocos do Scratch da programação textual em Python.
 
 A proposta é oferecer um pequeno ambiente de programação que funciona **diretamente no navegador**, combinando **Python para a lógica** com **HTML/Canvas para a parte visual**. O aluno escreve Python, executa o programa e observa o resultado no terminal e na tela gráfica.
 
@@ -49,7 +49,7 @@ O botão **EXECUTAR** executa o conteúdo do editor usando Pyodide.
 Mensagens produzidas por `print()`, avisos e erros aparecem na área de saída.
 
 ### Python + HTML + Canvas
-Python controla a lógica e o Canvas apresenta o resultado. A engine disponibiliza `limpar()`, `retangulo()`, `circulo()`, `linha()`, `texto()`, `pressionado()` e `Personagem`.
+Python controla a lógica e o Canvas apresenta o resultado. A engine disponibiliza `limpar()`, `retangulo()`, `circulo()`, `linha()`, `texto()`, `pressionado()` e `Sprite`.
 
 Exemplo mínimo:
 
@@ -202,7 +202,7 @@ Py-code/
 
 ## 🔮 Próximas evoluções
 
-Entre as evoluções planejadas estão biblioteca de exercícios, salvamento local de projetos, APIs educativas para jogos 2D, eventos de teclado/toque e componentes visuais controlados por Python.
+Entre as evoluções planejadas estão biblioteca de exercícios, projetos salvos, mais blocos para lógica e HTML, animações, física, eventos de teclado/toque e componentes visuais controlados por Python.
 
 ## 📄 Licença
 
