@@ -103,6 +103,7 @@ As categorias atuais são:
 
 - Movimento
 - Controle
+- HTML
 - Aparência
 - Física
 - Entrada
