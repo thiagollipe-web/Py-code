@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#050505">
 <meta name="description" content="Py-Code — editor Python executado no navegador com Pyodide.">
+<meta name="application-name" content="Py-Code">
+<link rel="manifest" href="./manifest.webmanifest">
 <title>Py-Code | Python no navegador</title>
 <style>
 :root{--bg:#000;--panel:#050505;--fg:#00ff66;--muted:#74a98b;--border:#00ff66;--editor:#001407}
@@ -16,6 +18,7 @@ button:hover{background:#00310f}button:disabled{opacity:.45;cursor:not-allowed}
 header{background:var(--panel);border-bottom:2px solid var(--border);padding:10px}
 .top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
 .brand{font-size:20px;font-weight:800;letter-spacing:2px}.status{font-size:12px;color:var(--muted);min-height:18px}
+#online{white-space:nowrap}
 .controls{display:flex;gap:8px;flex-wrap:wrap}
 main{height:calc(100dvh - 89px);display:grid;grid-template-rows:minmax(260px,1fr) minmax(220px,.85fr);min-height:0}
 #code:focus{box-shadow:inset 0 0 0 1px var(--border)}
@@ -46,6 +49,7 @@ canvas{display:block;width:min(100%,500px);height:auto;max-height:100%;aspect-ra
 <body>
 <header><div class="top">
 <div><div class="brand">PY-CODE</div><div id="status" class="status">Inicializando editor…</div></div>
+<div id="online" class="status" aria-live="polite">● ONLINE</div>
 <div class="controls">
 <button id="theme-btn" type="button">TEMA: PRETO</button>
 <button id="clear-btn" type="button">LIMPAR</button>
@@ -88,6 +92,9 @@ function iniciarExemplos(){
 }
 example.onchange=()=>{if(EXEMPLOS[example.value]){editor.value=EXEMPLOS[example.value];salvar();setOutput("Exemplo carregado: "+example.value)}};
 editor.addEventListener("input",salvar);
+editor.addEventListener("keydown",e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();if(!run.disabled)run.click()}
+});
 
 themeBtn.onclick=()=>{
   dark=!dark;
@@ -151,6 +158,11 @@ window.addEventListener("unhandledrejection",e=>{
   setStatus("Erro assíncrono");output.textContent+="\n\nERRO ASSÍNCRONO:\n"+r
 });
 
+const online=$("online");
+function atualizarRede(){online.textContent=navigator.onLine?"● ONLINE":"● OFFLINE";setStatus(navigator.onLine?status.textContent:"Sem internet");}
+addEventListener("online",atualizarRede);addEventListener("offline",atualizarRede);
+atualizarRede();
+if("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(()=>{});
 carregar();iniciarExemplos();clearCanvas();carregarPython();
 
 </script></body></html>
