@@ -1,0 +1,10 @@
+{
+  "name":"Py-Code",
+  "short_name":"Py-Code",
+  "start_url":"./",
+  "scope":"./",
+  "display":"standalone",
+  "background_color":"#000000",
+  "theme_color":"#050505",
+  "description":"Editor Python educacional executado no navegador."
+}
