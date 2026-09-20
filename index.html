@@ -247,9 +247,7 @@ function inserirBloco(codigo){
 ")?"
 
 ":"";
-  const sufixo=depois&&!depois.startsWith("
-")?"
-":"";
+  const sufixo=depois&&!depois.startsWith("\n")?"\n":"";
   editor.value=antes+prefixo+codigo+sufixo+depois;
   const pos=(antes+prefixo+codigo).length;
   editor.focus();editor.setSelectionRange(pos,pos);salvar();
@@ -265,8 +263,7 @@ function renderBlocos(){
   BLOCOS[blocoCategoria].forEach(([titulo,codigo,classe])=>{
     const b=document.createElement("button");
     b.type="button";b.draggable=true;b.className="code-block "+classe;
-    b.innerHTML=escaparHtml(titulo)+"<small>"+escaparHtml(codigo.replaceAll("
-"," ↵ "))+"</small>";
+    b.innerHTML=escaparHtml(titulo)+"<small>"+escaparHtml(codigo.replaceAll("\n"," ↵ "))+"</small>";
     b.title="Inserir bloco Python";
     b.onclick=()=>inserirBloco(codigo);
     b.addEventListener("dragstart",e=>{
@@ -287,7 +284,7 @@ renderBlocos();
 
 editor.addEventListener("input",salvar);
 editor.addEventListener("keydown",e=>{
-  if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();if(!run.disabled)run.click()}
+  if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();if(!run.disabled)run.click()}\n  if(e.key==="Tab"){e.preventDefault();const a=this.selectionStart,b=this.selectionEnd;this.setRangeText("    ",a,b,"end");salvar()}
 });
 
 themeBtn.onclick=()=>{
