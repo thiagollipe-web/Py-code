@@ -93,6 +93,25 @@ O layout foi ajustado para utilização também em smartphones e telas pequenas.
 ### PWA e offline
 O shell da aplicação é armazenado em cache e pode abrir sem conexão depois do primeiro acesso. A execução de Python continua exigindo que os arquivos do Pyodide estejam disponíveis no navegador.
 
+## 🧱 Blocos de programação
+
+O Py-Code possui uma paleta de **blocos visuais de código**. Eles não substituem o Python: cada bloco representa um trecho real de Python.
+
+O aluno pode **clicar** em um bloco para inseri-lo no editor ou **arrastar** o bloco para dentro do código.
+
+As categorias atuais são:
+
+- Movimento
+- Controle
+- Aparência
+- Física
+- Entrada
+- Som
+- Pontuação
+- Cenas
+
+Assim, o fluxo pedagógico fica próximo do Scratch, mas o resultado final continua sendo **Python textual**.
+
 ## 🎮 Mini-engine de jogos
 
 O Py-Code agora tem uma camada própria para jogos 2D. A intenção é esconder a complexidade do JavaScript sem esconder a lógica de programação: o aluno escreve Python e a engine cuida da ligação com Canvas, teclado, toque e áudio.
