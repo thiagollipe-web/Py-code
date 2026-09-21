@@ -46,6 +46,10 @@ O repositório principal foi revisado diretamente no GitHub.
 3. O arquivo `AUDITORIA.md` ainda documentava a arquitetura visual anterior, incluindo blocos e cache v7. Atualizado.
 4. O arquivo `README.md` foi alinhado com a proposta de terminal.
 
+### Correção adicional — conexão do Python
+
+O Worker agora tenta o Pyodide 0.28.3 por dois CDNs independentes: jsDelivr e UNPKG. Quando a primeira origem falha, a segunda é tentada automaticamente. Quando ambas falham, o terminal recebe um erro explícito de conexão com o runtime.
+
 ### Ponto crítico restante
 
 O runtime Pyodide é carregado de um CDN externo dentro do Worker. Isso significa que a execução do Python ainda depende do carregamento dos arquivos do Pyodide. O Service Worker atual guarda o shell e os arquivos do projeto, mas não transforma o Pyodide inteiro em um runtime offline.
