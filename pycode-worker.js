@@ -21,7 +21,11 @@ self.pycode_sound=(frequency,duration,type,volume)=>{
 };
 
 async function carregarPyodide(){
-  send("status",{value:"Carregando Python local…"});
+  send("status",{value:"Carregando biblioteca Python local…"});
+  const runtime=await fetch(PYODIDE_LOCAL+"pyodide.js",{cache:"no-store"});
+  if(!runtime.ok){
+    throw new Error("Biblioteca Pyodide local não encontrada. O build do GitHub Pages precisa incluir /pyodide/.");
+  }
   importScripts(PYODIDE_LOCAL+"pyodide.js");
 
   if(typeof loadPyodide!=="function"){
