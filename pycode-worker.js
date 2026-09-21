@@ -44,10 +44,13 @@ async function carregarPyodide(){
         throw new Error("loadPyodide não foi encontrado.");
       }
 
-      pyodide=await loadPyodide({
-        indexURL:cdn.index,
-        stdout:msg=>send("stdout",{value:String(msg??"")}),
-        stderr:msg=>send("stderr",{value:String(msg??"")})
+      pyodide=await loadPyodide({indexURL:cdn.index});
+
+      pyodide.setStdout({
+        batched:(msg)=>send("stdout",{value:String(msg??"")})
+      });
+      pyodide.setStderr({
+        batched:(msg)=>send("stderr",{value:String(msg??"")})
       });
 
       send("status",{value:"Python carregado via "+cdn.nome});
