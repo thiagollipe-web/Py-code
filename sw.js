@@ -1,4 +1,4 @@
-const CACHE="py-code-v13";
+const CACHE="py-code-v14";
 const APP_SHELL=[
   "./",
   "./index.html",
@@ -6,38 +6,21 @@ const APP_SHELL=[
   "./pycode-worker.js",
   "./pycode_worker.py",
   "./jogo.html",
-  "./assets/py-code-banner.svg"
+  "./sw.js",
+  "./assets/py-code-banner.svg",
+  "./pyodide/pyodide.js",
+  "./pyodide/pyodide.mjs",
+  "./pyodide/pyodide.asm.mjs",
+  "./pyodide/pyodide.asm.wasm",
+  "./pyodide/python_stdlib.zip",
+  "./pyodide/pyodide-lock.json",
+  "./pyodide/package.json"
 ];
-const PYODIDE_BASE="https://cdn.jsdelivr.net/pyodide/v314.0.7/full/";
-const PYODIDE_FILES=[
-  "pyodide.js",
-  "pyodide.mjs",
-  "pyodide.asm.mjs",
-  "pyodide.asm.wasm",
-  "python_stdlib.zip",
-  "pyodide-lock.json",
-  "package.json"
-];
-
-async function cacheRuntime(){
-  const cache=await caches.open(CACHE);
-  for(const file of PYODIDE_FILES){
-    const local=new Request("./pyodide/"+file);
-    const remote=PYODIDE_BASE+file;
-    try{
-      const res=await fetch(remote,{mode:"cors",cache:"no-store"});
-      if(!res.ok)throw new Error("HTTP "+res.status);
-      await cache.put(local,res.clone());
-    }catch(e){
-      console.warn("Pyodide:",file,e);
-    }
-  }
-}
 
 self.addEventListener("install",event=>{
   event.waitUntil(
     caches.open(CACHE)
-      .then(c=>c.addAll(APP_SHELL))
+      .then(cache=>cache.addAll(APP_SHELL))
       .then(()=>self.skipWaiting())
   );
 });
@@ -45,52 +28,30 @@ self.addEventListener("install",event=>{
 self.addEventListener("activate",event=>{
   event.waitUntil(
     caches.keys()
-      .then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))
+      .then(keys=>Promise.all(
+        keys.filter(key=>key!==CACHE).map(key=>caches.delete(key))
+      ))
       .then(()=>self.clients.claim())
   );
 });
 
-self.addEventListener("message",event=>{
-  if(event.data?.type==="precache_runtime"){
-    event.waitUntil(cacheRuntime());
-  }
-});
-
 self.addEventListener("fetch",event=>{
-  const req=event.request;
-  const url=new URL(req.url);
-
-  if(url.origin===location.origin && url.pathname.includes("/pyodide/")){
-    const file=url.pathname.split("/pyodide/").pop();
-    event.respondWith(
-      caches.match(req).then(cached=>{
-        if(cached)return cached;
-
-        return fetch(PYODIDE_BASE+file,{mode:"cors"}).then(res=>{
-          if(!res.ok)throw new Error("Pyodide HTTP "+res.status);
-          const copy=res.clone();
-          caches.open(CACHE).then(c=>c.put(req,copy));
-          return res;
-        });
-      })
-    );
-    return;
-  }
+  const request=event.request;
+  const url=new URL(request.url);
 
   if(url.origin!==location.origin)return;
 
-  if(req.mode==="navigate"){
-    event.respondWith(
-      fetch(req).then(res=>{
-        const copy=res.clone();
-        caches.open(CACHE).then(c=>c.put("./index.html",copy));
-        return res;
-      }).catch(()=>caches.match("./index.html"))
-    );
-    return;
-  }
-
   event.respondWith(
-    caches.match(req).then(cached=>cached||fetch(req))
+    caches.match(request).then(cached=>{
+      if(cached)return cached;
+
+      return fetch(request).then(response=>{
+        if(request.method==="GET"&&response.ok){
+          const copy=response.clone();
+          caches.open(CACHE).then(cache=>cache.put(request,copy));
+        }
+        return response;
+      });
+    })
   );
 });
