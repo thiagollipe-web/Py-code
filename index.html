@@ -103,6 +103,7 @@ footer{
     <div class="controls">
       <button id="clear" type="button">LIMPAR</button>
       <button id="download" type="button">BAIXAR .PY</button>
+      <button id="offline" type="button">PREPARAR OFFLINE</button>
       <button id="run" type="button" disabled>EXECUTAR</button>
       <button id="stop" type="button" disabled>PARAR</button>
     </div>
@@ -141,6 +142,7 @@ const terminal=$("terminal");
 const run=$("run");
 const stop=$("stop");
 const status=$("status");
+const offlineBtn=$("offline");
 let worker=null;
 let ready=false;
 let running=false;
@@ -201,9 +203,14 @@ function setStatus(texto,classe=""){
   status.className="status "+classe;
 }
 
-function novoWorker(){
+async function novoWorker(){
   if(worker) worker.terminate();
-  worker=new Worker("./pycode-worker.js?v=12");
+
+  if(window.__swReady){
+    try{await window.__swReady}catch(_){}
+  }
+
+  worker=new Worker("./pycode-worker.js?v=13");
 
   worker.onmessage=e=>{
     const m=e.data||{};
@@ -389,8 +396,44 @@ function rede(){
 addEventListener("online",rede);
 addEventListener("offline",rede);
 
+function prepararOffline(){
+  if(!("serviceWorker" in navigator)){
+    linha("Service Worker não é suportado neste navegador.","err");
+    return;
+  }
+  offlineBtn.disabled=true;
+  offlineBtn.textContent="BAIXANDO PYTHON...";
+  linha("$ preparando runtime Python offline","prompt");
+  navigator.serviceWorker.controller?.postMessage({type:"precache_runtime"});
+  const timer=setInterval(()=>{
+    if(navigator.serviceWorker.controller){
+      clearInterval(timer);
+      setTimeout(()=>{
+        offlineBtn.disabled=false;
+        offlineBtn.textContent="PREPARAR OFFLINE";
+        linha("✓ runtime solicitado para o cache local","ok");
+      },1200);
+    }
+  },250);
+  setTimeout(()=>{
+    clearInterval(timer);
+    offlineBtn.disabled=false;
+    offlineBtn.textContent="PREPARAR OFFLINE";
+  },15000);
+}
+
+offlineBtn.onclick=prepararOffline;
+
 if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("./sw.js").catch(()=>{});
+  window.__swReady=navigator.serviceWorker
+    .register("./sw.js")
+    .then(reg=>navigator.serviceWorker.ready)
+    .catch(e=>{
+      linha("Service Worker: "+String(e&&e.message||e),"warn");
+      return null;
+    });
+}else{
+  window.__swReady=Promise.resolve(null);
 }
 
 carregar();
