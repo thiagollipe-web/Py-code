@@ -74,7 +74,7 @@ https://thiagollipe-web.github.io/Py-code/
 
 ## Limitação
 
-O primeiro carregamento do Pyodide depende dos arquivos do runtime disponíveis no navegador. Depois do carregamento da aplicação, o shell do Py-Code pode ser armazenado pelo Service Worker.
+O runtime Pyodide é preparado localmente pelo Service Worker. Na primeira utilização, os arquivos do runtime são buscados uma vez e armazenados no cache do próprio aplicativo; depois disso, o Python pode iniciar sem conexão. O botão `PREPARAR OFFLINE` solicita o pré-carregamento antecipado. Em uma instalação totalmente nova e sem internet, o runtime ainda não existe no cache e precisa ser preparado antes.
 
 ---
 
