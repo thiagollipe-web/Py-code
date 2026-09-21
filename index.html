@@ -97,7 +97,7 @@ footer{
   <div class="top">
     <div>
       <div class="brand">PY-CODE</div>
-      <div class="sub">TERMINAL PYTHON • LEVE • COLORIDO • SEM DESIGNER</div>
+      <div class="sub">TERMINAL PYTHON • LEVE • COLORIDO • MODO OFFLINE</div>
     </div>
     <div id="status" class="status">CARREGANDO PYTHON...</div>
     <div class="controls">
@@ -122,7 +122,7 @@ footer{
   <section class="panel">
     <div class="panel-title">
       <span>▸ TERMINAL</span>
-      <span id="network">ONLINE</span>
+      <span>MODO OFFLINE</span>
     </div>
     <div id="terminal" aria-live="polite"></div>
   </section>
@@ -390,12 +390,6 @@ $("download").onclick=()=>{
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 };
 
-function rede(){
-  $("network").textContent=navigator.onLine?"ONLINE":"OFFLINE";
-}
-addEventListener("online",rede);
-addEventListener("offline",rede);
-
 function prepararOffline(){
   if(!("serviceWorker" in navigator)){
     linha("Service Worker não é suportado neste navegador.","err");
@@ -438,7 +432,6 @@ if("serviceWorker" in navigator){
 
 carregar();
 mensagemInicial();
-rede();
 novoWorker();
 </script>
 </body>
