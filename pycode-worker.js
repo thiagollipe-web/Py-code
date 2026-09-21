@@ -1,18 +1,6 @@
 /* Py-Code Worker: runtime Python isolado do thread principal. */
-const PYODIDE_VERSAO="0.28.3";
-const CDN=[
-  {
-    nome:"jsDelivr",
-    script:"https://cdn.jsdelivr.net/pyodide/v"+PYODIDE_VERSAO+"/full/pyodide.js",
-    index:"https://cdn.jsdelivr.net/pyodide/v"+PYODIDE_VERSAO+"/full/"
-  },
-  {
-    nome:"UNPKG",
-    script:"https://unpkg.com/pyodide@"+PYODIDE_VERSAO+"/pyodide.js",
-    index:"https://unpkg.com/pyodide@"+PYODIDE_VERSAO+"/"
-  }
-];
-
+const PYODIDE_VERSAO="314.0.7";
+const PYODIDE_LOCAL="./pyodide/";
 let pyodide=null;
 let engineReady=false;
 let running=false;
@@ -33,37 +21,23 @@ self.pycode_sound=(frequency,duration,type,volume)=>{
 };
 
 async function carregarPyodide(){
-  const erros=[];
+  send("status",{value:"Carregando Python local…"});
+  importScripts(PYODIDE_LOCAL+"pyodide.js");
 
-  for(const cdn of CDN){
-    try{
-      send("status",{value:"Conectando ao Python via "+cdn.nome+"…"});
-      importScripts(cdn.script);
-
-      if(typeof loadPyodide!=="function"){
-        throw new Error("loadPyodide não foi encontrado.");
-      }
-
-      pyodide=await loadPyodide({indexURL:cdn.index});
-
-      pyodide.setStdout({
-        batched:(msg)=>send("stdout",{value:String(msg??"")})
-      });
-      pyodide.setStderr({
-        batched:(msg)=>send("stderr",{value:String(msg??"")})
-      });
-
-      send("status",{value:"Python carregado via "+cdn.nome});
-      return cdn.nome;
-    }catch(e){
-      erros.push(cdn.nome+": "+String(e&&e.message||e));
-      try{delete self.loadPyodide}catch(_){}
-    }
+  if(typeof loadPyodide!=="function"){
+    throw new Error("Runtime Python local não disponível.");
   }
 
-  throw new Error(
-    "Erro de conexão com o runtime Python. Tentativas: "+erros.join(" | ")
-  );
+  pyodide=await loadPyodide({indexURL:PYODIDE_LOCAL});
+
+  pyodide.setStdout({
+    batched:(msg)=>send("stdout",{value:String(msg??"")})
+  });
+  pyodide.setStderr({
+    batched:(msg)=>send("stderr",{value:String(msg??"")})
+  });
+
+  return "local";
 }
 
 async function boot(){
