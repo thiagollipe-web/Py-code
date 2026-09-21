@@ -279,10 +279,29 @@ function executar(){
   run.disabled=true;
   stop.disabled=false;
 
-  linha("$ python programa.py","prompt");
-  setStatus("EXECUTANDO...");
+  const codigo=editor.value;
+  const usaJogo=/\\b(Sprite|criar_sprite|limpar|retangulo|circulo|linha|texto|pressionado|tocar|cena|mudar_cena|mostrar_pontos)\\b/.test(codigo);
 
-  worker.postMessage({type:"run",code:editor.value});
+  linha("$ python programa.py","prompt");
+  setStatus(usaJogo?"ABRINDO JOGO...":"EXECUTANDO...");
+
+  if(usaJogo){
+    abrirJogo(codigo).then(()=>{
+      running=false;
+      stop.disabled=true;
+      run.disabled=false;
+      setStatus("JOGO ABERTO","ok");
+    }).catch(e=>{
+      running=false;
+      stop.disabled=true;
+      run.disabled=false;
+      linha("Falha ao abrir o jogo: "+e.message,"err");
+      setStatus("ERRO AO ABRIR JOGO","err");
+    });
+    return;
+  }
+
+  worker.postMessage({type:"run",code:codigo});
 
   timeoutId=setTimeout(()=>{
     if(running){
@@ -309,6 +328,23 @@ function parar(silencioso=false){
 
   setStatus("REINICIANDO PYTHON...");
   novoWorker();
+}
+
+async function abrirJogo(codigo){
+  const largura=window.screen?.availWidth||900;
+  const altura=window.screen?.availHeight||700;
+  const chave="pycode_game_"+Date.now()+"_"+Math.random().toString(36).slice(2);
+  localStorage.setItem(chave,codigo);
+
+  const janela=window.open("./jogo.html#"+encodeURIComponent(chave),"_blank","noopener,noreferrer,width="+Math.min(1000,largura)+",height="+Math.min(760,altura));
+
+  if(janela){
+    try{janela.opener=null}catch(_){}
+    return;
+  }
+
+  linha("O navegador bloqueou a nova aba. Clique em EXECUTAR novamente ou permita pop-ups para o Py-Code.","warn");
+  throw new Error("Nova aba bloqueada pelo navegador.");
 }
 
 editor.addEventListener("input",salvar);
