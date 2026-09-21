@@ -141,7 +141,6 @@ const terminal=$("terminal");
 const run=$("run");
 const stop=$("stop");
 const status=$("status");
-const offlineBtn=$("offline");
 let worker=null;
 let ready=false;
 let running=false;
@@ -389,33 +388,6 @@ $("download").onclick=()=>{
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 };
 
-function prepararOffline(){
-  if(!("serviceWorker" in navigator)){
-    linha("Service Worker não é suportado neste navegador.","err");
-    return;
-  }
-  offlineBtn.disabled=true;
-  offlineBtn.textContent="BAIXANDO PYTHON...";
-  linha("$ preparando runtime Python offline","prompt");
-  navigator.serviceWorker.controller?.postMessage({type:"precache_runtime"});
-  const timer=setInterval(()=>{
-    if(navigator.serviceWorker.controller){
-      clearInterval(timer);
-      setTimeout(()=>{
-        offlineBtn.disabled=false;
-        offlineBtn.textContent="PREPARAR OFFLINE";
-        linha("✓ runtime solicitado para o cache local","ok");
-      },1200);
-    }
-  },250);
-  setTimeout(()=>{
-    clearInterval(timer);
-    offlineBtn.disabled=false;
-    offlineBtn.textContent="PREPARAR OFFLINE";
-  },15000);
-}
-
-offlineBtn.onclick=prepararOffline;
 
 if("serviceWorker" in navigator){
   window.__swReady=navigator.serviceWorker
