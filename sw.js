@@ -1,5 +1,5 @@
-const CACHE="py-code-v9";
-const SHELL=["./","./index.html","./manifest.webmanifest","./pycode-worker.js","./pycode_worker.py","./assets/py-code-banner.svg"];
+const CACHE="py-code-v10";
+const SHELL=["./","./index.html","./manifest.webmanifest","./pycode-worker.js","./pycode_worker.py","./jogo.html","./assets/py-code-banner.svg"];
 
 self.addEventListener("install",event=>{
   event.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()));
