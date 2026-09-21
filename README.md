@@ -27,7 +27,9 @@ Não há designer, canvas, blocos ou painel gráfico. A interface é um terminal
 - download do programa como `.py`;
 - layout responsivo para computador e celular;
 - PWA;
-- shell da aplicação em cache.
+- runtime Pyodide empacotado no build do GitHub Pages;
+- execução sem CDN durante o uso;
+- shell e biblioteca Python em cache local.
 
 ## Exemplo
 
@@ -68,13 +70,15 @@ https://thiagollipe-web.github.io/Py-code/
     ├── pycode_worker.py
     ├── sw.js
     ├── manifest.webmanifest
+    ├── .github/workflows/pages.yml
+    └── pyodide/ (gerado no build do Pages)
     ├── assets/
     │   └── py-code-banner.svg
     └── README.md
 
 ## Limitação
 
-O runtime Pyodide é preparado localmente pelo Service Worker. Na primeira utilização, os arquivos do runtime são buscados uma vez e armazenados no cache do próprio aplicativo; depois disso, o Python pode iniciar sem conexão. O botão `PREPARAR OFFLINE` solicita o pré-carregamento antecipado. Em uma instalação totalmente nova e sem internet, o runtime ainda não existe no cache e precisa ser preparado antes.
+O runtime Pyodide é baixado durante o build do GitHub Pages e publicado dentro de `pyodide/` junto com o editor. O navegador não precisa buscar Pyodide em CDN para executar os programas. O Service Worker coloca o shell e o runtime local em cache para uso posterior sem conexão.
 
 ---
 
