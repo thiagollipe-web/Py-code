@@ -34,6 +34,13 @@ O repositório principal foi revisado diretamente no GitHub.
 
 ### Problemas corrigidos nesta auditoria
 
+0. O erro `TypeError: i.bind is not a function` foi localizado na configuração de `stdout`/`stderr` passada ao `loadPyodide()`. O Pyodide aceita diretamente uma função nesses campos; a versão anterior passava um objeto `{batched: ...}` e isso provocava a falha durante a inicialização. A configuração foi corrigida.
+6. O `index.html` tinha sido simplificado para terminal, mas o Service Worker não estava mais sendo registrado. Corrigido.
+7. O manifesto ainda descrevia blocos, HTML e Canvas, embora a interface atual fosse somente terminal. Corrigido.
+8. O arquivo `AUDITORIA.md` ainda documentava a arquitetura visual anterior, incluindo blocos e cache v7. Atualizado.
+9. O arquivo `README.md` foi alinhado com a proposta de terminal.
+5. A execução gráfica em `jogo.html` iniciava o loop antes da conclusão do código do usuário e não marcava a execução como modo de jogo no Worker. Corrigido: o Worker agora envia `game_ready` e só então aceita frames.
+
 1. O `index.html` tinha sido simplificado para terminal, mas o Service Worker não estava mais sendo registrado. Corrigido.
 2. O manifesto ainda descrevia blocos, HTML e Canvas, embora a interface atual fosse somente terminal. Corrigido.
 3. O arquivo `AUDITORIA.md` ainda documentava a arquitetura visual anterior, incluindo blocos e cache v7. Atualizado.
