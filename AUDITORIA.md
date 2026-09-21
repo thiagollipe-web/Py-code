@@ -1,7 +1,7 @@
 # Auditoria técnica — Py-Code
 
 Data: 21/09/2026
-Estado: terminal Python + jogos em aba separada + runtime local em cache
+Estado: terminal Python + jogos em aba separada + modo offline
 
 ## Arquitetura
 
