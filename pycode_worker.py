@@ -34,8 +34,11 @@ def circulo(x,y,raio,cor="#00ff66"): canvas.circle(x,y,raio,cor)
 def linha(x1,y1,x2,y2,cor="#00ff66",espessura=2): canvas.line(x1,y1,x2,y2,cor,espessura)
 def texto(valor,x,y,cor="#00ff66",tamanho=16): canvas.text(valor,x,y,cor,tamanho)
 
-definir_status = lambda valor: _cmd("html_status", value=str(valor))
-def mostrar_texto_html = lambda valor: _cmd("html_text", value=str(valor))
+def definir_status(valor):
+    _cmd("html_status", value=str(valor))
+
+def mostrar_texto_html(valor):
+    _cmd("html_text", value=str(valor))
 def pressionado(tecla): return bool(self.pycode_pressed(str(tecla)))
 def tocar(frequencia=440,duracao=0.12,tipo="square",volume=0.05): self.pycode_sound(float(frequencia),float(duracao),str(tipo),float(volume))
 
