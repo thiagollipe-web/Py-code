@@ -353,6 +353,10 @@ function rede(){
 addEventListener("online",rede);
 addEventListener("offline",rede);
 
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("./sw.js").catch(()=>{});
+}
+
 carregar();
 mensagemInicial();
 rede();
