@@ -1,0 +1,73 @@
+name: Deploy Py-Code Offline
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare site
+        run: |
+          set -e
+          mkdir -p _site/pyodide
+          cp index.html jogo.html manifest.webmanifest pycode-worker.js pycode_worker.py sw.js README.md _site/
+          cp -R assets _site/assets
+
+      - name: Bundle Pyodide locally
+        env:
+          PYODIDE_VERSION: "314.0.7"
+        run: |
+          set -euo pipefail
+          base="https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full"
+          files=(
+            pyodide.js
+            pyodide.mjs
+            pyodide.asm.mjs
+            pyodide.asm.wasm
+            python_stdlib.zip
+            pyodide-lock.json
+            package.json
+          )
+          for file in "${files[@]}"; do
+            echo "Baixando Pyodide: $file"
+            curl --fail --location --retry 4 --retry-delay 2 "$base/$file" -o "_site/pyodide/$file"
+          done
+          test -s _site/pyodide/pyodide.js
+          test -s _site/pyodide/pyodide.asm.wasm
+          test -s _site/pyodide/python_stdlib.zip
+          test -s _site/pyodide/pyodide-lock.json
+          echo "Runtime Pyodide local empacotado."
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
