@@ -203,7 +203,7 @@ function setStatus(texto,classe=""){
 
 function novoWorker(){
   if(worker) worker.terminate();
-  worker=new Worker("./pycode-worker.js");
+  worker=new Worker("./pycode-worker.js?v=12");
 
   worker.onmessage=e=>{
     const m=e.data||{};
