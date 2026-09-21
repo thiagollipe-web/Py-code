@@ -1,7 +1,7 @@
 # Auditoria técnica — Py-Code
 
 Data: 21/09/2026
-Estado: terminal Python simplificado
+Estado: terminal Python + execução gráfica em aba separada
 
 ## Resultado da verificação
 
@@ -63,4 +63,4 @@ Python
 Terminal
 ```
 
-O próximo teste recomendado é executar um programa mínimo com `print()`, depois um programa com erro proposital, e verificar `PARAR`.
+A execução gráfica usa `jogo.html` em uma aba separada quando o código contém APIs de jogo/Canvas. O teste real em navegador ainda é necessário.
