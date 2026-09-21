@@ -99,11 +99,10 @@ footer{
       <div class="brand">PY-CODE</div>
       <div class="sub">TERMINAL PYTHON • LEVE • COLORIDO • MODO OFFLINE</div>
     </div>
-    <div id="status" class="status">CARREGANDO PYTHON...</div>
+    <div id="status" class="status">PYTHON LOCAL • CARREGANDO...</div>
     <div class="controls">
       <button id="clear" type="button">LIMPAR</button>
       <button id="download" type="button">BAIXAR .PY</button>
-      <button id="offline" type="button">PREPARAR OFFLINE</button>
       <button id="run" type="button" disabled>EXECUTAR</button>
       <button id="stop" type="button" disabled>PARAR</button>
     </div>
@@ -223,7 +222,7 @@ async function novoWorker(){
     if(m.type==="ready"){
       ready=true;
       run.disabled=false;
-      setStatus("PYTHON PRONTO","ok");
+      setStatus("PYTHON LOCAL • PRONTO","ok");
       return;
     }
 
@@ -333,7 +332,7 @@ function parar(silencioso=false){
 
   if(!silencioso)linha("^C processo interrompido pelo usuário.","warn");
 
-  setStatus("REINICIANDO PYTHON...");
+  setStatus("PYTHON LOCAL • REINICIANDO...");
   novoWorker();
 }
 
