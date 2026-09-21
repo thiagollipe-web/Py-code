@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#05070c">
+<title>Py-Code — Jogo</title>
+<style>
+html,body{margin:0;width:100%;height:100%;background:#05070c;color:#dbeafe;font-family:Consolas,"Courier New",monospace;overflow:hidden}
+body{display:flex;flex-direction:column}
+header{height:36px;flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 10px;background:#0b1018;border-bottom:1px solid #263244;font-size:12px}
+#status{color:#4ade80}
+main{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;position:relative}
+canvas{display:block;width:min(100vw,1000px);height:auto;max-height:100%;aspect-ratio:16/9;background:#000;image-rendering:pixelated;touch-action:none}
+#touch{position:absolute;left:0;right:0;bottom:12px;display:grid;grid-template-columns:repeat(3,58px);gap:7px;justify-content:center;pointer-events:none}
+.touch{pointer-events:auto;width:58px;height:48px;border:1px solid #3b82f6;background:#111827;color:#fff;border-radius:6px;font:700 18px monospace;opacity:.9;touch-action:none}
+.empty{visibility:hidden}
+footer{height:28px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;border-top:1px solid #263244;color:#7d8b99;font-size:10px}
+@media(max-width:600px){canvas{width:100%;max-height:calc(100dvh - 64px)}#touch{bottom:8px}.touch{width:52px;height:44px}}
+</style>
+</head>
+<body>
+<header><span>PY-CODE • JOGO</span><span id="status">INICIANDO...</span></header>
+<main>
+<canvas id="canvas" width="320" height="180" aria-label="Tela do jogo"></canvas>
+<div id="touch" aria-label="Controles">
+<button class="touch empty" aria-hidden="true"></button><button class="touch" data-key="ArrowUp">▲</button><button class="touch empty" aria-hidden="true"></button>
+<button class="touch" data-key="ArrowLeft">◀</button><button class="touch" data-key="ArrowDown">▼</button><button class="touch" data-key="ArrowRight">▶</button>
+</div>
+</main>
+<footer>Teclado • toque • PY-CODE</footer>
+<script>
+"use strict";
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+const status=document.getElementById("status");
+const keys=new Set();
+let worker=null,ready=false,running=false,busy=false,last=0,timeoutId=null;
+
+function msg(v){status.textContent=String(v)}
+function draw(m){
+ if(m.type==="fill"){ctx.fillStyle=m.color;ctx.fillRect(0,0,canvas.width,canvas.height)}
+ else if(m.type==="rect"){ctx.fillStyle=m.color;ctx.fillRect(m.x,m.y,m.w,m.h)}
+ else if(m.type==="circle"){ctx.fillStyle=m.color;ctx.beginPath();ctx.arc(m.x,m.y,m.r,0,Math.PI*2);ctx.fill()}
+ else if(m.type==="line"){ctx.strokeStyle=m.color;ctx.lineWidth=m.width;ctx.beginPath();ctx.moveTo(m.x1,m.y1);ctx.lineTo(m.x2,m.y2);ctx.stroke()}
+ else if(m.type==="text"){ctx.fillStyle=m.color;ctx.font=m.size+"px monospace";ctx.fillText(m.value,m.x,m.y)}
+ else if(m.type==="image"){const img=new Image();img.onload=()=>ctx.drawImage(img,m.x,m.y,m.w,m.h);img.src=m.url}
+}
+function som(m){
+ try{const ac=window.__pyac||(window.__pyac=new AudioContext());const o=ac.createOscillator(),g=ac.createGain();o.type=m.waveform||"square";o.frequency.value=Number(m.frequency)||440;g.gain.value=Math.min(.25,Number(m.volume)||.05);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+(Number(m.duration)||.1))}catch(_){}
+}
+function iniciar(codigo){
+ worker=new Worker("./pycode-worker.js");
+ worker.onmessage=e=>{
+  const m=e.data||{};
+  if(m.type==="status"){msg(m.value);return}
+  if(m.type==="ready"){ready=true;running=true;msg("JOGO RODANDO");worker.postMessage({type:"run",code:codigo});return}
+  if(["fill","rect","circle","line","text","image"].includes(m.type)){draw(m);return}
+  if(m.type==="sound"){som(m);return}
+  if(m.type==="frame_done"){busy=false;return}
+  if(m.type==="error"||m.type==="fatal"){running=false;msg("ERRO PYTHON");console.error(m.value);return}
+ };
+ worker.onerror=e=>{running=false;msg("FALHA NO RUNTIME");console.error(e.message)};
+ worker.postMessage({type:"boot"});
+ timeoutId=setTimeout(()=>{if(!ready){msg("TEMPO LIMITE DO RUNTIME");worker.terminate();}},15000);
+}
+function frame(now){
+ if(running&&ready&&!busy&&now-last>=33){
+  last=now;busy=true;
+  worker.postMessage({type:"keys",keys:[...keys]});
+  worker.postMessage({type:"frame"});
+ }
+ requestAnimationFrame(frame);
+}
+addEventListener("keydown",e=>{keys.add(e.key);if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].includes(e.key))e.preventDefault()});
+addEventListener("keyup",e=>keys.delete(e.key));
+addEventListener("blur",()=>keys.clear());
+document.querySelectorAll(".touch").forEach(b=>{
+ const k=b.dataset.key;if(!k)return;
+ const down=e=>{e.preventDefault();keys.add(k)};
+ const up=e=>{e.preventDefault();keys.delete(k)};
+ b.addEventListener("pointerdown",down);
+ ["pointerup","pointercancel","pointerleave"].forEach(x=>b.addEventListener(x,up));
+});
+function recuperar(){
+ const chave=decodeURIComponent(location.hash.slice(1));
+ const codigo=localStorage.getItem(chave);
+ if(!codigo){msg("CÓDIGO NÃO ENCONTRADO");return}
+ localStorage.removeItem(chave);
+ iniciar(codigo);
+ requestAnimationFrame(frame);
+}
+recuperar();
+</script>
+</body>
+</html>
