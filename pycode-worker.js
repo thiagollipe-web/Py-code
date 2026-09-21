@@ -2,6 +2,7 @@
 let pyodide=null;
 let engineReady=false;
 let running=false;
+let gameMode=false;
 let keys=new Set();
 
 function send(type,data={}){self.postMessage({type,...data})}
@@ -17,8 +18,8 @@ async function boot(){
   importScripts("https://cdn.jsdelivr.net/pyodide/v0.28.2/full/pyodide.js");
   pyodide=await loadPyodide({
     indexURL:"https://cdn.jsdelivr.net/pyodide/v0.28.2/full/",
-    stdout:{batched:lines=>send("stdout",{value:String(lines||"")})},
-    stderr:{batched:lines=>send("stderr",{value:String(lines||"")})}
+    stdout:msg=>send("stdout",{value:String(msg??"")}),
+    stderr:msg=>send("stderr",{value:String(msg??"")})
   });
   const engine=await fetch("./pycode_worker.py").then(r=>{if(!r.ok)throw Error("Engine Py-Code não encontrada.");return r.text()});
   pyodide.runPython(engine);
