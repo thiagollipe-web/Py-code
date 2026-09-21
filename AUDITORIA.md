@@ -1,49 +1,66 @@
 # Auditoria técnica — Py-Code
 
-Data: 20/09/2026
-Estado: pós-correção arquitetural
+Data: 21/09/2026
+Estado: terminal Python simplificado
 
-## Correções implementadas
+## Resultado da verificação
 
-- Runtime Python movido para **Web Worker**.
-- Pyodide carregado dentro do Worker, retirando a execução Python do thread principal.
-- stdout e stderr do Pyodide encaminhados para o console visual.
-- Botão **PARAR** criado.
-- PARAR encerra o Worker e cria um novo runtime.
-- Timeout de 8 segundos para a execução inicial, evitando travamento permanente por código inicial infinito.
-- Game loop limitado a aproximadamente 30 FPS.
-- Controle de frames com `frameBusy` e confirmação `frame_done`, evitando chamadas Python sobrepostas.
-- Teclado da IDE separado do teclado do jogo quando o textarea está focado.
-- Controles touch continuam usando Pointer Events e limpeza de teclas no blur.
-- API HTML foi retirada do DOM principal: blocos HTML agora usam APIs controladas `definir_status()` e `mostrar_texto_html()`.
-- Service Worker atualizado para `py-code-v7` e passou a cachear os arquivos do Worker e da engine.
-- O modo textual Python foi preservado.
-- A paleta de blocos foi preservada.
+O repositório principal foi revisado diretamente no GitHub.
 
-## Validação estática
+### Estrutura atual
 
-- JavaScript principal: OK.
-- JavaScript do Worker: OK.
-- JavaScript do Service Worker: OK.
-- Worker criado pelo aplicativo: OK.
-- stdout/stderr configurados: OK.
-- PARAR presente: OK.
-- timeout presente: OK.
-- sincronização `frame_done`: OK.
-- cache dos arquivos do Worker: OK.
+- `index.html`: interface, editor, terminal e controles.
+- `pycode-worker.js`: carregamento do Pyodide e execução Python no Web Worker.
+- `pycode_worker.py`: engine Python experimental.
+- `sw.js`: cache da aplicação.
+- `manifest.webmanifest`: manifesto PWA.
 
-## Limitações que permanecem
+### Verificações estáticas
 
-1. Não foi possível executar Chrome/Android/iOS real nesta sessão. Portanto touch, áudio, PWA e carregamento real do Pyodide ainda precisam de teste manual/automatizado em navegador.
-2. Os blocos ainda são snippets. Eles não possuem AST, encaixe estrutural, parâmetros visuais ou sincronização bloco → Python por modelo estruturado.
-3. O editor ainda é um textarea; falta syntax highlighting, números de linha, autoindentação inteligente e destaque da linha com erro.
-4. Não existe ainda sistema de múltiplos projetos, IndexedDB ou importação/exportação `.pycode.json`.
-5. Delta time ainda não foi incorporado à API de sprites.
-6. O runtime Pyodide completo continua sendo baixado externamente; o Service Worker não garante Python totalmente offline.
-7. O timeout protege a execução inicial. O game loop fica deliberadamente contínuo até PARAR.
-8. O isolamento impede que o Python bloqueie a interface principal, mas o Worker ainda tem acesso às APIs que a engine disponibiliza. A API educacional deve continuar sendo controlada.
+- JavaScript de `index.html`: OK.
+- JavaScript de `pycode-worker.js`: OK.
+- JavaScript de `sw.js`: OK.
+- JSON do manifesto: OK.
+- Referência do Worker: OK.
+- Carregamento de `pycode_worker.py`: OK.
+- `stdout` e `stderr`: presentes.
+- `runPythonAsync`: presente.
+- PARAR com encerramento do Worker: presente.
+- Timeout de execução: presente.
+- Editor e terminal: presentes.
+- Canvas na interface: removido.
+- Sistema de blocos na interface: removido.
+- Registro do Service Worker: presente.
 
-## Próxima etapa
+### Problemas corrigidos nesta auditoria
 
-A próxima mudança estrutural deve ser o **sistema de blocos estruturados**: cada bloco deve possuir tipo, parâmetros, filhos e gerador determinístico de Python. A paleta atual pode permanecer como camada de compatibilidade enquanto essa arquitetura é introduzida.
+1. O `index.html` tinha sido simplificado para terminal, mas o Service Worker não estava mais sendo registrado. Corrigido.
+2. O manifesto ainda descrevia blocos, HTML e Canvas, embora a interface atual fosse somente terminal. Corrigido.
+3. O arquivo `AUDITORIA.md` ainda documentava a arquitetura visual anterior, incluindo blocos e cache v7. Atualizado.
+4. O arquivo `README.md` foi alinhado com a proposta de terminal.
 
+### Ponto crítico restante
+
+O runtime Pyodide é carregado de um CDN externo dentro do Worker. Isso significa que a execução do Python ainda depende do carregamento dos arquivos do Pyodide. O Service Worker atual guarda o shell e os arquivos do projeto, mas não transforma o Pyodide inteiro em um runtime offline.
+
+### Teste de navegador
+
+A análise feita nesta sessão é estática sobre os arquivos publicados e o estado do GitHub. Não é uma execução real em Chrome, Edge, Android ou iOS. Portanto, carregamento efetivo do Pyodide, execução real do Python e comportamento de cache precisam ser confirmados no navegador.
+
+## Conclusão técnica
+
+A arquitetura atual está coerente com a proposta de um terminal Python leve:
+
+```
+Editor
+  ↓
+Web Worker
+  ↓
+Pyodide
+  ↓
+Python
+  ↓
+Terminal
+```
+
+O próximo teste recomendado é executar um programa mínimo com `print()`, depois um programa com erro proposital, e verificar `PARAR`.
