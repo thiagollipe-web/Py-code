@@ -1,4 +1,18 @@
 /* Py-Code Worker: runtime Python isolado do thread principal. */
+const PYODIDE_VERSAO="0.28.3";
+const CDN=[
+  {
+    nome:"jsDelivr",
+    script:"https://cdn.jsdelivr.net/pyodide/v"+PYODIDE_VERSAO+"/full/pyodide.js",
+    index:"https://cdn.jsdelivr.net/pyodide/v"+PYODIDE_VERSAO+"/full/"
+  },
+  {
+    nome:"UNPKG",
+    script:"https://unpkg.com/pyodide@"+PYODIDE_VERSAO+"/pyodide.js",
+    index:"https://unpkg.com/pyodide@"+PYODIDE_VERSAO+"/"
+  }
+];
+
 let pyodide=null;
 let engineReady=false;
 let running=false;
@@ -18,23 +32,48 @@ self.pycode_sound=(frequency,duration,type,volume)=>{
   });
 };
 
+async function carregarPyodide(){
+  const erros=[];
+
+  for(const cdn of CDN){
+    try{
+      send("status",{value:"Conectando ao Python via "+cdn.nome+"…"});
+      importScripts(cdn.script);
+
+      if(typeof loadPyodide!=="function"){
+        throw new Error("loadPyodide não foi encontrado.");
+      }
+
+      pyodide=await loadPyodide({
+        indexURL:cdn.index,
+        stdout:msg=>send("stdout",{value:String(msg??"")}),
+        stderr:msg=>send("stderr",{value:String(msg??"")})
+      });
+
+      send("status",{value:"Python carregado via "+cdn.nome});
+      return cdn.nome;
+    }catch(e){
+      erros.push(cdn.nome+": "+String(e&&e.message||e));
+      try{delete self.loadPyodide}catch(_){}
+    }
+  }
+
+  throw new Error(
+    "Erro de conexão com o runtime Python. Tentativas: "+erros.join(" | ")
+  );
+}
+
 async function boot(){
   try{
     send("status",{value:"Carregando runtime Python…"});
-    importScripts("https://cdn.jsdelivr.net/pyodide/v0.28.2/full/pyodide.js");
+    const origem=await carregarPyodide();
 
-    pyodide=await loadPyodide({
-      indexURL:"https://cdn.jsdelivr.net/pyodide/v0.28.2/full/",
-      stdout:msg=>send("stdout",{value:String(msg??"")}),
-      stderr:msg=>send("stderr",{value:String(msg??"")})
-    });
-
-    const engine=await fetch("./pycode_worker.py");
+    const engine=await fetch("./pycode_worker.py",{cache:"no-store"});
     if(!engine.ok)throw new Error("Engine Py-Code não encontrada.");
     pyodide.runPython(await engine.text());
 
     engineReady=true;
-    send("ready");
+    send("ready",{origem});
   }catch(e){
     engineReady=false;
     send("fatal",{value:String(e&&e.stack||e)});
