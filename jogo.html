@@ -54,9 +54,10 @@ function iniciar(codigo){
  worker.onmessage=e=>{
   const m=e.data||{};
   if(m.type==="status"){msg(m.value);return}
-  if(m.type==="ready"){ready=true;running=true;msg("JOGO RODANDO");worker.postMessage({type:"run",code:codigo});return}
+  if(m.type==="ready"){ready=true;msg("CARREGANDO JOGO");worker.postMessage({type:"run",code:codigo,game:true});return}
   if(["fill","rect","circle","line","text","image"].includes(m.type)){draw(m);return}
   if(m.type==="sound"){som(m);return}
+  if(m.type==="game_ready"){running=true;msg("JOGO RODANDO");return}
   if(m.type==="frame_done"){busy=false;return}
   if(m.type==="error"||m.type==="fatal"){running=false;msg("ERRO PYTHON");console.error(m.value);return}
  };
