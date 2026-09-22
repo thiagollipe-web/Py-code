@@ -100,10 +100,19 @@ def __pycode_frame__():
     funcao=globals().get("atualizar")
     if callable(funcao) and funcao is not __pycode_frame__: funcao()
 
+# Snapshot dos nomes que pertencem à engine. O próprio conjunto precisa
+# permanecer protegido para que múltiplas execuções funcionem.
 __pycode_engine_names=set(globals())
+__pycode_engine_names.add("__pycode_engine_names")
+
 def reiniciar_programa():
     global cenas,cena_atual,pontuacao
+    protegidos=__pycode_engine_names
     for nome in list(globals()):
-        if nome not in __pycode_engine_names: del globals()[nome]
-    cenas={};cena_atual=None;pontuacao=0
+        if nome not in protegidos:
+            del globals()[nome]
+    cenas={}
+    cena_atual=None
+    pontuacao=0
+
 __pycode_engine_names.add("reiniciar_programa")
