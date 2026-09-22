@@ -545,6 +545,12 @@ atualizarLinhas();
 mensagemInicial();
 novoWorker();
 window.__pyCodeGetCode=()=>editor.value;
+window.__pyCodeRuntimeStatus=()=>({
+  ready,
+  running,
+  workerAlive:Boolean(worker),
+  serviceWorkerControlled:Boolean(navigator.serviceWorker&&navigator.serviceWorker.controller)
+});
 
 const assistant=$("assistant");
 const assistantTab=$("assistantTab");
