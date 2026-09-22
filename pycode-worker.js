@@ -1,8 +1,4 @@
-/* Py-Code Worker: runtime Python isolado do thread principal.
- * Pyodide 314 exige Worker do tipo module em navegadores modernos.
- */
-import { loadPyodide } from "./pyodide/pyodide.mjs";
-
+/* Py-Code Worker: runtime Python isolado da interface. */
 const PYODIDE_VERSAO="314.0.7";
 const PYODIDE_LOCAL=new URL("./pyodide/", import.meta.url).href;
 
@@ -25,30 +21,44 @@ function errorText(error){
   );
 }
 
+function diagnostic(error,etapa){
+  const detalhe=errorText(error);
+  send("fatal",{
+    etapa,
+    value:detalhe,
+    diagnostic:etapa+" -> "+detalhe
+  });
+}
+
 function pressed(k){
   const chave=String(k);
   return keys.has(chave)||keys.has(chave.toLowerCase());
 }
 
-self.pycode_pressed=pressed;
-
-self.pycode_sound=(frequency,duration,type,volume)=>{
-  send("sound",{
-    frequency:Number(frequency)||440,
-    duration:Number(duration)||0.12,
-    waveform:String(type||"square"),
-    volume:Number(volume)||0.05
-  });
-};
-
 async function carregarPyodide(){
-  send("status",{
-    value:"Carregando Python "+PYODIDE_VERSAO+" local…"
-  });
+  send("status",{value:"Importando loader Pyodide "+PYODIDE_VERSAO+"…"});
+  let loadPyodide;
 
-  pyodide=await loadPyodide({
-    indexURL:PYODIDE_LOCAL
-  });
+  try{
+    const modulo=await import("./pyodide/pyodide.mjs");
+    if(typeof modulo.loadPyodide!=="function"){
+      throw new Error("pyodide.mjs não exportou loadPyodide.");
+    }
+    loadPyodide=modulo.loadPyodide;
+  }catch(error){
+    diagnostic(error,"import-pyodide-mjs");
+    throw error;
+  }
+
+  send("status",{value:"Inicializando WebAssembly Python…"});
+  try{
+    pyodide=await loadPyodide({
+      indexURL:PYODIDE_LOCAL
+    });
+  }catch(error){
+    diagnostic(error,"load-pyodide");
+    throw error;
+  }
 
   pyodide.setStdout({
     batched:(msg)=>send("stdout",{value:String(msg??"")})
@@ -66,20 +76,20 @@ async function boot(){
     send("status",{value:"Iniciando runtime Python…"});
     const origem=await carregarPyodide();
 
-    const engine=await fetch("./pycode_worker.py",{
+    send("status",{value:"Carregando engine Py-Code…"});
+    const url=new URL("./pycode_worker.py",import.meta.url);
+    const engine=await fetch(url.href,{
       cache:"no-store",
       credentials:"same-origin"
     });
 
     if(!engine.ok){
-      throw new Error(
-        "Engine Py-Code não encontrada: HTTP "+engine.status
-      );
+      throw new Error("Engine Py-Code não encontrada: HTTP "+engine.status);
     }
 
     const engineSource=await engine.text();
 
-    if(!engineSource.includes("def reiniciar_programa")) {
+    if(!engineSource.includes("def reiniciar_programa")){
       throw new Error("Engine Py-Code inválida ou incompleta.");
     }
 
@@ -92,7 +102,10 @@ async function boot(){
     });
   }catch(error){
     engineReady=false;
-    send("fatal",{value:errorText(error)});
+    if(!errorText(error).includes("import-pyodide-mjs") &&
+       !errorText(error).includes("load-pyodide")){
+      diagnostic(error,"boot");
+    }
   }
 }
 
@@ -135,6 +148,16 @@ async function frame(){
   }
 }
 
+self.pycode_pressed=pressed;
+self.pycode_sound=(frequency,duration,type,volume)=>{
+  send("sound",{
+    frequency:Number(frequency)||440,
+    duration:Number(duration)||0.12,
+    waveform:String(type||"square"),
+    volume:Number(volume)||0.05
+  });
+};
+
 self.onmessage=async(event)=>{
   const m=event.data||{};
 
@@ -143,30 +166,25 @@ self.onmessage=async(event)=>{
       case "boot":
         await boot();
         break;
-
       case "run":
         await executar(String(m.code||""),Boolean(m.game));
         break;
-
       case "frame":
         await frame();
         break;
-
       case "keys":
         keys=new Set(Array.isArray(m.keys)?m.keys:[]);
         break;
-
       case "stop":
         running=false;
         gameMode=false;
         break;
-
       default:
         send("warn",{value:"Mensagem desconhecida: "+String(m.type)});
     }
   }catch(error){
     running=false;
     gameMode=false;
-    send("fatal",{value:errorText(error)});
+    send("fatal",{etapa:"message-handler",value:errorText(error)});
   }
 };
