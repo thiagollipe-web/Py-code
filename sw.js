@@ -1,4 +1,4 @@
-const CACHE="py-code-v15";
+const CACHE="py-code-v16";
 const APP_SHELL=[
   "./",
   "./index.html",
@@ -11,8 +11,6 @@ const APP_SHELL=[
   "./pyodide/pyodide.js",
   "./pyodide/pyodide.mjs",
   "./pyodide/pyodide.asm.mjs",
-  "./pyodide/pyodide.asm.wasm",
-  "./pyodide/python_stdlib.zip",
   "./pyodide/pyodide-lock.json",
   "./pyodide/package.json"
 ];
@@ -22,6 +20,7 @@ self.addEventListener("install",event=>{
     caches.open(CACHE)
       .then(cache=>cache.addAll(APP_SHELL))
       .then(()=>self.skipWaiting())
+      .catch(()=>self.skipWaiting())
   );
 });
 
