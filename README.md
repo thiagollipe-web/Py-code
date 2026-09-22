@@ -83,3 +83,10 @@ O runtime Pyodide é baixado durante o build do GitHub Pages e publicado dentro 
 ---
 
 **Py-Code — Python simples, direto no terminal.**
+## Professor Bot
+
+- tutor local integrado ao editor;
+- dicas progressivas e desafios;
+- leitura de erros reais do runtime;
+- referências para exemplos da AWS Code Library;
+- execução local sem dependência de um servidor de IA remoto.
