@@ -77,10 +77,15 @@
       const s=String(source||"");
       const r={concepts:[],errors:[],focus:null,imports:[],lines:s.split(/\r?\n/).length};
 
-      const importMatches=s.match(/^(?:from\s+([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)\s+import|import\s+([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*))/gm)||[];
-      r.imports=[...new Set(importMatches.map(function(line){
-        const m=line.match(/^(?:from\s+([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)\s+import|import\s+([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)/);
-        return (m&&((m[1]||m[2])))||"";
+      const importLines=s.split(/\r?\n/).map(function(line){return line.trim();}).filter(function(line){
+        return /^from\s+[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*\s+import\b/.test(line)
+          || /^import\s+[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*(?:\s*,\s*[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)*$/.test(line);
+      });
+      r.imports=[...new Set(importLines.map(function(line){
+        const from=line.match(/^from\s+([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)\s+import\b/);
+        if(from)return from[1];
+        const imp=line.match(/^import\s+([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)/);
+        return imp?imp[1]:"";
       }).filter(Boolean))];
 
       if(/\bprint\s*\(/.test(s))r.concepts.push("print");
@@ -162,7 +167,15 @@
 
     function library(){
       if(!window.PyCodeAWS)return add("A biblioteca local de referências ainda não carregou.");
-      add("Biblioteca Python + AWS disponível. Você pode perguntar por: Python, Boto3, S3, Lambda, DynamoDB, Bedrock, IAM ou EC2.");
+      add("Biblioteca de estudo disponível: Biblioteca padrão do Python + referências AWS Code Library. Exemplos: json, math, random, pathlib, datetime, re, collections, itertools, os, Boto3, S3, Lambda, DynamoDB, Bedrock, IAM e EC2.");
+    }
+
+    function pythonTopicAssist(text){
+      if(!window.PyCodeAWS||typeof window.PyCodeAWS.lookupPython!=="function")return false;
+      const ref=window.PyCodeAWS.lookupPython(text);
+      if(!ref)return false;
+      add("Encontrei a referência da biblioteca Python para "+ref.label+". Use a documentação para estudar a API e depois adapte ao seu programa.","bot",ref);
+      return true;
     }
 
     function challenge(){
@@ -234,8 +247,14 @@
       }
 
       if(/dica|ajuda|help/.test(n))return add(nextHint());
+
+      if(/o que voce pode fazer|o que você pode fazer|recursos|funcoes/.test(n)){
+        return add("Posso analisar seu código, explicar conceitos, interpretar erros do Python, propor desafios e apontar documentação oficial. Escreva sua dúvida de forma simples.");
+      }
       if(/desafio|exercicio|exercício/.test(n))return challenge();
       if(/biblioteca|livro|documentacao|documentação|stdlib|padrao|padrão/.test(n))return library();
+
+      if(pythonTopicAssist(t))return;
 
       if(/aws|amazon|boto3|s3|lambda|dynamodb|bedrock|iam|ec2|cloudwatch/.test(n)){
         if(awsAssist(t))return;
