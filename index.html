@@ -295,7 +295,7 @@ function executar(){
   stop.disabled=false;
 
   const codigo=editor.value;
-  const usaJogo=/\b(import\s+pygame|from\s+pygame|def\s+atualizar\s*\()/m.test(codigo)&&/\b(pygame|Sprite|criar_sprite|pressionado|cena|mudar_cena|retangulo|circulo|linha|texto|limpar)\b/.test(codigo);
+  const usaJogo=/\bdef\s+atualizar\s*\(/.test(codigo)&&/\b(Sprite|criar_sprite|pressionado|cena|mudar_cena|retangulo|circulo|linha|texto|limpar)\b/.test(codigo);
 
   linha("$ python programa.py","prompt");
   setStatus(usaJogo?"ABRINDO JOGO...":"EXECUTANDO...");
