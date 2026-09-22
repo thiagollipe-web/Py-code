@@ -37,7 +37,7 @@ header{
 .controls{display:flex;gap:6px;flex-wrap:wrap}
 main{
   flex:1;min-height:0;display:grid;
-  grid-template-rows:minmax(320px,1fr) minmax(210px,.8fr);
+  grid-template-rows:minmax(300px,1fr) minmax(160px,.65fr) minmax(220px,.75fr);
 }
 .panel{min-height:0;display:flex;flex-direction:column}
 .editor-wrap{flex:1;min-height:0;display:grid;grid-template-columns:48px minmax(0,1fr);background:#000}
@@ -80,7 +80,7 @@ footer{
   .status{width:100%;order:3}
   .controls{width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
   .controls button{min-width:0;padding:7px 4px;font-size:10px}
-  main{height:calc(100dvh - 108px);min-height:0;grid-template-rows:minmax(260px,1.15fr) minmax(180px,.85fr)}
+  main{height:calc(100dvh - 108px);min-height:0;grid-template-rows:minmax(230px,1fr) minmax(140px,.62fr) minmax(200px,.78fr)}
   .panel-title{padding:0 8px}
   .panel-title span:last-child{display:none}
   .editor-wrap{grid-template-columns:40px minmax(0,1fr)}
@@ -250,7 +250,7 @@ async function novoWorker(){
     if(m.type==="ready"){
       ready=true;
       run.disabled=false;
-      setStatus(m.online?"PYTHON ONLINE • PRONTO":"PYTHON LOCAL • PRONTO","ok");
+      setStatus("PYTHON LOCAL • PRONTO","ok");
       return;
     }
 
