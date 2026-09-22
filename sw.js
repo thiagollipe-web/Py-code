@@ -8,6 +8,7 @@ const APP_SHELL=[
   "./jogo.html",
   "./diagnostico.html",
   "./professor-bot.js",
+  "./aws-code-library.js",
   "./code-audit.js",
   "./sw.js",
   "./assets/py-code-banner.svg",
