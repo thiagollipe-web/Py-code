@@ -101,6 +101,8 @@ footer{
 .bot-input input{flex:1;min-width:0;background:#000;border:1px solid #333;color:#fff;padding:7px;font:12px monospace;outline:0}
 .bot-input button{min-height:32px;padding:5px 9px}
 @media(max-width:700px){#bot{min-height:200px}.bot-msg{font-size:11px}}
+
+#auditPanel{position:fixed;inset:8% 6%;z-index:30;background:#000;border:1px solid #555;box-shadow:0 0 0 9999px rgba(0,0,0,.82);display:flex;flex-direction:column;overflow:hidden}#auditPanel[hidden]{display:none}#auditResult{flex:1;overflow:auto;padding:12px;font:12px/1.5 Consolas,"Courier New",monospace}.audit-head{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.audit-card{border:1px solid #333;margin:8px 0;padding:10px}.audit-title{font-weight:700}.audit-code{white-space:pre-wrap;background:#080808;padding:8px;margin-top:7px}.audit-close{margin-left:auto}@media(max-width:700px){#auditPanel{inset:2% 2%}}
 </style>
 </head>
 <body>
@@ -152,6 +154,7 @@ footer{
     <button id="botSend" type="button">ENVIAR</button>
   </div>
 </section>
+<section id="auditPanel" class="panel" hidden><div class="panel-title"><span>▸ AUDITORIA DO CÓDIGO</span><span id="auditSummary">Aguardando análise</span></div><div id="auditResult"></div></section>
 </main>
 
 <footer>
@@ -442,6 +445,7 @@ mensagemInicial();
 novoWorker();
 window.__pyCodeGetCode=()=>editor.value;
 </script>
+<script src="./code-audit.js?v=1" defer></script>
 <script src="./professor-bot.js?v=1" defer></script>
 </body>
 </html>
