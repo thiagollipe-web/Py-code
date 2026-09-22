@@ -1,42 +1,59 @@
-/* Py-Code Worker: runtime Python isolado do thread principal. */
+/* Py-Code Worker: runtime Python isolado do thread principal.
+ * Pyodide 314 exige Worker do tipo module em navegadores modernos.
+ */
+import { loadPyodide } from "./pyodide/pyodide.mjs";
+
 const PYODIDE_VERSAO="314.0.7";
-const PYODIDE_LOCAL="./pyodide/";
+const PYODIDE_LOCAL=new URL("./pyodide/", import.meta.url).href;
+
 let pyodide=null;
 let engineReady=false;
 let running=false;
 let gameMode=false;
 let keys=new Set();
 
-function send(type,data={}){self.postMessage({type,...data})}
-function pressed(k){return keys.has(String(k))||keys.has(String(k).toLowerCase())}
+function send(type,data={}){
+  self.postMessage({type,...data});
+}
+
+function errorText(error){
+  return String(
+    error?.stack ||
+    error?.message ||
+    error ||
+    "Erro desconhecido no Worker"
+  );
+}
+
+function pressed(k){
+  const chave=String(k);
+  return keys.has(chave)||keys.has(chave.toLowerCase());
+}
 
 self.pycode_pressed=pressed;
+
 self.pycode_sound=(frequency,duration,type,volume)=>{
   send("sound",{
-    frequency:Number(frequency),
-    duration:Number(duration),
+    frequency:Number(frequency)||440,
+    duration:Number(duration)||0.12,
     waveform:String(type||"square"),
-    volume:Number(volume||0.05)
+    volume:Number(volume)||0.05
   });
 };
 
 async function carregarPyodide(){
-  send("status",{value:"Carregando biblioteca Python local…"});
-  const runtime=await fetch(PYODIDE_LOCAL+"pyodide.js",{cache:"no-store"});
-  if(!runtime.ok){
-    throw new Error("Biblioteca Pyodide local não encontrada. O build do GitHub Pages precisa incluir /pyodide/.");
-  }
-  importScripts(PYODIDE_LOCAL+"pyodide.js");
+  send("status",{
+    value:"Carregando Python "+PYODIDE_VERSAO+" local…"
+  });
 
-  if(typeof loadPyodide!=="function"){
-    throw new Error("Runtime Python local não disponível.");
-  }
-
-  pyodide=await loadPyodide({indexURL:PYODIDE_LOCAL});
+  pyodide=await loadPyodide({
+    indexURL:PYODIDE_LOCAL
+  });
 
   pyodide.setStdout({
     batched:(msg)=>send("stdout",{value:String(msg??"")})
   });
+
   pyodide.setStderr({
     batched:(msg)=>send("stderr",{value:String(msg??"")})
   });
@@ -46,30 +63,51 @@ async function carregarPyodide(){
 
 async function boot(){
   try{
-    send("status",{value:"Carregando runtime Python…"});
+    send("status",{value:"Iniciando runtime Python…"});
     const origem=await carregarPyodide();
 
-    const engine=await fetch("./pycode_worker.py",{cache:"no-store"});
-    if(!engine.ok)throw new Error("Engine Py-Code não encontrada.");
-    pyodide.runPython(await engine.text());
+    const engine=await fetch("./pycode_worker.py",{
+      cache:"no-store",
+      credentials:"same-origin"
+    });
+
+    if(!engine.ok){
+      throw new Error(
+        "Engine Py-Code não encontrada: HTTP "+engine.status
+      );
+    }
+
+    const engineSource=await engine.text();
+
+    if(!engineSource.includes("def reiniciar_programa")) {
+      throw new Error("Engine Py-Code inválida ou incompleta.");
+    }
+
+    pyodide.runPython(engineSource);
 
     engineReady=true;
-    send("ready",{origem});
-  }catch(e){
+    send("ready",{
+      origem,
+      pyodide:PYODIDE_VERSAO
+    });
+  }catch(error){
     engineReady=false;
-    send("fatal",{value:String(e&&e.stack||e)});
+    send("fatal",{value:errorText(error)});
   }
 }
 
 async function executar(codigo,jogo=false){
-  if(!engineReady)return;
+  if(!engineReady){
+    send("error",{value:"Runtime Python ainda não está pronto."});
+    return;
+  }
 
   gameMode=Boolean(jogo);
   running=false;
 
   try{
     pyodide.runPython("reiniciar_programa()");
-    await pyodide.runPythonAsync(codigo);
+    await pyodide.runPythonAsync(String(codigo||""));
 
     if(gameMode){
       running=true;
@@ -77,10 +115,10 @@ async function executar(codigo,jogo=false){
     }else{
       send("done");
     }
-  }catch(e){
+  }catch(error){
     running=false;
     gameMode=false;
-    send("error",{value:String(e&&e.stack||e)});
+    send("error",{value:errorText(error)});
   }
 }
 
@@ -90,45 +128,45 @@ async function frame(){
   try{
     await pyodide.runPythonAsync("__pycode_frame__()");
     send("frame_done");
-  }catch(e){
+  }catch(error){
     running=false;
     gameMode=false;
-    send("error",{value:String(e&&e.stack||e)});
+    send("error",{value:errorText(error)});
   }
 }
 
-self.onmessage=async e=>{
-  const m=e.data||{};
+self.onmessage=async(event)=>{
+  const m=event.data||{};
 
   try{
-    if(m.type==="boot"){
-      await boot();
-      return;
-    }
+    switch(m.type){
+      case "boot":
+        await boot();
+        break;
 
-    if(m.type==="run"){
-      await executar(String(m.code||""),Boolean(m.game));
-      return;
-    }
+      case "run":
+        await executar(String(m.code||""),Boolean(m.game));
+        break;
 
-    if(m.type==="frame"){
-      await frame();
-      return;
-    }
+      case "frame":
+        await frame();
+        break;
 
-    if(m.type==="keys"){
-      keys=new Set(Array.isArray(m.keys)?m.keys:[]);
-      return;
-    }
+      case "keys":
+        keys=new Set(Array.isArray(m.keys)?m.keys:[]);
+        break;
 
-    if(m.type==="stop"){
-      running=false;
-      gameMode=false;
-      return;
+      case "stop":
+        running=false;
+        gameMode=false;
+        break;
+
+      default:
+        send("warn",{value:"Mensagem desconhecida: "+String(m.type)});
     }
-  }catch(e){
+  }catch(error){
     running=false;
     gameMode=false;
-    send("fatal",{value:String(e&&e.stack||e)});
+    send("fatal",{value:errorText(error)});
   }
 };
