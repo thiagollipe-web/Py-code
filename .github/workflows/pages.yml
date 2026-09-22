@@ -28,30 +28,24 @@ jobs:
           cp index.html jogo.html manifest.webmanifest pycode-worker.js pycode_worker.py sw.js README.md _site/
           cp -R assets _site/assets
 
-      - name: Bundle Pyodide locally
+      - name: Bundle Pyodide completo localmente
         env:
           PYODIDE_VERSION: "314.0.7"
         run: |
           set -euo pipefail
-          base="https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full"
-          files=(
-            pyodide.js
-            pyodide.mjs
-            pyodide.asm.mjs
-            pyodide.asm.wasm
-            python_stdlib.zip
-            pyodide-lock.json
-            package.json
-          )
-          for file in "${files[@]}"; do
-            echo "Baixando Pyodide: $file"
-            curl --fail --location --retry 4 --retry-delay 2 "$base/$file" -o "_site/pyodide/$file"
-          done
+          mkdir -p _cache/pyodide _site/pyodide
+          archive="_cache/pyodide/pyodide-${PYODIDE_VERSION}.tar.bz2"
+          url="https://github.com/pyodide/pyodide/releases/download/${PYODIDE_VERSION}/pyodide-${PYODIDE_VERSION}.tar.bz2"
+          echo "Baixando distribuição completa do Pyodide..."
+          curl --fail --location --retry 4 --retry-delay 2 "$url" -o "$archive"
+          tar -xjf "$archive" -C _cache/pyodide --strip-components=1
+          cp -R _cache/pyodide/. _site/pyodide/
           test -s _site/pyodide/pyodide.js
           test -s _site/pyodide/pyodide.asm.wasm
           test -s _site/pyodide/python_stdlib.zip
           test -s _site/pyodide/pyodide-lock.json
-          echo "Runtime Pyodide local empacotado."
+          find _site/pyodide -maxdepth 1 -type f | sort
+          echo "Distribuição completa do Pyodide empacotada localmente."
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
