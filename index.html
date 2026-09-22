@@ -212,7 +212,7 @@ function setStatus(texto,classe=""){
 async function novoWorker(){
   if(worker) worker.terminate();
 
-  worker=new Worker("./pycode-worker.js?v=23",{type:"module"});
+  worker=new Worker("./pycode-worker.js?v=24",{type:"module"});
 
   worker.onmessage=e=>{
     const m=e.data||{};
@@ -225,7 +225,7 @@ async function novoWorker(){
     if(m.type==="ready"){
       ready=true;
       run.disabled=false;
-      setStatus("PYTHON LOCAL • PRONTO","ok");
+      setStatus(m.online?"PYTHON ONLINE • PRONTO":"PYTHON LOCAL • PRONTO","ok");
       return;
     }
 
