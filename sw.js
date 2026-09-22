@@ -7,6 +7,7 @@ const APP_SHELL=[
   "./pycode_worker.py",
   "./jogo.html",
   "./diagnostico.html",
+  "./professor-bot.js",
   "./sw.js",
   "./assets/py-code-banner.svg",
   "./pyodide/pyodide.js",
