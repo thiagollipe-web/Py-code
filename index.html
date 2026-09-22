@@ -207,7 +207,7 @@ async function novoWorker(){
     try{await window.__swReady}catch(_){}
   }
 
-  worker=new Worker("./pycode-worker.js?v=13");
+  worker=new Worker("./pycode-worker.js?v=14");
 
   worker.onmessage=e=>{
     const m=e.data||{};
@@ -340,7 +340,7 @@ async function abrirJogo(codigo){
   const chave="pycode_game_"+Date.now()+"_"+Math.random().toString(36).slice(2);
   localStorage.setItem(chave,codigo);
 
-  const janela=window.open("./jogo.html#"+encodeURIComponent(chave),"_blank","noopener,noreferrer,width="+Math.min(1000,largura)+",height="+Math.min(760,altura));
+  const janela=window.open("./jogo.html#"+encodeURIComponent(chave),"_blank","width="+Math.min(1000,largura)+",height="+Math.min(760,altura));
 
   if(janela){
     try{janela.opener=null}catch(_){}
