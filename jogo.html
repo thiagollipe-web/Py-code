@@ -50,7 +50,7 @@ function som(m){
  try{const ac=window.__pyac||(window.__pyac=new AudioContext());const o=ac.createOscillator(),g=ac.createGain();o.type=m.waveform||"square";o.frequency.value=Number(m.frequency)||440;g.gain.value=Math.min(.25,Number(m.volume)||.05);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+(Number(m.duration)||.1))}catch(_){}
 }
 function iniciar(codigo){
- worker=new Worker("./pycode-worker.js?v=21",{type:"module"});
+ worker=new Worker("./pycode-worker.js?v=23",{type:"module"});
  worker.onmessage=e=>{
   const m=e.data||{};
   if(m.type==="status"){msg(m.value);return}
