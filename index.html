@@ -9,76 +9,66 @@
 <title>Py-Code — Terminal Python</title>
 <style>
 :root{
-  --bg:#080b12;
-  --panel:#0d111a;
-  --panel2:#111827;
-  --text:#e6edf3;
-  --muted:#7d8b99;
-  --cyan:#22d3ee;
-  --green:#4ade80;
-  --yellow:#facc15;
-  --pink:#f472b6;
-  --red:#fb7185;
-  --blue:#60a5fa;
-  --border:#263244;
-  --editor:#0a0f18;
+  --bg:#000;
+  --panel:#0b0b0b;
+  --text:#fff;
+  --muted:#999;
+  --border:#333;
+  --editor:#000;
 }
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--text);font-family:Consolas,"Courier New",monospace}
 body{display:flex;flex-direction:column;overflow:hidden}
 button{
-  border:1px solid var(--border);background:#121a27;color:var(--text);
-  border-radius:5px;padding:8px 12px;font:700 12px Consolas,monospace;
+  border:1px solid #555;background:#111;color:#fff;
+  border-radius:2px;padding:8px 12px;font:700 12px Consolas,monospace;
   cursor:pointer;min-height:36px
 }
-button:hover{border-color:var(--cyan);color:var(--cyan)}
+button:hover{background:#fff;color:#000;border-color:#fff}
 button:disabled{opacity:.45;cursor:not-allowed}
 header{
   flex:0 0 auto;border-bottom:1px solid var(--border);
-  background:linear-gradient(90deg,#0b111b,#101827);
-  padding:10px 14px
+  background:#000;padding:10px 14px
 }
 .top{display:flex;align-items:center;gap:14px;justify-content:space-between}
-.brand{font-size:18px;font-weight:800;letter-spacing:2px;color:var(--cyan)}
+.brand{font-size:18px;font-weight:800;letter-spacing:2px;color:#fff}
 .sub{font-size:11px;color:var(--muted);margin-top:3px}
-.status{font-size:11px;color:var(--green)}
+.status{font-size:11px;color:#fff}
 .controls{display:flex;gap:6px;flex-wrap:wrap}
 main{
   flex:1;min-height:0;display:grid;
   grid-template-rows:minmax(260px,1fr) minmax(210px,.8fr);
 }
 .panel{min-height:0;display:flex;flex-direction:column}
+.editor-wrap{flex:1;min-height:0;display:grid;grid-template-columns:48px minmax(0,1fr);background:#000}
+.line-numbers{overflow:hidden;padding:14px 8px 14px 0;text-align:right;border-right:1px solid #333;background:#050505;color:#777;font:14px/1.55 Consolas,"Courier New",monospace;user-select:none;white-space:pre}
+.editor-wrap #code{height:100%}
 .panel-title{
   flex:0 0 auto;height:34px;display:flex;align-items:center;
   justify-content:space-between;padding:0 12px;
-  background:var(--panel);border-bottom:1px solid var(--border);
-  color:var(--cyan);font-size:12px
+  background:#0b0b0b;border-bottom:1px solid var(--border);
+  color:#fff;font-size:12px
 }
 .panel-title span:last-child{color:var(--muted);font-weight:400}
 #code{
   flex:1;width:100%;min-height:0;resize:none;border:0;outline:0;
-  padding:14px;background:var(--editor);color:#d1fae5;
+  padding:14px;background:var(--editor);color:#fff;
   font:14px/1.55 Consolas,"Courier New",monospace;
-  tab-size:4;white-space:pre;caret-color:var(--yellow)
+  tab-size:4;white-space:pre;caret-color:#fff
 }
-#code:focus{box-shadow:inset 2px 0 0 var(--cyan)}
+#code:focus{box-shadow:inset 2px 0 0 #fff}
 #terminal{
   flex:1;min-height:0;overflow:auto;padding:12px 14px;
-  background:#06080d;color:#dbeafe;font:13px/1.55 Consolas,"Courier New",monospace;
+  background:#000;color:#fff;font:13px/1.55 Consolas,"Courier New",monospace;
   white-space:pre-wrap;word-break:break-word
 }
 .line{min-height:20px}
-.out{color:#dbeafe}
-.info{color:var(--cyan)}
-.ok{color:var(--green)}
-.warn{color:var(--yellow)}
-.err{color:var(--red)}
-.prompt{color:var(--pink)}
-.meta{color:var(--muted)}
+.out,.info,.ok,.warn,.err,.prompt{color:#fff}
+.meta{color:#999}
 .cursor{display:inline-block;width:7px;height:14px;background:var(--green);vertical-align:-2px;animation:blink 1s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
 footer{
-  flex:0 0 auto;border-top:1px solid var(--border);background:#0b1018;
+  flex:0 0 auto;border-top:1px solid var(--border);background:#000;
   color:var(--muted);font-size:10px;padding:5px 10px;display:flex;justify-content:space-between
 }
 @media(max-width:700px){
@@ -115,7 +105,10 @@ footer{
       <span>▸ PROGRAMA.PY</span>
       <span>CTRL + ENTER para executar</span>
     </div>
-    <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+    <div class="editor-wrap">
+      <div id="lines" class="line-numbers" aria-hidden="true">1</div>
+      <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+    </div>
   </section>
 
   <section class="panel">
@@ -137,6 +130,7 @@ footer{
 
 const $=id=>document.getElementById(id);
 const editor=$("code");
+const lineNumbers=$("lines");
 const terminal=$("terminal");
 const run=$("run");
 const stop=$("stop");
@@ -163,6 +157,11 @@ print("2 + 3 =", 2 + 3)
 print("Programa executado com sucesso.")
 `;
 
+function atualizarLinhas(){
+  const quantidade=Math.max(1,editor.value.split("\n").length);
+  lineNumbers.textContent=Array.from({length:quantidade},(_,i)=>i+1).join("\n");
+  lineNumbers.scrollTop=editor.scrollTop;
+}
 function salvar(){
   try{localStorage.setItem("pycode_codigo",editor.value)}catch(_){}
 }
@@ -352,7 +351,8 @@ async function abrirJogo(codigo){
   throw new Error("Nova aba bloqueada pelo navegador.");
 }
 
-editor.addEventListener("input",salvar);
+editor.addEventListener("input",()=>{salvar();atualizarLinhas();});
+editor.addEventListener("scroll",()=>{lineNumbers.scrollTop=editor.scrollTop;});
 
 editor.addEventListener("keydown",e=>{
   if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){
@@ -402,6 +402,7 @@ if("serviceWorker" in navigator){
 }
 
 carregar();
+atualizarLinhas();
 mensagemInicial();
 novoWorker();
 </script>
