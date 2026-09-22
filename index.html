@@ -212,7 +212,7 @@ function setStatus(texto,classe=""){
 async function novoWorker(){
   if(worker) worker.terminate();
 
-  worker=new Worker("./pycode-worker.js?v=21",{type:"module"});
+  worker=new Worker("./pycode-worker.js?v=23",{type:"module"});
 
   worker.onmessage=e=>{
     const m=e.data||{};
