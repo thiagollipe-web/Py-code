@@ -1,10 +1,8 @@
 /* Py-Code Worker: Python no navegador.
- * Tenta runtime local primeiro e cai automaticamente para JsDelivr.
+ * Runtime local do Py-Code. O projeto não usa fallback externo.
  */
 const PYODIDE_VERSAO="314.0.7";
 const LOCAL_BASE=new URL("./pyodide/",import.meta.url).href;
-const CDN_BASE="https://cdn.jsdelivr.net/pyodide/v314.0.7/full/";
-
 let pyodide=null;
 let engineReady=false;
 let running=false;
@@ -34,49 +32,19 @@ self.pycode_sound=(frequency,duration,type,volume)=>{
   });
 };
 
-async function importarLoader(base){
-  const url=base+"pyodide.mjs";
-  send("status",{
-    value:(base===LOCAL_BASE?"Python local":"Python online • JsDelivr")+" • carregando..."
-  });
+async function carregarPyodide(){
+  const url=LOCAL_BASE+"pyodide.mjs";
+  send("status",{value:"Python local • carregando..."});
 
   const mod=await import(url);
   if(typeof mod.loadPyodide!=="function"){
     throw new Error("loadPyodide não foi encontrado em "+url);
   }
 
-  return mod.loadPyodide;
-}
-
-async function carregarPyodide(){
-  let ultimoErro=null;
-
-  try{
-    const loadLocal=await importarLoader(LOCAL_BASE);
-    send("status",{value:"Inicializando Python local..."});
-    pyodide=await loadLocal({indexURL:LOCAL_BASE});
-    send("status",{value:"Python local carregado."});
-    return "local";
-  }catch(error){
-    ultimoErro=error;
-    send("status",{
-      value:"Runtime local falhou. Tentando Pyodide online..."
-    });
-  }
-
-  try{
-    const loadOnline=await importarLoader(CDN_BASE);
-    send("status",{value:"Inicializando Pyodide online..."});
-    pyodide=await loadOnline({indexURL:CDN_BASE});
-    send("status",{value:"Pyodide online carregado."});
-    return "online";
-  }catch(error){
-    throw new Error(
-      "Falha no runtime local e no online.\n"+
-      "LOCAL: "+errorText(ultimoErro)+"\n"+
-      "ONLINE: "+errorText(error)
-    );
-  }
+  send("status",{value:"Inicializando Python local..."});
+  pyodide=await mod.loadPyodide({indexURL:LOCAL_BASE});
+  send("status",{value:"Python local carregado."});
+  return "local";
 }
 
 async function carregarEngine(){
@@ -123,7 +91,7 @@ async function boot(){
     send("ready",{
       origem,
       pyodide:PYODIDE_VERSAO,
-      online:origem==="online"
+      online:false
     });
   }catch(error){
     engineReady=false;
