@@ -252,6 +252,7 @@ let worker=null;
 let ready=false;
 let running=false;
 let timeoutId=null;
+let workerGeneration=0;
 
 const DEFAULT_CODE=`# Py-Code
 # Um terminal simples para aprender Python.
@@ -314,6 +315,7 @@ function setStatus(texto,classe=""){
 }
 
 async function novoWorker(){
+  const generation=++workerGeneration;
   if(worker) worker.terminate();
 
   worker=new Worker("./pycode-worker.js",{type:"module"});
@@ -327,6 +329,7 @@ async function novoWorker(){
     }
 
     if(m.type==="ready"){
+      if(generation!==workerGeneration)return;
       ready=true;
       run.disabled=false;
       setStatus("PYTHON LOCAL • PRONTO","ok");
@@ -363,6 +366,7 @@ async function novoWorker(){
     }
 
     if(m.type==="error"||m.type==="fatal"){
+      if(generation!==workerGeneration)return;
       if(timeoutId)clearTimeout(timeoutId);
       timeoutId=null;
       running=false;
@@ -370,12 +374,15 @@ async function novoWorker(){
       run.disabled=false;
       const mensagem=String(m.value||"Erro desconhecido");
       linha(mensagem,"err");
-      setStatus("ERRO PYTHON","err");
-      window.dispatchEvent(new CustomEvent("pycode:runtime-error",{detail:{message:mensagem}}));
+      setStatus(m.type==="fatal" ? "FALHA NO RUNTIME" : "ERRO PYTHON","err");
+      window.dispatchEvent(new CustomEvent("pycode:runtime-error",{
+        detail:{message:mensagem,stage:m.etapa||"run"}
+      }));
     }
   };
 
   worker.onerror=e=>{
+    if(generation!==workerGeneration)return;
     ready=false;
     running=false;
     run.disabled=true;
@@ -391,10 +398,18 @@ async function novoWorker(){
   };
 
   worker.postMessage({type:"boot"});
+  return worker;
 }
 
 function executar(){
-  if(!ready||running)return;
+  if(!ready){
+    linha("Python ainda está iniciando. Aguarde o status PYTHON LOCAL • PRONTO.","warn");
+    return;
+  }
+  if(running){
+    linha("Já existe um programa em execução.","warn");
+    return;
+  }
 
   salvar();
   running=true;
@@ -423,6 +438,7 @@ function executar(){
     return;
   }
 
+  linha("Enviando código ao runtime Python...","meta");
   worker.postMessage({type:"run",code:codigo});
 
   timeoutId=setTimeout(()=>{
@@ -495,6 +511,12 @@ $("clear").onclick=()=>{
 
 $("run").onclick=executar;
 $("stop").onclick=()=>parar(false);
+
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden&&running){
+    linha("Py-Code está em segundo plano; a execução continua no Worker.","meta");
+  }
+});
 
 $("download").onclick=()=>{
   const blob=new Blob([editor.value],{type:"text/x-python;charset=utf-8"});
