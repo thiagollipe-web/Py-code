@@ -37,7 +37,69 @@ header{
 .controls{display:flex;gap:6px;flex-wrap:wrap}
 main{
   flex:1;min-height:0;display:grid;
-  grid-template-rows:minmax(300px,1fr) minmax(160px,.65fr) minmax(220px,.75fr);
+  grid-template-columns:minmax(0,1fr) 340px;
+  gap:0;
+  position:relative;
+}
+.workspace{
+  min-width:0;min-height:0;display:grid;
+  grid-template-rows:minmax(300px,1fr) minmax(160px,.62fr);
+}
+.assistant{
+  min-height:0;display:flex;flex-direction:column;
+  border-left:1px solid #333;background:#050505;
+  box-shadow:-10px 0 24px rgba(0,0,0,.28);
+}
+.assistant-top{
+  flex:0 0 auto;height:38px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 10px;border-bottom:1px solid #333;background:#0b0b0b;font-size:12px;
+}
+.assistant-title{display:flex;align-items:center;gap:8px}
+.assistant-dot{width:7px;height:7px;border:1px solid #fff;border-radius:50%;display:inline-block;box-shadow:0 0 7px rgba(255,255,255,.35)}
+.robot-art{
+  flex:0 0 auto;margin:10px auto 6px;width:180px;
+  padding:9px 8px;border:1px solid #333;background:#000;color:#fff;
+  font:12px/1.1 "Courier New",monospace;text-align:center;white-space:pre;
+}
+.assistant-sub{flex:0 0 auto;text-align:center;padding:0 10px 8px;color:#999;font-size:10px}
+.assistant-status{
+  flex:0 0 auto;margin:0 8px 6px;padding:5px 7px;border:1px solid #333;
+  color:#999;font-size:9px;text-transform:uppercase
+}
+#botMessages{flex:1;min-height:0;overflow:auto;padding:8px 10px}
+.bot-msg{padding:7px 8px;margin:0 0 6px;border-left:2px solid #777;font-size:12px;line-height:1.45;white-space:pre-wrap}
+.bot-msg.user{border-left-color:#fff;text-align:right}
+.bot-actions{display:flex;gap:5px;padding:6px;border-top:1px solid #333}
+.bot-actions button{flex:1;min-height:30px;padding:5px 8px;font-size:10px}
+.bot-input{display:flex;gap:5px;padding:6px;border-top:1px solid #333}
+.bot-input input{flex:1;min-width:0;background:#000;border:1px solid #333;color:#fff;padding:7px;font:12px monospace;outline:0}
+.bot-input button{min-height:32px;padding:5px 9px}
+.bot-source{
+  flex:0 0 auto;margin:0 8px 6px;display:flex;gap:5px;flex-wrap:wrap
+}
+.bot-source a{
+  flex:1;text-align:center;text-decoration:none;border:1px solid #333;color:#fff;
+  padding:6px 5px;font:10px/1 Consolas,"Courier New",monospace;background:#0b0b0b
+}
+.bot-source a:hover{background:#fff;color:#000}
+.assistant-tab{
+  display:none;position:fixed;right:0;top:45%;z-index:20;
+  writing-mode:vertical-rl;transform:rotate(180deg);
+  border:1px solid #555;border-right:0;background:#0b0b0b;color:#fff;
+  padding:12px 7px;border-radius:4px 0 0 4px;font:700 10px monospace;
+}
+@media(max-width:700px){
+  main{height:calc(100dvh - 108px);min-height:0;display:block;position:relative}
+  .workspace{height:100%;grid-template-rows:minmax(230px,1fr) minmax(140px,.62fr)}
+  .assistant{
+    position:absolute;z-index:15;top:0;right:0;bottom:0;width:min(92vw,360px);
+    border-left:1px solid #555;box-shadow:-18px 0 35px rgba(0,0,0,.55)
+  }
+  .assistant.hidden{transform:translateX(101%);pointer-events:none}
+  .assistant-tab{display:block}
+  .assistant-tab[hidden]{display:none}
+  .robot-art{width:170px}
+  .bot-msg{font-size:11px}
 }
 .panel{min-height:0;display:flex;flex-direction:column}
 .editor-wrap{flex:1;min-height:0;display:grid;grid-template-columns:48px minmax(0,1fr);background:#000}
@@ -80,7 +142,6 @@ footer{
   .status{width:100%;order:3}
   .controls{width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
   .controls button{min-width:0;padding:7px 4px;font-size:10px}
-  main{height:calc(100dvh - 108px);min-height:0;grid-template-rows:minmax(230px,1fr) minmax(140px,.62fr) minmax(200px,.78fr)}
   .panel-title{padding:0 8px}
   .panel-title span:last-child{display:none}
   .editor-wrap{grid-template-columns:40px minmax(0,1fr)}
@@ -89,18 +150,6 @@ footer{
   footer{height:24px;font-size:9px}
   footer span:last-child{display:none}
 }
-
-#bot{display:flex;flex-direction:column;min-height:0;background:#050505;border-top:1px solid #333}
-#botHead{height:34px;flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 10px;border-bottom:1px solid #333;font-size:12px}
-#botMessages{flex:1;min-height:0;overflow:auto;padding:8px 10px}
-.bot-msg{padding:7px 8px;margin:0 0 6px;border-left:2px solid #777;font-size:12px;line-height:1.45;white-space:pre-wrap}
-.bot-msg.user{border-left-color:#fff;text-align:right}
-.bot-actions{display:flex;gap:5px;padding:6px;border-top:1px solid #333}
-.bot-actions button{min-height:30px;padding:5px 8px;font-size:10px}
-.bot-input{display:flex;gap:5px;padding:6px;border-top:1px solid #333}
-.bot-input input{flex:1;min-width:0;background:#000;border:1px solid #333;color:#fff;padding:7px;font:12px monospace;outline:0}
-.bot-input button{min-height:32px;padding:5px 9px}
-@media(max-width:700px){#bot{min-height:200px}.bot-msg{font-size:11px}}
 
 #auditPanel{position:fixed;inset:8% 6%;z-index:30;background:#000;border:1px solid #555;box-shadow:0 0 0 9999px rgba(0,0,0,.82);display:flex;flex-direction:column;overflow:hidden}#auditPanel[hidden]{display:none}#auditResult{flex:1;overflow:auto;padding:12px;font:12px/1.5 Consolas,"Courier New",monospace}.audit-head{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.audit-card{border:1px solid #333;margin:8px 0;padding:10px}.audit-title{font-weight:700}.audit-code{white-space:pre-wrap;background:#080808;padding:8px;margin-top:7px}.audit-close{margin-left:auto}@media(max-width:700px){#auditPanel{inset:2% 2%}}
 </style>
@@ -118,43 +167,69 @@ footer{
       <button id="download" type="button">BAIXAR .PY</button>
       <button id="run" type="button" disabled>EXECUTAR</button>
       <button id="stop" type="button" disabled>PARAR</button>
+      <button id="audit" type="button">AUDITAR</button>
     </div>
   </div>
 </header>
 
 <main>
-  <section class="panel">
-    <div class="panel-title">
-      <span>▸ PROGRAMA.PY</span>
-      <span>CTRL + ENTER para executar</span>
-    </div>
-    <div class="editor-wrap">
-      <div id="lines" class="line-numbers" aria-hidden="true">1</div>
-      <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
-    </div>
-  </section>
+  <div class="workspace">
+    <section class="panel">
+      <div class="panel-title">
+        <span>▸ PROGRAMA.PY</span>
+        <span>CTRL + ENTER para executar</span>
+      </div>
+      <div class="editor-wrap">
+        <div id="lines" class="line-numbers" aria-hidden="true">1</div>
+        <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+      </div>
+    </section>
 
-  <section class="panel">
-    <div class="panel-title">
-      <span>▸ TERMINAL</span>
-      <span>MODO OFFLINE</span>
-    </div>
-    <div id="terminal" aria-live="polite"></div>
-  </section>
+    <section class="panel">
+      <div class="panel-title">
+        <span>▸ TERMINAL</span>
+        <span>MODO OFFLINE</span>
+      </div>
+      <div id="terminal" aria-live="polite"></div>
+    </section>
+  </div>
 
-<section id="bot" aria-label="Professor Bot">
-  <div id="botHead"><span>PROFESSOR BOT</span><span>OFFLINE</span></div>
-  <div id="botMessages" aria-live="polite"></div>
-  <div class="bot-actions">
-    <button id="botHintBtn" type="button">PEDIR DICA</button>
-    <button id="botChallenge" type="button">DESAFIO</button>
-  </div>
-  <div class="bot-input">
-    <input id="botInput" type="text" placeholder="Converse com o professor..." autocomplete="off">
-    <button id="botSend" type="button">ENVIAR</button>
-  </div>
-</section>
-<section id="auditPanel" class="panel" hidden><div class="panel-title"><span>▸ AUDITORIA DO CÓDIGO</span><span id="auditSummary">Aguardando análise</span></div><div id="auditResult"></div></section>
+  <aside id="assistant" class="assistant" aria-label="Professor Bot">
+    <div class="assistant-top">
+      <div class="assistant-title"><span class="assistant-dot"></span><span>PROFESSOR BOT</span></div>
+      <button id="botClose" type="button" aria-label="Fechar assistente">FECHAR</button>
+    </div>
+    <pre class="robot-art" aria-label="Robô em ASCII">   .--------.
+  /  .----.  \
+ |  | o  o |  |
+ |  |  --  |  |
+ |  | \\__/ |  |
+  \  '----'  /
+   '---||---'
+      /  \
+  ___/____\___
+     |    |
+     |____|
+    /______\</pre>
+    <div class="assistant-sub">Estou aqui para orientar seu código, explicar erros e indicar exemplos.</div>
+    <div id="botStatus" class="assistant-status">ASSISTENTE LOCAL PRONTO</div>
+    <div id="botMessages" aria-live="polite"></div>
+    <div class="bot-source">
+      <a id="botAwsLibrary" href="https://docs.aws.amazon.com/pt_br/code-library/latest/ug/what-is-code-library.html" target="_blank" rel="noopener noreferrer">AWS CODE LIBRARY</a>
+      <a id="botAwsPython" href="https://docs.aws.amazon.com/pt_br/code-library/latest/ug/python_3_code_examples.html" target="_blank" rel="noopener noreferrer">AWS • PYTHON</a>
+    </div>
+    <div class="bot-actions">
+      <button id="botHintBtn" type="button">PEDIR DICA</button>
+      <button id="botChallenge" type="button">DESAFIO</button>
+    </div>
+    <div class="bot-input">
+      <input id="botInput" type="text" placeholder="Converse com o professor..." autocomplete="off">
+      <button id="botSend" type="button">ENVIAR</button>
+    </div>
+  </aside>
+
+  <button id="assistantTab" class="assistant-tab" type="button" aria-label="Abrir Professor Bot">ROBO • AJUDA</button>
+  <section id="auditPanel" class="panel" hidden><div class="panel-title"><span>▸ AUDITORIA DO CÓDIGO</span><span id="auditSummary">Aguardando análise</span></div><div id="auditResult"></div></section>
 </main>
 
 <footer>
@@ -254,6 +329,7 @@ async function novoWorker(){
       ready=true;
       run.disabled=false;
       setStatus("PYTHON LOCAL • PRONTO","ok");
+      window.dispatchEvent(new CustomEvent("pycode:runtime-ready",{detail:m}));
       return;
     }
 
@@ -291,8 +367,10 @@ async function novoWorker(){
       running=false;
       stop.disabled=true;
       run.disabled=false;
-      linha(String(m.value||"Erro desconhecido"),"err");
+      const mensagem=String(m.value||"Erro desconhecido");
+      linha(mensagem,"err");
       setStatus("ERRO PYTHON","err");
+      window.dispatchEvent(new CustomEvent("pycode:runtime-error",{detail:{message:mensagem}}));
     }
   };
 
@@ -444,8 +522,24 @@ atualizarLinhas();
 mensagemInicial();
 novoWorker();
 window.__pyCodeGetCode=()=>editor.value;
+
+const assistant=$("assistant");
+const assistantTab=$("assistantTab");
+const botClose=$("botClose");
+function abrirAssistente(){
+  assistant.classList.remove("hidden");
+  assistantTab.hidden=true;
+}
+function fecharAssistente(){
+  assistant.classList.add("hidden");
+  assistantTab.hidden=false;
+}
+botClose?.addEventListener("click",fecharAssistente);
+assistantTab?.addEventListener("click",abrirAssistente);
+abrirAssistente();
 </script>
-<script src="./code-audit.js?v=1" defer></script>
-<script src="./professor-bot.js?v=1" defer></script>
+<script src="./code-audit.js?v=2" defer></script>
+<script src="./aws-code-library.js?v=1" defer></script>
+<script src="./professor-bot.js?v=2" defer></script>
 </body>
 </html>
