@@ -316,7 +316,7 @@ function setStatus(texto,classe=""){
 async function novoWorker(){
   if(worker) worker.terminate();
 
-  worker=new Worker("./pycode-worker.js?v=24",{type:"module"});
+  worker=new Worker("./pycode-worker.js",{type:"module"});
 
   worker.onmessage=e=>{
     const m=e.data||{};
@@ -509,7 +509,7 @@ $("download").onclick=()=>{
 
 if("serviceWorker" in navigator){
   window.__swReady=navigator.serviceWorker
-    .register("./sw.js")
+    .register("./sw.js",{updateViaCache:"none"})
     .catch(e=>{
       linha("Cache offline indisponível: "+String(e&&e.message||e),"warn");
       return null;
@@ -539,8 +539,8 @@ botClose?.addEventListener("click",fecharAssistente);
 assistantTab?.addEventListener("click",abrirAssistente);
 abrirAssistente();
 </script>
-<script src="./code-audit.js?v=2" defer></script>
-<script src="./aws-code-library.js?v=1" defer></script>
-<script src="./professor-bot.js?v=2" defer></script>
+<script src="./code-audit.js" defer></script>
+<script src="./aws-code-library.js" defer></script>
+<script src="./professor-bot.js" defer></script>
 </body>
 </html>
