@@ -28,9 +28,35 @@
     return null;
   }
 
+  const PYTHON_DOCS="https://docs.python.org/pt-br/3/library/";
+  const PYTHON_TOPICS={
+    python:{label:"Biblioteca padrão do Python",url:PYTHON_DOCS},
+    stdlib:{label:"Biblioteca padrão do Python",url:PYTHON_DOCS},
+    json:{label:"json — codificação e decodificação JSON",url:PYTHON_DOCS+"json.html"},
+    math:{label:"math — funções matemáticas",url:PYTHON_DOCS+"math.html"},
+    random:{label:"random — geração de números aleatórios",url:PYTHON_DOCS+"random.html"},
+    pathlib:{label:"pathlib — caminhos de arquivos",url:PYTHON_DOCS+"pathlib.html"},
+    datetime:{label:"datetime — datas e horários",url:PYTHON_DOCS+"datetime.html"},
+    re:{label:"re — expressões regulares",url:PYTHON_DOCS+"re.html"},
+    collections:{label:"collections — contêineres especializados",url:PYTHON_DOCS+"collections.html"},
+    itertools:{label:"itertools — ferramentas para iteração",url:PYTHON_DOCS+"itertools.html"},
+    os:{label:"os — interfaces do sistema operacional",url:PYTHON_DOCS+"os.html"}
+  };
+
+  function lookupPython(text){
+    const s=normalize(text);
+    const order=["datetime","pathlib","collections","itertools","random","json","math","re","os","stdlib","python"];
+    for(const key of order){
+      if(new RegExp("\\b"+key+"\\b").test(s))return PYTHON_TOPICS[key];
+    }
+    return null;
+  }
+
   global.PyCodeAWS={
     libraryUrl:BASE+"what-is-code-library.html",
     sdkPythonUrl:DATA.python.url,
-    lookup
+    pythonLibraryUrl:PYTHON_DOCS,
+    lookup,
+    lookupPython
   };
 })(window);
