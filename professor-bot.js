@@ -23,6 +23,7 @@
     let lastFingerprint="";
     let lastAnalysis=null;
     let lastRuntimeError="";
+    let messageCount=0;
 
     function setBotStatus(text){
       if(status)status.textContent=text;
@@ -48,6 +49,11 @@
 
       messages.appendChild(item);
       messages.scrollTop=messages.scrollHeight;
+      messageCount++;
+      while(messageCount>80&&messages.firstChild){
+        messages.removeChild(messages.firstChild);
+        messageCount--;
+      }
     }
 
     function code(){
@@ -69,7 +75,13 @@
 
     function analyze(source){
       const s=String(source||"");
-      const r={concepts:[],errors:[],focus:null};
+      const r={concepts:[],errors:[],focus:null,imports:[],lines:s.split(/\r?\n/).length};
+
+      const importMatches=s.match(/^(?:from\s+([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)\s+import|import\s+([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*))/gm)||[];
+      r.imports=[...new Set(importMatches.map(function(line){
+        const m=line.match(/^(?:from\s+([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)\s+import|import\s+([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)/);
+        return (m&&((m[1]||m[2])))||"";
+      }).filter(Boolean))];
 
       if(/\bprint\s*\(/.test(s))r.concepts.push("print");
       if(/\b[A-Za-z_]\w*\s*=\s*[^=]/.test(s))r.concepts.push("variáveis");
@@ -148,6 +160,11 @@
       return "Dica 3: explique cada linha com suas próprias palavras antes de alterar o programa.";
     }
 
+    function library(){
+      if(!window.PyCodeAWS)return add("A biblioteca local de referências ainda não carregou.");
+      add("Biblioteca Python + AWS disponível. Você pode perguntar por: Python, Boto3, S3, Lambda, DynamoDB, Bedrock, IAM ou EC2.");
+    }
+
     function challenge(){
       const info=analyze(code());
       if(!info.concepts.includes("variáveis"))return add("DESAFIO: crie uma variável chamada pontos e guarde um número.");
@@ -218,6 +235,7 @@
 
       if(/dica|ajuda|help/.test(n))return add(nextHint());
       if(/desafio|exercicio|exercício/.test(n))return challenge();
+      if(/biblioteca|livro|documentacao|documentação|stdlib|padrao|padrão/.test(n))return library();
 
       if(/aws|amazon|boto3|s3|lambda|dynamodb|bedrock|iam|ec2|cloudwatch/.test(n)){
         if(awsAssist(t))return;
@@ -255,6 +273,10 @@
       hintBtn.addEventListener("click",function(){add(nextHint());});
       challengeBtn.addEventListener("click",challenge);
       window.addEventListener("pycode:runtime-error",handleRuntimeError);
+    window.addEventListener("pycode:runtime-ready",function(){
+      lastRuntimeError="";
+      setBotStatus(window.PyCodeAWS?"PYTHON PRONTO • TUTOR ATIVO":"PYTHON PRONTO • TUTOR LOCAL");
+    });
       window.addEventListener("error",function(event){
         const source=String(event&&event.filename||"");
         if(source.includes("professor-bot.js")){
@@ -263,11 +285,12 @@
       });
 
       setBotStatus(window.PyCodeAWS
-        ?"ASSISTENTE LOCAL + AWS REFERENCES"
-        :"ASSISTENTE LOCAL");
+        ?"TUTOR PYTHON + BIBLIOTECA AWS"
+        :"TUTOR PYTHON LOCAL");
 
-      add("Olá. Sou o Professor Bot. Estou conectado ao editor e posso orientar seus estudos sem entregar a solução pronta.");
-      add("Use PEDIR DICA, DESAFIO ou escreva sua dúvida.");
+      add("Olá. Sou o Professor Bot. Estou conectado ao editor.");
+      add("Posso explicar Python, interpretar erros, propor exercícios e apontar referências da biblioteca oficial. Não entrego a solução pronta.");
+      add("Diga, por exemplo: “explique listas”, “por que deu NameError?”, “me dê uma dica”, “mostre a documentação de S3” ou “crie um desafio”.");
 
       observe();
       setInterval(observe,1200);
@@ -275,6 +298,7 @@
         respond:respond,
         hint:nextHint,
         challenge:challenge,
+        library:library,
         analyze:function(){return analyze(code());},
         status:function(){return status?status.textContent:"";}
       };
