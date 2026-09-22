@@ -1,4 +1,4 @@
-const CACHE="py-code-v29";
+const CACHE="py-code-v30";
 const APP_SHELL=[
   "./",
   "./index.html",
@@ -7,6 +7,7 @@ const APP_SHELL=[
   "./pycode_worker.py",
   "./jogo.html",
   "./diagnostico.html",
+  "./runtime-diagnostics.js",
   "./professor-bot.js",
   "./aws-code-library.js",
   "./code-audit.js",
