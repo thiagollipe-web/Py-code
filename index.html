@@ -212,7 +212,7 @@ function setStatus(texto,classe=""){
 async function novoWorker(){
   if(worker) worker.terminate();
 
-  worker=new Worker("./pycode-worker.js?v=14");
+  worker=new Worker("./pycode-worker.js?v=17",{type:"module"});
 
   worker.onmessage=e=>{
     const m=e.data||{};
@@ -273,8 +273,14 @@ async function novoWorker(){
     running=false;
     run.disabled=true;
     stop.disabled=true;
-    linha(e.message||"Falha no Worker","err");
+    const detalhe=[e.message,e.filename,e.lineno&&("linha "+e.lineno)].filter(Boolean).join(" • ");
+    linha(detalhe||"Falha no Worker","err");
     setStatus("FALHA NO RUNTIME","err");
+  };
+
+  worker.onmessageerror=()=>{
+    linha("Falha ao receber mensagem do Worker.","err");
+    setStatus("ERRO DE COMUNICAÇÃO","err");
   };
 
   worker.postMessage({type:"boot"});
@@ -289,7 +295,7 @@ function executar(){
   stop.disabled=false;
 
   const codigo=editor.value;
-  const usaJogo=/\bdef\s+atualizar\s*\(/.test(codigo)&&/\b(Sprite|criar_sprite|pressionado|cena|mudar_cena|retangulo|circulo|linha|texto|limpar)\b/.test(codigo);
+  const usaJogo=/\b(import\s+pygame|from\s+pygame|def\s+atualizar\s*\()/m.test(codigo)&&/\b(pygame|Sprite|criar_sprite|pressionado|cena|mudar_cena|retangulo|circulo|linha|texto|limpar)\b/.test(codigo);
 
   linha("$ python programa.py","prompt");
   setStatus(usaJogo?"ABRINDO JOGO...":"EXECUTANDO...");
