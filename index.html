@@ -89,6 +89,18 @@ footer{
   footer{height:24px;font-size:9px}
   footer span:last-child{display:none}
 }
+
+#bot{display:flex;flex-direction:column;min-height:0;background:#050505;border-top:1px solid #333}
+#botHead{height:34px;flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 10px;border-bottom:1px solid #333;font-size:12px}
+#botMessages{flex:1;min-height:0;overflow:auto;padding:8px 10px}
+.bot-msg{padding:7px 8px;margin:0 0 6px;border-left:2px solid #777;font-size:12px;line-height:1.45;white-space:pre-wrap}
+.bot-msg.user{border-left-color:#fff;text-align:right}
+.bot-actions{display:flex;gap:5px;padding:6px;border-top:1px solid #333}
+.bot-actions button{min-height:30px;padding:5px 8px;font-size:10px}
+.bot-input{display:flex;gap:5px;padding:6px;border-top:1px solid #333}
+.bot-input input{flex:1;min-width:0;background:#000;border:1px solid #333;color:#fff;padding:7px;font:12px monospace;outline:0}
+.bot-input button{min-height:32px;padding:5px 9px}
+@media(max-width:700px){#bot{min-height:200px}.bot-msg{font-size:11px}}
 </style>
 </head>
 <body>
@@ -127,6 +139,19 @@ footer{
     </div>
     <div id="terminal" aria-live="polite"></div>
   </section>
+
+<section id="bot" aria-label="Professor Bot">
+  <div id="botHead"><span>PROFESSOR BOT</span><span>OFFLINE</span></div>
+  <div id="botMessages" aria-live="polite"></div>
+  <div class="bot-actions">
+    <button id="botHintBtn" type="button">PEDIR DICA</button>
+    <button id="botChallenge" type="button">DESAFIO</button>
+  </div>
+  <div class="bot-input">
+    <input id="botInput" type="text" placeholder="Converse com o professor..." autocomplete="off">
+    <button id="botSend" type="button">ENVIAR</button>
+  </div>
+</section>
 </main>
 
 <footer>
@@ -415,6 +440,8 @@ carregar();
 atualizarLinhas();
 mensagemInicial();
 novoWorker();
+window.__pyCodeGetCode=()=>editor.value;
 </script>
+<script src="./professor-bot.js?v=1" defer></script>
 </body>
 </html>
