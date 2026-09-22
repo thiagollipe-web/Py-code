@@ -1,4 +1,4 @@
-const CACHE="py-code-v24";
+const CACHE="py-code-v25";
 const APP_SHELL=[
   "./",
   "./index.html",
