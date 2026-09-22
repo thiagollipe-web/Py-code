@@ -25,7 +25,7 @@ jobs:
         run: |
           set -e
           mkdir -p _site/pyodide
-          cp index.html jogo.html diagnostico.html professor-bot.js manifest.webmanifest pycode-worker.js pycode_worker.py sw.js README.md _site/
+          cp index.html jogo.html diagnostico.html professor-bot.js code-audit.js manifest.webmanifest pycode-worker.js pycode_worker.py sw.js README.md _site/
           cp -R assets _site/assets
 
       - name: Bundle Pyodide core localmente
