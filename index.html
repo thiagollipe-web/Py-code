@@ -318,7 +318,7 @@ async function novoWorker(){
   const generation=++workerGeneration;
   if(worker) worker.terminate();
 
-  worker=new Worker("./pycode-worker.js?v=32",{type:"module"});
+  worker=new Worker("./pycode-worker.js?v=34",{type:"module"});
 
   worker.onmessage=e=>{
     const m=e.data||{};
@@ -333,6 +333,7 @@ async function novoWorker(){
       ready=true;
       run.disabled=false;
       setStatus("PYTHON LOCAL • PRONTO","ok");
+      linha("✓ Worker + Pyodide prontos. EXECUTAR liberado.","ok");
       window.dispatchEvent(new CustomEvent("pycode:runtime-ready",{detail:m}));
       return;
     }
@@ -567,8 +568,8 @@ botClose?.addEventListener("click",fecharAssistente);
 assistantTab?.addEventListener("click",abrirAssistente);
 abrirAssistente();
 </script>
-<script src="./code-audit.js?v=32" defer></script>
-<script src="./aws-code-library.js?v=32" defer></script>
-<script src="./professor-bot.js?v=32" defer></script>
+<script src="./code-audit.js?v=34" defer></script>
+<script src="./aws-code-library.js?v=34" defer></script>
+<script src="./professor-bot.js?v=34" defer></script>
 </body>
 </html>
