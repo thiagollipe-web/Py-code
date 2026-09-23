@@ -1,16 +1,20 @@
-const CACHE="py-code-v31";
+const CACHE="py-code-v32";
 const APP_SHELL=[
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./pycode-worker.js",
+  "./pycode-worker.js?v=32",
   "./pycode_worker.py",
   "./jogo.html",
   "./diagnostico.html",
   "./runtime-diagnostics.js",
   "./professor-bot.js",
+  "./professor-bot.js?v=32",
   "./aws-code-library.js",
+  "./aws-code-library.js?v=32",
   "./code-audit.js",
+  "./code-audit.js?v=32",
   "./sw.js",
   "./assets/py-code-banner.svg",
   "./pyodide/pyodide.js",
