@@ -1,6 +1,6 @@
 # Auditoria técnica — Py-Code
 
-Data: 21/09/2026
+Data: 24/09/2026
 Estado: terminal Python + jogos em aba separada + modo offline
 
 ## Arquitetura
@@ -21,7 +21,7 @@ A interface principal continua sendo somente terminal. Jogos abrem em uma aba se
 
 ## Runtime offline
 
-O projeto usa Pyodide 314.0.7. Os arquivos essenciais são obtidos do CDN oficial durante a preparação inicial e armazenados no Cache Storage do próprio Py-Code:
+O projeto usa Pyodide 314.0.7. O workflow do GitHub Pages baixa o pacote de runtime durante o build e publica os arquivos em `pyodide/`. Durante o uso, o Worker importa `./pyodide/pyodide.mjs` e usa esse diretório como `indexURL`:
 
 - pyodide.js
 - pyodide.mjs
@@ -31,7 +31,7 @@ O projeto usa Pyodide 314.0.7. Os arquivos essenciais são obtidos do CDN oficia
 - pyodide-lock.json
 - package.json
 
-O Worker não acessa mais o CDN diretamente. Ele solicita `./pyodide/pyodide.js`. O Service Worker intercepta essa URL: primeiro procura no cache local; se não existir, busca a cópia oficial, armazena e entrega ao Worker.
+O Worker não acessa CDN para executar Python. Ele importa `./pyodide/pyodide.mjs` localmente. O Service Worker mantém o shell e os arquivos locais em Cache Storage para uso posterior sem conexão.
 
 ## Verificações estáticas
 
@@ -45,7 +45,6 @@ O Worker não acessa mais o CDN diretamente. Ele solicita `./pyodide/pyodide.js`
 - `setStdout()`: presente.
 - `setStderr()`: presente.
 - Cache do runtime: presente.
-- Botão `PREPARAR OFFLINE`: presente.
 - Editor e terminal: presentes.
 - Canvas na interface principal: removido.
 - Blocos na interface principal: removidos.
@@ -53,7 +52,7 @@ O Worker não acessa mais o CDN diretamente. Ele solicita `./pyodide/pyodide.js`
 
 ## Limitação real
 
-“Offline” aqui significa **offline após a preparação do runtime**. Um dispositivo que nunca abriu o Py-Code conectado ainda não possui os arquivos Pyodide no Cache Storage. Para funcionar sem internet desde a primeira abertura, os arquivos do Pyodide teriam de ser empacotados no próprio aplicativo, aumentando significativamente o tamanho do projeto.
+“Offline” significa que a execução do Python não depende de CDN e que, depois de o shell e o runtime terem sido armazenados localmente pelo navegador, o aplicativo pode continuar funcionando sem conexão. Na publicação atual, os arquivos do Pyodide já são empacotados no artefato do GitHub Pages; ainda assim, o usuário precisa obter a aplicação pelo menos uma vez para receber esses arquivos.
 
 A documentação oficial do Pyodide informa que o conjunto mínimo `pyodide-core` é muito menor que a distribuição completa, e que é possível hospedar os arquivos localmente. A distribuição completa é superior a 200 MB; o core é a alternativa adequada quando o objetivo é reduzir o tamanho inicial. citeturn951547search1
 
@@ -61,13 +60,13 @@ A documentação oficial do Pyodide informa que o conjunto mínimo `pyodide-core
 
 A sessão atual validou os arquivos estaticamente, mas não executou o aplicativo em Chrome/Android/iOS neste ambiente. Portanto, o comportamento final do Service Worker, Cache Storage e execução offline precisa ser confirmado em navegador real.
 
-## Próximo teste
+## Teste recomendado
 
-1. Abrir o Py-Code conectado.
-2. Aguardar `PYTHON PRONTO`.
-3. Clicar em `PREPARAR OFFLINE`.
-4. Executar `print("offline")`.
-5. Desligar a internet.
-6. Recarregar a página.
-7. Executar novamente.
+1. Abrir o Py-Code e aguardar `PYTHON LOCAL • PRONTO`.
+2. Executar `print("offline")`.
+3. Confirmar que o Service Worker está ativo.
+4. Desligar a internet.
+5. Recarregar a página.
+6. Executar novamente.
+7. Abrir `diagnostico.html` e repetir os testes do runtime quando houver conexão, caso seja necessário investigar uma falha.
 
