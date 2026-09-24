@@ -8,14 +8,10 @@
   if(!button||!output)return;
 
   const checks=[
-    ["editor","Editor"],
-    ["run","Botão EXECUTAR"],
-    ["terminal","Terminal"],
-    ["assistant","Professor Bot"],
-    ["botInput","Entrada do Professor Bot"],
-    ["botSend","Botão ENVIAR"],
-    ["botHintBtn","Botão PEDIR DICA"],
-    ["botChallenge","Botão DESAFIO"]
+    ["log","Painel de diagnóstico"],
+    ["again","Botão TESTAR NOVAMENTE"],
+    ["diagnose","Botão TESTAR INTEGRAÇÃO"],
+    ["diagnoseOutput","Saída do diagnóstico"]
   ];
 
   function line(text,kind="info"){
@@ -33,16 +29,9 @@
       else line("ERRO • "+label,"err");
     }
 
-    if(typeof window.__pyCodeGetCode==="function")line("OK • API do editor conectada","ok");
-    else line("ERRO • API do editor ausente","err");
+    line("INFO • Esta página testa o runtime; o editor e o Professor Bot pertencem ao index.html.","info");
 
-    if(typeof window.PyCodeBot==="object"){
-      line("OK • Professor Bot inicializado","ok");
-    }else{
-      line("ERRO • Professor Bot não inicializou","err");
-    }
-
-    const worker=new Worker("./pycode-worker.js",{type:"module"});
+    const worker=new Worker("./pycode-worker.js?v=37",{type:"module"});
     let finished=false;
     const timer=setTimeout(()=>{
       if(finished)return;
