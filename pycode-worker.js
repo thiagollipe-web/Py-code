@@ -3,6 +3,7 @@
  */
 const PYODIDE_VERSAO="314.0.7";
 const LOCAL_BASE=new URL("./pyodide/",import.meta.url).href;
+const CDN_BASE="https://cdn.jsdelivr.net/pyodide/v314.0.7/full/";
 let pyodide=null;
 let engineReady=false;
 let running=false;
@@ -33,18 +34,29 @@ self.pycode_sound=(frequency,duration,type,volume)=>{
 };
 
 async function carregarPyodide(){
-  const url=LOCAL_BASE+"pyodide.mjs";
-  send("status",{value:"Python local • carregando..."});
+  send("status",{value:"Python • procurando runtime local..."});
 
-  const mod=await import(url);
-  if(typeof mod.loadPyodide!=="function"){
-    throw new Error("loadPyodide não foi encontrado em "+url);
+  try{
+    const mod=await import(LOCAL_BASE+"pyodide.mjs");
+    if(typeof mod.loadPyodide!=="function"){
+      throw new Error("loadPyodide não foi encontrado no runtime local.");
+    }
+    pyodide=await mod.loadPyodide({indexURL:LOCAL_BASE});
+    send("status",{value:"Python local carregado."});
+    return "local";
+  }catch(localError){
+    send("status",{value:"Runtime local não encontrado • usando Pyodide oficial..."});
   }
 
-  send("status",{value:"Inicializando Python local..."});
-  pyodide=await mod.loadPyodide({indexURL:LOCAL_BASE});
-  send("status",{value:"Python local carregado."});
-  return "local";
+  const mod=await import(CDN_BASE+"pyodide.mjs");
+  if(typeof mod.loadPyodide!=="function"){
+    throw new Error("loadPyodide não foi encontrado no Pyodide oficial.");
+  }
+
+  send("status",{value:"Inicializando Pyodide oficial..."});
+  pyodide=await mod.loadPyodide({indexURL:CDN_BASE});
+  send("status",{value:"Pyodide oficial carregado."});
+  return "cdn";
 }
 
 async function carregarEngine(){
