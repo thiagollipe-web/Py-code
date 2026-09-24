@@ -73,9 +73,17 @@
         .replace(/[\u0300-\u036f]/g,"");
     }
 
+    // Comentários e textos não são código; analisá-los produz pistas falsas.
+    function semTextos(source){
+      return String(source||"")
+        .replace(/('''|""")[\s\S]*?\1/g," ")
+        .replace(/(['"])(?:\\.|(?!\1)[^\\\n])*\1/g," ")
+        .replace(/#[^\n]*/g," ");
+    }
+
     function analyze(source){
-      const s=String(source||"");
-      const r={concepts:[],errors:[],focus:null,imports:[],lines:s.split(/\r?\n/).length};
+      const s=semTextos(source);
+      const r={concepts:[],errors:[],focus:null,imports:[],lines:String(source||"").split(/\r?\n/).length};
 
       const importLines=s.split(/\r?\n/).map(function(line){return line.trim();}).filter(function(line){
         return /^from\s+[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*\s+import\b/.test(line)
@@ -103,12 +111,20 @@
       if(closes>opens)r.errors.push("há um símbolo de fechamento sem abertura");
 
       const lines=s.split(/\r?\n/);
+      const originais=String(source||"").split(/\r?\n/);
+      const bloco=/^(if|elif|else|for|while|def|class|try|except|finally|with)\b.*[^:]$/;
+      const incompleta=/[^=!<>+\-*/%]=\s*$/;
+      let profundidade=0;
       lines.forEach(function(line,index){
         const t=line.trim();
-        if(/^(if|elif|else|for|while|def)\b.*[^:]$/.test(t)){
+        const o=String(originais[index]||"").trim();
+        const continuacao=profundidade>0;
+        profundidade=Math.max(0,profundidade+(line.match(/[({\[]/g)||[]).length-(line.match(/[)}\]]/g)||[]).length);
+        if(continuacao||/[\\,]$/.test(t))return;
+        if(bloco.test(t)&&bloco.test(o)){
           r.errors.push("a linha "+(index+1)+" parece iniciar um bloco sem ':'");
         }
-        if(/=\s*$/.test(t)){
+        if(incompleta.test(t)&&incompleta.test(o)){
           r.errors.push("a linha "+(index+1)+" termina com '=' e parece incompleta");
         }
       });
@@ -312,7 +328,10 @@
       add("Diga, por exemplo: “explique listas”, “por que deu NameError?”, “me dê uma dica”, “mostre a documentação de S3” ou “crie um desafio”.");
 
       observe();
-      setInterval(observe,1200);
+      const editor=$("code");
+      if(editor)editor.addEventListener("input",observe);
+      const relogio=setInterval(observe,1500);
+      window.addEventListener("pagehide",function(){clearInterval(relogio);},{once:true});
       window.PyCodeBot={
         respond:respond,
         hint:nextHint,

@@ -28,6 +28,16 @@ jobs:
           cp index.html jogo.html diagnostico.html runtime-diagnostics.js professor-bot.js aws-code-library.js code-audit.js manifest.webmanifest pycode-worker.js pycode_worker.py sw.js README.md _site/
           cp -R assets _site/assets
 
+      - name: Verificar arquivos do app shell
+        run: |
+          set -euo pipefail
+          for arquivo in index.html jogo.html diagnostico.html sw.js manifest.webmanifest \
+            pycode-worker.js pycode_worker.py professor-bot.js code-audit.js \
+            aws-code-library.js runtime-diagnostics.js \
+            assets/icon-192.png assets/icon-512.png assets/py-code-banner.svg; do
+            test -s "_site/$arquivo" || { echo "Faltando: $arquivo"; exit 1; }
+          done
+
       - name: Bundle Pyodide core localmente
         env:
           PYODIDE_VERSION: "314.0.7"

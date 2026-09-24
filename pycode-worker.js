@@ -6,11 +6,57 @@ const LOCAL_BASE=new URL("./pyodide/",import.meta.url).href;
 let pyodide=null;
 let engineReady=false;
 let running=false;
+let executando=false;
 let gameMode=false;
 let keys=new Set();
 
 function send(type,data={}){ self.postMessage({type,...data}); }
-function errorText(error){ return String(error?.stack||error?.message||error||"Erro desconhecido"); }
+
+// Erros do Pyodide trazem a pilha JS/WASM junto do traceback Python. No terminal
+// interessa apenas o traceback, então a parte JS é descartada.
+function limparPilha(texto){
+  const linhas=String(texto).split(/\r?\n/);
+  const fim=linhas.findIndex(l=>/^\s+at\s/.test(l));
+  const semJs=(fim>=0?linhas.slice(0,fim):linhas);
+
+  // O traceback também traz quadros do próprio Pyodide, que só confundem quem
+  // está aprendendo: ficam apenas os quadros do programa do usuário.
+  const uteis=[];
+  let pulando=false;
+  for(const linha of semJs){
+    const quadro=linha.match(/^\s*File "([^"]*)"/);
+    if(quadro){
+      pulando=/^\/lib\/python|_pyodide|\/pyodide\//.test(quadro[1]);
+      if(pulando)continue;
+      uteis.push(linha.replace(/"<exec>"/,'"programa.py"'));
+      continue;
+    }
+    if(pulando){
+      if(/^\S/.test(linha))pulando=false;
+      else continue;
+    }
+    uteis.push(linha);
+  }
+  while(uteis.length&&uteis[uteis.length-1].trim()==="")uteis.pop();
+  return uteis.join("\n");
+}
+
+function errorText(error){
+  if(!error)return "Erro desconhecido";
+  const bruto=String(error.stack||error.message||error);
+  const limpo=limparPilha(bruto)||String(error.message||bruto);
+  // "PythonError" é nome interno do Pyodide; o traceback já diz o que houve.
+  return limpo.replace(/^PythonError:\s*/,"");
+}
+
+// Remove comentários e literais de texto para que a checagem de DOM não
+// dispare por causa de uma palavra dentro de uma string.
+function codigoSemTextos(fonte){
+  return String(fonte)
+    .replace(/('''|""")[\s\S]*?\1/g," ")
+    .replace(/(['"])(?:\\.|(?!\1)[^\\\n])*\1/g," ")
+    .replace(/#[^\n]*/g," ");
+}
 
 function pressed(k){
   const chave=String(k);
@@ -92,19 +138,35 @@ async function executar(codigo,jogo=false){
     return;
   }
 
+  if(executando){
+    send("warn",{value:"Já existe um programa em execução neste runtime."});
+    return;
+  }
+
+  executando=true;
   gameMode=Boolean(jogo);
   running=false;
 
   try{
     const fonte=String(codigo||"");
 
-    // document pertence ao DOM da página principal. Este runtime roda em
-    // Web Worker, portanto o usuário deve usar a API Python/Canvas do Py-Code.
-    if(/\bdocument\b/.test(fonte)){
+    if(!fonte.trim()){
+      send("warn",{value:"O editor está vazio. Escreva um programa Python antes de executar."});
+      send("done");
+      return;
+    }
+
+    // document/window pertencem ao DOM da página principal. Este runtime roda
+    // em Web Worker, portanto o usuário deve usar a API Python/Canvas.
+    const fonteLimpa=codigoSemTextos(fonte);
+    const usaDom=/\b(document|window)\s*\./.test(fonteLimpa)
+      || /\bfrom\s+js\s+import\b[^\n]*\b(document|window)\b/.test(fonteLimpa);
+
+    if(usaDom){
       throw new Error(
-        "document não está disponível no Worker Python. "+
-        "O Py-Code executa Python em um Web Worker. "+
-        "Para interface/jogos use a API do Py-Code: canvas, retangulo(), "+
+        "document/window não estão disponíveis no Worker Python. "+
+        "O Py-Code executa Python em um Web Worker, sem acesso ao DOM da página. "+
+        "Para interface/jogos use a API do Py-Code: limpar(), retangulo(), "+
         "circulo(), linha(), texto(), Sprite, pressionado() e tocar()."
       );
     }
@@ -122,19 +184,25 @@ async function executar(codigo,jogo=false){
     running=false;
     gameMode=false;
     send("error",{value:errorText(error)});
+  }finally{
+    executando=false;
   }
 }
 
 async function frame(){
-  if(!engineReady||!running||!gameMode)return;
+  if(!engineReady||!running||!gameMode){
+    send("frame_done");
+    return;
+  }
 
   try{
     await pyodide.runPythonAsync("__pycode_frame__()");
-    send("frame_done");
   }catch(error){
     running=false;
     gameMode=false;
     send("error",{value:errorText(error)});
+  }finally{
+    send("frame_done");
   }
 }
 
@@ -147,7 +215,8 @@ self.onmessage=async(event)=>{
       case "run": await executar(String(m.code||""),Boolean(m.game)); break;
       case "frame": await frame(); break;
       case "keys": keys=new Set(Array.isArray(m.keys)?m.keys:[]); break;
-      case "stop": running=false; gameMode=false; break;
+      case "stop": running=false; gameMode=false; send("stopped"); break;
+      case "ping": send("pong",{ready:engineReady,running:executando}); break;
       default: send("warn",{value:"Mensagem desconhecida: "+String(m.type)});
     }
   }catch(error){

@@ -4,7 +4,13 @@
   "start_url":"./",
   "scope":"./",
   "display":"standalone",
+  "orientation":"any",
   "background_color":"#000000",
-  "theme_color":"#05070c",
-  "description":"Terminal Python leve e colorido para programar offline."
+  "theme_color":"#080b12",
+  "description":"Terminal Python leve e colorido para programar offline.",
+  "icons":[
+    {"src":"./assets/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"./assets/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
+    {"src":"./assets/icon-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
+  ]
 }

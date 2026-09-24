@@ -20,6 +20,7 @@ Não há designer, canvas, blocos ou painel gráfico. A interface é um terminal
 - terminal de saída;
 - mensagens de erro;
 - botão PARAR;
+- botão REINICIAR para recuperar o runtime após uma falha;
 - limite de tempo para processos travados;
 - salvamento automático do código no navegador;
 - Ctrl + Enter para executar;
@@ -40,7 +41,31 @@ Não há designer, canvas, blocos ou painel gráfico. A interface é um terminal
 
 ## Jogos e gráficos
 
-O runtime Python ainda contém uma pequena API experimental para jogos e Canvas no Worker. A interface atual, porém, é propositalmente apenas um terminal. O foco desta versão é manter o ambiente leve e estável para programação textual.
+A interface principal é apenas terminal. Quando o programa define `atualizar()` ou registra
+cenas com `cena(...)`, o Py-Code abre `jogo.html` em outra aba e desenha em um Canvas de
+320x180 coordenadas lógicas.
+
+API disponível no Python: `limpar()`, `retangulo()`, `circulo()`, `linha()`, `texto()`,
+`Sprite` / `criar_sprite()`, `colisao()`, `aplicar_gravidade()`, `somar_pontos()`,
+`mostrar_pontos()`, `pressionado()`, `tocar()`, `cena()`, `mudar_cena()` e
+`cena_atual_nome()`.
+
+Exemplo mínimo:
+
+    jogador = Sprite(20, 80, 20, 20, "#00ff66")
+
+    def atualizar():
+        limpar("#001018")
+        if pressionado("ArrowRight"):
+            jogador.mover(2, 0)
+        jogador.gravidade(0.3)
+        jogador.no_chao(160)
+        jogador.desenhar()
+
+O Python roda em um Web Worker e **não enxerga o DOM**: `document` e `window` não estão
+disponíveis. Para desenhar, use a API acima.
+
+Não há integração com pygame.
 
 ## Arquitetura
 
@@ -66,15 +91,36 @@ https://thiagollipe-web.github.io/Py-code/
 
     Py-code/
     ├── index.html
+    ├── jogo.html
+    ├── diagnostico.html
     ├── pycode-worker.js
     ├── pycode_worker.py
+    ├── professor-bot.js
+    ├── code-audit.js
+    ├── runtime-diagnostics.js
+    ├── aws-code-library.js
     ├── sw.js
     ├── manifest.webmanifest
     ├── .github/workflows/pages.yml
-    └── pyodide/ (gerado no build do Pages)
     ├── assets/
-    │   └── py-code-banner.svg
+    │   ├── py-code-banner.svg
+    │   ├── icon-192.png
+    │   └── icon-512.png
+    ├── pyodide/ (gerado no build do Pages)
+    ├── AUDITORIA.md
     └── README.md
+
+## Testes
+
+`tests/test_navegador.py` executa o projeto em Chromium e valida runtime, terminal,
+jogo em Canvas, Service Worker e modo offline:
+
+    pip install playwright && playwright install chromium
+    python -m http.server 8765 --directory .
+    python tests/test_navegador.py
+
+O teste precisa do runtime em `./pyodide/` — o mesmo conteúdo que o workflow do Pages
+baixa do release oficial do Pyodide.
 
 ## Limitação
 
