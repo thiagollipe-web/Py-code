@@ -1,9 +1,9 @@
-const CACHE="py-code-v34";
+const CACHE="py-code-v35";
 const APP_SHELL=[
   "./",
   "./index.html",
   "./manifest.webmanifest",
-  "./pycode-worker.js?v=34",
+  "./pycode-worker.js?v=35",
   "./pycode_worker.py",
   "./jogo.html",
   "./diagnostico.html",
@@ -12,14 +12,7 @@ const APP_SHELL=[
   "./aws-code-library.js?v=34",
   "./code-audit.js?v=34",
   "./sw.js",
-  "./assets/py-code-banner.svg",
-  "./pyodide/pyodide.js",
-  "./pyodide/pyodide.mjs",
-  "./pyodide/pyodide.asm.mjs",
-  "./pyodide/pyodide-lock.json",
-  "./pyodide/package.json",
-  "./pyodide/pyodide.asm.wasm",
-  "./pyodide/python_stdlib.zip"
+  "./assets/py-code-banner.svg"
 ];
 
 self.addEventListener("install",event=>{
