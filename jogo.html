@@ -35,7 +35,7 @@ const canvas=document.getElementById("canvas");
 const ctx=canvas.getContext("2d");
 const status=document.getElementById("status");
 const keys=new Set();
-let worker=null,ready=false,running=false,busy=false,last=0,timeoutId=null;
+let worker=null,ready=false,running=false,busy=false,last=0,bootTimer=null,frameTimer=null,recoveryKey="";
 
 function msg(v){status.textContent=String(v)}
 function draw(m){
@@ -49,28 +49,64 @@ function draw(m){
 function som(m){
  try{const ac=window.__pyac||(window.__pyac=new AudioContext());const o=ac.createOscillator(),g=ac.createGain();o.type=m.waveform||"square";o.frequency.value=Number(m.frequency)||440;g.gain.value=Math.min(.25,Number(m.volume)||.05);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+(Number(m.duration)||.1))}catch(_){}
 }
+function limparTimers(){
+ if(bootTimer){clearTimeout(bootTimer);bootTimer=null}
+ if(frameTimer){clearTimeout(frameTimer);frameTimer=null}
+}
+function pararRuntime(mensagem){
+ running=false;
+ busy=false;
+ limparTimers();
+ if(worker){worker.terminate();worker=null}
+ if(mensagem)msg(mensagem);
+}
 function iniciar(codigo){
- worker=new Worker("./pycode-worker.js?v=36",{type:"module"});
+ worker=new Worker("./pycode-worker.js?v=37",{type:"module"});
  worker.onmessage=e=>{
   const m=e.data||{};
   if(m.type==="status"){msg(m.value);return}
-  if(m.type==="ready"){ready=true;msg(m.online?"PYTHON ONLINE • CARREGANDO JOGO":"PYTHON LOCAL • CARREGANDO JOGO");worker.postMessage({type:"run",code:codigo,game:true});return}
+  if(m.type==="ready"){
+    ready=true;
+    if(bootTimer){clearTimeout(bootTimer);bootTimer=null}
+    msg("PYTHON LOCAL • CARREGANDO JOGO");
+    worker.postMessage({type:"run",code:codigo,game:true});
+    return;
+  }
   if(["fill","rect","circle","line","text","image"].includes(m.type)){draw(m);return}
   if(m.type==="sound"){som(m);return}
-  if(m.type==="game_ready"){running=true;msg("JOGO RODANDO");return}
-  if(m.type==="frame_done"){busy=false;return}
-  if(m.type==="error"||m.type==="fatal"){running=false;msg("ERRO PYTHON");console.error(m.value);return}
+  if(m.type==="game_ready"){
+    running=true;
+    if(recoveryKey)localStorage.removeItem(recoveryKey);
+    msg("JOGO RODANDO");
+    return;
+  }
+  if(m.type==="frame_done"){
+    busy=false;
+    if(frameTimer){clearTimeout(frameTimer);frameTimer=null}
+    return;
+  }
+  if(m.type==="error"||m.type==="fatal"){
+    pararRuntime("ERRO PYTHON");
+    console.error(m.value);
+    return;
+  }
  };
- worker.onerror=e=>{running=false;msg("FALHA NO RUNTIME");console.error(e.message,e.filename,e.lineno)};
- worker.onmessageerror=()=>{running=false;msg("ERRO DE COMUNICAÇÃO");};
+ worker.onerror=e=>{pararRuntime("FALHA NO RUNTIME");console.error(e.message,e.filename,e.lineno)};
+ worker.onmessageerror=()=>{pararRuntime("ERRO DE COMUNICAÇÃO")};
  worker.postMessage({type:"boot"});
- timeoutId=setTimeout(()=>{if(!ready){msg("TEMPO LIMITE DO RUNTIME");worker.terminate();}},15000);
+ bootTimer=setTimeout(()=>{if(!ready)pararRuntime("TEMPO LIMITE DO RUNTIME")},15000);
 }
 function frame(now){
- if(running&&ready&&!busy&&now-last>=33){
+ if(running&&ready&&!busy&&worker&&now-last>=33){
   last=now;busy=true;
   worker.postMessage({type:"keys",keys:[...keys]});
   worker.postMessage({type:"frame"});
+  frameTimer=setTimeout(()=>{
+    if(busy){
+      pararRuntime("FRAME TRAVOU • ATUALIZE A PÁGINA");
+      console.error("O frame Python excedeu o limite de 800 ms.");
+    }
+  },800);
  }
  requestAnimationFrame(frame);
 }
@@ -88,10 +124,11 @@ function recuperar(){
  const chave=decodeURIComponent(location.hash.slice(1));
  const codigo=localStorage.getItem(chave);
  if(!codigo){msg("CÓDIGO NÃO ENCONTRADO");return}
- localStorage.removeItem(chave);
+ recoveryKey=chave;
  iniciar(codigo);
  requestAnimationFrame(frame);
 }
+addEventListener("pagehide",()=>pararRuntime(""));
 recuperar();
 </script>
 </body>
