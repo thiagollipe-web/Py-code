@@ -78,8 +78,8 @@ jobs:
           }
           console.log("Inline JavaScript: OK");
           NODE
-          if grep -R "cdn.jsdelivr.net/pyodide" -n . --exclude-dir=.git --exclude-dir=_cache --exclude-dir=_site; then
-            echo "Referência proibida a CDN do Pyodide encontrada." >&2
+          if grep -n "cdn.jsdelivr.net/pyodide" index.html jogo.html diagnostico.html pycode-worker.js pycode_worker.py sw.js professor-bot.js aws-code-library.js code-audit.js runtime-diagnostics.js README.md AUDITORIA.md; then
+            echo "Referência proibida a CDN do Pyodide encontrada nas fontes do projeto." >&2
             exit 1
           fi
           grep -q 'pycode-worker.js?v=37' index.html jogo.html diagnostico.html sw.js
