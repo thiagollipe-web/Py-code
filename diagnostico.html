@@ -40,7 +40,7 @@ async function run(){
   linhas=[];
   log.textContent="Executando...";
   try{
-    await check("./pycode-worker.js");
+    await check("./pycode-worker.js?v=37");
     write("pycode-worker.js acessível");
 
     await check("./pycode_worker.py");
@@ -54,6 +54,12 @@ async function run(){
 
     await check("./pyodide/pyodide.asm.mjs");
     write("pyodide.asm.mjs acessível");
+
+    await check("./pyodide/pyodide.asm.wasm");
+    write("pyodide.asm.wasm acessível");
+
+    await check("./pyodide/python_stdlib.zip");
+    write("python_stdlib.zip acessível");
 
     const worker=new Worker("./pycode-worker.js?v=36",{type:"module"});
     let terminou=false;
