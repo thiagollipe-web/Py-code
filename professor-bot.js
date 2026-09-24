@@ -223,7 +223,9 @@
       const lower=normalize(message);
       let clue="Leia a linha indicada pelo Python e identifique o tipo do erro.";
 
-      if(lower.includes("syntaxerror"))clue="O Python encontrou um problema de sintaxe. Revise a estrutura da linha indicada.";
+      if(lower.includes("document nao esta disponivel")||lower.includes("document não está disponível")){
+        clue="Esse código tentou usar o DOM. No Py-Code, o Python roda em Web Worker; use a API do Canvas do Py-Code para gráficos e jogos.";
+      }else if(lower.includes("syntaxerror"))clue="O Python encontrou um problema de sintaxe. Revise a estrutura da linha indicada.";
       else if(lower.includes("indentationerror"))clue="O Python encontrou um problema de indentação. Compare os espaços dessa linha com o bloco ao qual ela pertence.";
       else if(lower.includes("nameerror"))clue="O Python não reconheceu um nome. Verifique se a variável ou função existe antes do uso.";
       else if(lower.includes("typeerror"))clue="Os tipos dos valores usados nessa operação podem não combinar. Verifique cada valor.";
