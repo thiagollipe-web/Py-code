@@ -49,6 +49,42 @@ jobs:
           find _site/pyodide -maxdepth 1 -type f | sort
           echo "Pyodide core empacotado localmente."
 
+      - name: Validate source
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check pycode-worker.js
+          node --check sw.js
+          node --check professor-bot.js
+          node --check aws-code-library.js
+          node --check code-audit.js
+          python3 -m py_compile pycode_worker.py
+          python3 -m json.tool manifest.webmanifest >/dev/null
+          node <<'NODE'
+          const fs=require("fs");
+          const {execFileSync}=require("child_process");
+          const files=["index.html","jogo.html","diagnostico.html"];
+          let n=0;
+          for(const file of files){
+            const html=fs.readFileSync(file,"utf8");
+            const re=/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi;
+            let m;
+            while((m=re.exec(html))){
+              if(!m[1].trim()) continue;
+              const tmp="/tmp/pycode-inline-"+(++n)+".js";
+              fs.writeFileSync(tmp,m[1]);
+              execFileSync(process.execPath,["--check",tmp],{stdio:"inherit"});
+            }
+          }
+          console.log("Inline JavaScript: OK");
+          NODE
+          if grep -R "cdn.jsdelivr.net/pyodide" -n . --exclude-dir=.git; then
+            echo "Referência proibida a CDN do Pyodide encontrada." >&2
+            exit 1
+          fi
+          grep -q 'pycode-worker.js?v=37' index.html jogo.html diagnostico.html sw.js
+          grep -q 'CACHE="py-code-v37"' sw.js
+          echo "Offline/runtime invariants: OK"
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
