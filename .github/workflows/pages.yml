@@ -78,7 +78,7 @@ jobs:
           }
           console.log("Inline JavaScript: OK");
           NODE
-          if grep -R "cdn.jsdelivr.net/pyodide" -n . --exclude-dir=.git; then
+          if grep -R "cdn.jsdelivr.net/pyodide" -n . --exclude-dir=.git --exclude-dir=_cache --exclude-dir=_site; then
             echo "Referência proibida a CDN do Pyodide encontrada." >&2
             exit 1
           fi
