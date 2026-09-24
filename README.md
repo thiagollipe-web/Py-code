@@ -1,6 +1,6 @@
 # Py-Code
 
-> Um terminal Python leve, colorido e pensado para uso offline.
+> Um terminal Python leve, direto e pensado para uso offline.
 
 O Py-Code é um pequeno ambiente para escrever e executar Python localmente no navegador, usando cache local do runtime.
 
@@ -10,7 +10,7 @@ A proposta é deliberadamente simples:
 
 **editor Python → executar → terminal**
 
-Não há designer, canvas, blocos ou painel gráfico. A interface é um terminal de programação com cores para diferenciar código, saída, informações, avisos e erros.
+Não há designer, canvas, blocos ou painel gráfico. A interface é um terminal de programação em preto e branco, com distinção visual para saída, informações, avisos e erros.
 
 ## Recursos
 
