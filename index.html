@@ -318,7 +318,7 @@ async function novoWorker(){
   const generation=++workerGeneration;
   if(worker) worker.terminate();
 
-  worker=new Worker("./pycode-worker.js?v=34",{type:"module"});
+  worker=new Worker("./pycode-worker.js?v=35",{type:"module"});
 
   worker.onmessage=e=>{
     const m=e.data||{};
