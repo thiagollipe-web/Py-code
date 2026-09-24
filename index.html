@@ -318,7 +318,7 @@ async function novoWorker(){
   const generation=++workerGeneration;
   if(worker) worker.terminate();
 
-  worker=new Worker("./pycode-worker.js?v=35",{type:"module"});
+  worker=new Worker("./pycode-worker.js?v=36",{type:"module"});
 
   worker.onmessage=e=>{
     const m=e.data||{};
@@ -568,8 +568,8 @@ botClose?.addEventListener("click",fecharAssistente);
 assistantTab?.addEventListener("click",abrirAssistente);
 abrirAssistente();
 </script>
-<script src="./code-audit.js?v=34" defer></script>
-<script src="./aws-code-library.js?v=34" defer></script>
-<script src="./professor-bot.js?v=34" defer></script>
+<script src="./code-audit.js?v=36" defer></script>
+<script src="./aws-code-library.js?v=36" defer></script>
+<script src="./professor-bot.js?v=36" defer></script>
 </body>
 </html>
