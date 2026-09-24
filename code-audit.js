@@ -9,10 +9,12 @@ function add(arr,sev,title,detail,fix){arr.push({sev,title,detail,fix});}
 function analyzePython(source){
  const a=[], lines=String(source||"").split(/\r?\n/);
  const open=(source.match(/[([{]/g)||[]).length, close=(source.match(/[)\]}]/g)||[]).length;
- if(open!==close)add(a,"CRÍTICO","Delimitadores desbalanceados","A quantidade de símbolos de abertura e fechamento não coincide.","Revise (), [] e {}.");
+ if(open!==close)add(a,"CRÍTICO","Delimitadores desbalanceados","A quantidade de símbolos de abertura e fechamento não coincide. Esta é uma verificação heurística e pode considerar símbolos dentro de strings.","Revise (), [] e {}.");
  lines.forEach(function(line,index){
-   const t=line.trim(), n=index+1;
-   if(/^(if|elif|else|for|while|def)\b.*[^:]$/.test(t))add(a,"ALTO","Possível bloco sem dois-pontos — linha "+n,"A construção parece iniciar um bloco sem terminar com : .","Finalize a declaração com dois-pontos.");
+   const t=line.trim(), n=index+1, semComentario=t.replace(/\s+#.*$/,"");
+   if(/^(if|elif|else|for|while|def)\b/.test(semComentario)&&!/:\s*(?:#.*)?$/.test(semComentario)){
+     add(a,"ALTO","Possível bloco sem dois-pontos — linha "+n,"A construção parece iniciar um bloco sem terminar com : .","Finalize a declaração com dois-pontos.");
+   }
    if(/=\s*$/.test(t))add(a,"ALTO","Atribuição incompleta — linha "+n,"A linha termina em = e provavelmente ainda falta o valor.","Complete a atribuição.");
  });
  if(/\b(import|from)\s+(os|subprocess|socket|ctypes)\b/.test(source))add(a,"MÉDIO","Módulo com acesso ao sistema","O código usa módulos que podem acessar recursos do sistema.","Revise se isso é necessário para o exercício.");
