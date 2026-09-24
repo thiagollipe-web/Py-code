@@ -55,7 +55,7 @@ async function run(){
     await check("./pyodide/pyodide.asm.mjs");
     write("pyodide.asm.mjs acessível");
 
-    const worker=new Worker("./pycode-worker.js?v=34",{type:"module"});
+    const worker=new Worker("./pycode-worker.js?v=36",{type:"module"});
     let terminou=false;
 
     const fim=(erro)=>{
