@@ -141,7 +141,7 @@ footer{
   .brand{font-size:16px}
   .sub{font-size:9px}
   .status{width:100%;order:3}
-  .controls{width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+  .controls{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
   .controls button{min-width:0;padding:7px 4px;font-size:10px}
   .panel-title{padding:0 8px}
   .panel-title span:last-child{display:none}
@@ -168,6 +168,7 @@ footer{
       <button id="download" type="button">BAIXAR .PY</button>
       <button id="run" type="button" disabled>EXECUTAR</button>
       <button id="stop" type="button" disabled>PARAR</button>
+      <button id="restart" type="button">REINICIAR</button>
       <button id="audit" type="button">AUDITAR</button>
     </div>
   </div>
@@ -235,7 +236,7 @@ footer{
 
 <footer>
   <span>Python executado no navegador com Pyodide</span>
-  <span id="version">Py-Code</span>
+  <span id="version">Py-Code v37</span>
 </footer>
 
 <script>
@@ -248,11 +249,14 @@ const terminal=$("terminal");
 const run=$("run");
 const stop=$("stop");
 const status=$("status");
+const TEMPO_LIMITE=20000;
+const DESENHOS=["fill","rect","circle","line","text","image"];
 let worker=null;
 let ready=false;
 let running=false;
 let timeoutId=null;
 let workerGeneration=0;
+let avisouDesenho=false;
 
 const DEFAULT_CODE=`# Py-Code
 # Um terminal simples para aprender Python.
@@ -318,18 +322,31 @@ async function novoWorker(){
   const generation=++workerGeneration;
   if(worker) worker.terminate();
 
-  worker=new Worker("./pycode-worker.js?v=36",{type:"module"});
+  worker=new Worker("./pycode-worker.js?v=37",{type:"module"});
 
   worker.onmessage=e=>{
     const m=e.data||{};
+    if(generation!==workerGeneration)return;
 
     if(m.type==="status"){
       setStatus(m.value);
       return;
     }
 
+    if(m.type==="warn"){
+      linha(String(m.value||""),"warn");
+      return;
+    }
+
+    if(DESENHOS.includes(m.type)||m.type==="sound"){
+      if(!avisouDesenho){
+        avisouDesenho=true;
+        linha("Este programa usa a API de desenho/som. Para vê-la em ação, crie uma função atualizar() — o Py-Code abre o jogo em jogo.html.","warn");
+      }
+      return;
+    }
+
     if(m.type==="ready"){
-      if(generation!==workerGeneration)return;
       ready=true;
       run.disabled=false;
       setStatus("PYTHON LOCAL • PRONTO","ok");
@@ -367,7 +384,6 @@ async function novoWorker(){
     }
 
     if(m.type==="error"||m.type==="fatal"){
-      if(generation!==workerGeneration)return;
       if(timeoutId)clearTimeout(timeoutId);
       timeoutId=null;
       running=false;
@@ -376,6 +392,13 @@ async function novoWorker(){
       const mensagem=String(m.value||"Erro desconhecido");
       linha(mensagem,"err");
       setStatus(m.type==="fatal" ? "FALHA NO RUNTIME" : "ERRO PYTHON","err");
+
+      if(m.type==="fatal"){
+        ready=false;
+        run.disabled=true;
+        linha("Use REINICIAR para tentar carregar o runtime novamente.","warn");
+      }
+
       window.dispatchEvent(new CustomEvent("pycode:runtime-error",{
         detail:{message:mensagem,stage:m.etapa||"run"}
       }));
@@ -384,12 +407,15 @@ async function novoWorker(){
 
   worker.onerror=e=>{
     if(generation!==workerGeneration)return;
+    if(timeoutId)clearTimeout(timeoutId);
+    timeoutId=null;
     ready=false;
     running=false;
     run.disabled=true;
     stop.disabled=true;
     const detalhe=[e.message,e.filename,e.lineno&&("linha "+e.lineno)].filter(Boolean).join(" • ");
     linha(detalhe||"Falha no Worker","err");
+    linha("Use REINICIAR para tentar carregar o runtime novamente.","warn");
     setStatus("FALHA NO RUNTIME","err");
   };
 
@@ -418,7 +444,7 @@ function executar(){
   stop.disabled=false;
 
   const codigo=editor.value;
-  const usaJogo=/\bdef\s+atualizar\s*\(/.test(codigo)&&/\b(Sprite|criar_sprite|pressionado|cena|mudar_cena|retangulo|circulo|linha|texto|limpar)\b/.test(codigo);
+  const usaJogo=jogoDetectado(codigo);
 
   linha("$ python programa.py","prompt");
   setStatus(usaJogo?"ABRINDO JOGO...":"EXECUTANDO...");
@@ -444,10 +470,23 @@ function executar(){
 
   timeoutId=setTimeout(()=>{
     if(running){
-      linha("Tempo limite atingido. O processo foi interrompido.","err");
+      linha("Tempo limite de "+(TEMPO_LIMITE/1000)+"s atingido. O processo foi interrompido.","err");
       parar(true);
     }
-  },10000);
+  },TEMPO_LIMITE);
+}
+
+// Um jogo precisa de um laço atualizar() e de pelo menos uma chamada real da
+// API gráfica; só citar o nome de uma função não caracteriza um jogo.
+function jogoDetectado(codigo){
+  const fonte=String(codigo||"")
+    .replace(/('''|""")[\s\S]*?\1/g," ")
+    .replace(/(['"])(?:\\.|(?!\1)[^\\\n])*\1/g," ")
+    .replace(/#[^\n]*/g," ");
+
+  const temLaco=/\bdef\s+atualizar\s*\(/.test(fonte)||/\bcena\s*\(/.test(fonte);
+  if(!temLaco)return false;
+  return /\b(Sprite|criar_sprite|pressionado|cena|mudar_cena|retangulo|circulo|linha|texto|limpar|mostrar_pontos|tocar)\s*\(/.test(fonte);
 }
 
 function parar(silencioso=false){
@@ -512,6 +551,10 @@ $("clear").onclick=()=>{
 
 $("run").onclick=executar;
 $("stop").onclick=()=>parar(false);
+$("restart").onclick=()=>{
+  linha("Reiniciando o runtime Python...","meta");
+  parar(true);
+};
 
 document.addEventListener("visibilitychange",()=>{
   if(document.hidden&&running){
@@ -531,8 +574,30 @@ $("download").onclick=()=>{
 
 
 if("serviceWorker" in navigator){
+  let recarregando=false;
+
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{
+    if(recarregando)return;
+    recarregando=true;
+    location.reload();
+  });
+
   window.__swReady=navigator.serviceWorker
     .register("./sw.js",{updateViaCache:"none"})
+    .then(registro=>{
+      // Uma versão nova assume o controle imediatamente; assim o navegador não
+      // fica preso a um cache antigo depois de um novo deploy.
+      registro.addEventListener("updatefound",()=>{
+        const novo=registro.installing;
+        if(!novo)return;
+        novo.addEventListener("statechange",()=>{
+          if(novo.state==="installed"&&navigator.serviceWorker.controller){
+            novo.postMessage({type:"skip-waiting"});
+          }
+        });
+      });
+      return registro;
+    })
     .catch(e=>{
       linha("Cache offline indisponível: "+String(e&&e.message||e),"warn");
       return null;
@@ -568,8 +633,8 @@ botClose?.addEventListener("click",fecharAssistente);
 assistantTab?.addEventListener("click",abrirAssistente);
 abrirAssistente();
 </script>
-<script src="./code-audit.js?v=36" defer></script>
-<script src="./aws-code-library.js?v=36" defer></script>
-<script src="./professor-bot.js?v=36" defer></script>
+<script src="./code-audit.js?v=37" defer></script>
+<script src="./aws-code-library.js?v=37" defer></script>
+<script src="./professor-bot.js?v=37" defer></script>
 </body>
 </html>

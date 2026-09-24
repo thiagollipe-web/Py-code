@@ -1,7 +1,8 @@
 """Engine Py-Code executada no Web Worker.
 A engine não acessa o DOM. Ela envia comandos gráficos para a thread principal.
 """
-from js import self
+from js import Object, self
+from pyodide.ffi import to_js
 
 CANVAS_LARGURA = 320
 CANVAS_ALTURA = 180
@@ -12,7 +13,7 @@ pontuacao = 0
 def _cmd(tipo, **dados):
     payload = {"type": tipo}
     payload.update(dados)
-    self.postMessage(payload)
+    self.postMessage(to_js(payload, dict_converter=Object.fromEntries))
 
 class CanvasProxy:
     def fill(self, cor):
@@ -85,7 +86,15 @@ class Sprite:
         self.chao=False;return False
 
 def criar_sprite(x=0,y=0,largura=24,altura=24,cor="#00ff66",imagem=None): return Sprite(x,y,largura,altura,cor,imagem)
-def cena(nome,iniciar=None,atualizar=None): cenas[str(nome)]={"iniciar":iniciar,"atualizar":atualizar}
+def cena(nome,iniciar=None,atualizar=None):
+    global cena_atual
+    nome=str(nome)
+    cenas[nome]={"iniciar":iniciar,"atualizar":atualizar}
+    # A primeira cena registrada vira a cena ativa; sem isso o jogo abre vazio
+    # até alguém chamar mudar_cena().
+    if cena_atual is None:
+        cena_atual=nome
+        if callable(iniciar): iniciar()
 def mudar_cena(nome):
     global cena_atual
     nome=str(nome)
