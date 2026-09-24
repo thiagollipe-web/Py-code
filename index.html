@@ -128,7 +128,7 @@ main{
 .line{min-height:20px}
 .out,.info,.ok,.warn,.err,.prompt{color:#fff}
 .meta{color:#999}
-.cursor{display:inline-block;width:7px;height:14px;background:var(--green);vertical-align:-2px;animation:blink 1s steps(1) infinite}
+.cursor{display:inline-block;width:7px;height:14px;background:#fff;vertical-align:-2px;animation:blink 1s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
 footer{
   flex:0 0 auto;border-top:1px solid var(--border);background:#000;
@@ -160,7 +160,7 @@ footer{
   <div class="top">
     <div>
       <div class="brand">PY-CODE</div>
-      <div class="sub">TERMINAL PYTHON • LEVE • COLORIDO • MODO OFFLINE</div>
+      <div class="sub">TERMINAL PYTHON • LEVE • EDITOR • MODO OFFLINE</div>
     </div>
     <div id="status" class="status">PYTHON LOCAL • CARREGANDO...</div>
     <div class="controls">
@@ -318,9 +318,10 @@ async function novoWorker(){
   const generation=++workerGeneration;
   if(worker) worker.terminate();
 
-  worker=new Worker("./pycode-worker.js?v=36",{type:"module"});
+  worker=new Worker("./pycode-worker.js?v=37",{type:"module"});
 
   worker.onmessage=e=>{
+    if(generation!==workerGeneration)return;
     const m=e.data||{};
 
     if(m.type==="status"){
@@ -329,7 +330,6 @@ async function novoWorker(){
     }
 
     if(m.type==="ready"){
-      if(generation!==workerGeneration)return;
       ready=true;
       run.disabled=false;
       setStatus("PYTHON LOCAL • PRONTO","ok");
@@ -367,7 +367,6 @@ async function novoWorker(){
     }
 
     if(m.type==="error"||m.type==="fatal"){
-      if(generation!==workerGeneration)return;
       if(timeoutId)clearTimeout(timeoutId);
       timeoutId=null;
       running=false;
@@ -394,6 +393,7 @@ async function novoWorker(){
   };
 
   worker.onmessageerror=()=>{
+    if(generation!==workerGeneration)return;
     linha("Falha ao receber mensagem do Worker.","err");
     setStatus("ERRO DE COMUNICAÇÃO","err");
   };
@@ -568,8 +568,8 @@ botClose?.addEventListener("click",fecharAssistente);
 assistantTab?.addEventListener("click",abrirAssistente);
 abrirAssistente();
 </script>
-<script src="./code-audit.js?v=36" defer></script>
-<script src="./aws-code-library.js?v=36" defer></script>
-<script src="./professor-bot.js?v=36" defer></script>
+<script src="./code-audit.js?v=37" defer></script>
+<script src="./aws-code-library.js?v=37" defer></script>
+<script src="./professor-bot.js?v=37" defer></script>
 </body>
 </html>
