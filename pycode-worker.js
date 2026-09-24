@@ -1,22 +1,16 @@
 /* Py-Code Worker: Python no navegador.
- * Runtime local do Py-Code. O projeto não usa fallback externo.
+ * Runtime 100% local. Não usa CDN/fallback externo.
  */
 const PYODIDE_VERSAO="314.0.7";
 const LOCAL_BASE=new URL("./pyodide/",import.meta.url).href;
-const CDN_BASE="https://cdn.jsdelivr.net/pyodide/v314.0.7/full/";
 let pyodide=null;
 let engineReady=false;
 let running=false;
 let gameMode=false;
 let keys=new Set();
 
-function send(type,data={}){
-  self.postMessage({type,...data});
-}
-
-function errorText(error){
-  return String(error?.stack||error?.message||error||"Erro desconhecido");
-}
+function send(type,data={}){ self.postMessage({type,...data}); }
+function errorText(error){ return String(error?.stack||error?.message||error||"Erro desconhecido"); }
 
 function pressed(k){
   const chave=String(k);
@@ -34,46 +28,34 @@ self.pycode_sound=(frequency,duration,type,volume)=>{
 };
 
 async function carregarPyodide(){
-  send("status",{value:"Python • procurando runtime local..."});
+  send("status",{value:"Python • carregando runtime local..."});
 
   try{
     const mod=await import(LOCAL_BASE+"pyodide.mjs");
     if(typeof mod.loadPyodide!=="function"){
-      throw new Error("loadPyodide não foi encontrado no runtime local.");
+      throw new Error("loadPyodide não foi encontrado em ./pyodide/pyodide.mjs.");
     }
     pyodide=await mod.loadPyodide({indexURL:LOCAL_BASE});
     send("status",{value:"Python local carregado."});
     return "local";
-  }catch(localError){
-    send("status",{value:"Runtime local não encontrado • usando Pyodide oficial..."});
+  }catch(error){
+    throw new Error(
+      "Pyodide local não pôde ser carregado. "+
+      "O Py-Code está em modo OFFLINE e não usa CDN. "+
+      errorText(error)
+    );
   }
-
-  const mod=await import(CDN_BASE+"pyodide.mjs");
-  if(typeof mod.loadPyodide!=="function"){
-    throw new Error("loadPyodide não foi encontrado no Pyodide oficial.");
-  }
-
-  send("status",{value:"Inicializando Pyodide oficial..."});
-  pyodide=await mod.loadPyodide({indexURL:CDN_BASE});
-  send("status",{value:"Pyodide oficial carregado."});
-  return "cdn";
 }
 
 async function carregarEngine(){
   const url=new URL("./pycode_worker.py",import.meta.url);
-  const response=await fetch(url.href,{
-    cache:"no-store",
-    credentials:"same-origin"
-  });
+  const response=await fetch(url.href,{cache:"no-store",credentials:"same-origin"});
 
   if(!response.ok){
-    throw new Error(
-      "Engine Py-Code não encontrada: HTTP "+response.status
-    );
+    throw new Error("Engine Py-Code não encontrada: HTTP "+response.status);
   }
 
   const source=await response.text();
-
   if(!source.includes("def reiniciar_programa")){
     throw new Error("Engine Py-Code inválida ou incompleta.");
   }
@@ -83,28 +65,17 @@ async function carregarEngine(){
 
 async function boot(){
   try{
-    send("status",{value:"Iniciando runtime Python..."});
-
+    send("status",{value:"Iniciando runtime Python local..."});
     const origem=await carregarPyodide();
 
     send("status",{value:"Carregando engine Py-Code..."});
     await carregarEngine();
 
-    pyodide.setStdout({
-      batched:(msg)=>send("stdout",{value:String(msg??"")})
-    });
-
-    pyodide.setStderr({
-      batched:(msg)=>send("stderr",{value:String(msg??"")})
-    });
+    pyodide.setStdout({batched:(msg)=>send("stdout",{value:String(msg??"")})});
+    pyodide.setStderr({batched:(msg)=>send("stderr",{value:String(msg??"")})});
 
     engineReady=true;
-
-    send("ready",{
-      origem,
-      pyodide:PYODIDE_VERSAO,
-      online:false
-    });
+    send("ready",{origem,pyodide:PYODIDE_VERSAO,online:false});
   }catch(error){
     engineReady=false;
     send("fatal",{
@@ -125,8 +96,21 @@ async function executar(codigo,jogo=false){
   running=false;
 
   try{
+    const fonte=String(codigo||"");
+
+    // document pertence ao DOM da página principal. Este runtime roda em
+    // Web Worker, portanto o usuário deve usar a API Python/Canvas do Py-Code.
+    if(/\bdocument\b/.test(fonte)){
+      throw new Error(
+        "document não está disponível no Worker Python. "+
+        "O Py-Code executa Python em um Web Worker. "+
+        "Para interface/jogos use a API do Py-Code: canvas, retangulo(), "+
+        "circulo(), linha(), texto(), Sprite, pressionado() e tocar()."
+      );
+    }
+
     pyodide.runPython("reiniciar_programa()");
-    await pyodide.runPythonAsync(String(codigo||""));
+    await pyodide.runPythonAsync(fonte);
 
     if(gameMode){
       running=true;
@@ -159,24 +143,12 @@ self.onmessage=async(event)=>{
 
   try{
     switch(m.type){
-      case "boot":
-        await boot();
-        break;
-      case "run":
-        await executar(String(m.code||""),Boolean(m.game));
-        break;
-      case "frame":
-        await frame();
-        break;
-      case "keys":
-        keys=new Set(Array.isArray(m.keys)?m.keys:[]);
-        break;
-      case "stop":
-        running=false;
-        gameMode=false;
-        break;
-      default:
-        send("warn",{value:"Mensagem desconhecida: "+String(m.type)});
+      case "boot": await boot(); break;
+      case "run": await executar(String(m.code||""),Boolean(m.game)); break;
+      case "frame": await frame(); break;
+      case "keys": keys=new Set(Array.isArray(m.keys)?m.keys:[]); break;
+      case "stop": running=false; gameMode=false; break;
+      default: send("warn",{value:"Mensagem desconhecida: "+String(m.type)});
     }
   }catch(error){
     running=false;
