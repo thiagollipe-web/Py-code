@@ -27,7 +27,7 @@ function possuiIdentificadorForaDeStringsEComentarios(source,identificador){
       }
       continue;
     }
-    if(ch==="#" ){ while(i<source.length && source[i]!=="\\n") i++; continue; }
+    if(ch==="#" ){ while(i<source.length && source[i]!=="\n") i++; continue; }
     if(next==='"""' || next==="'''"){
       quote=next[0]; triple=true; i+=2; continue;
     }
