@@ -12,6 +12,35 @@ let keys=new Set();
 function send(type,data={}){ self.postMessage({type,...data}); }
 function errorText(error){ return String(error?.stack||error?.message||error||"Erro desconhecido"); }
 
+function possuiIdentificadorForaDeStringsEComentarios(source,identificador){
+  const alvo=String(identificador);
+  let quote="", triple=false, escaped=false;
+  for(let i=0;i<source.length;i++){
+    const ch=source[i], next=source.slice(i,i+3);
+    if(quote){
+      if(escaped){ escaped=false; continue; }
+      if(ch==="\\"){ escaped=true; continue; }
+      if(triple && source.slice(i,i+3)===quote.repeat(3)){
+        quote=""; triple=false; i+=2;
+      }else if(!triple && ch===quote){
+        quote="";
+      }
+      continue;
+    }
+    if(ch==="#" ){ while(i<source.length && source[i]!=="\\n") i++; continue; }
+    if(next==='"""' || next==="'''"){
+      quote=next[0]; triple=true; i+=2; continue;
+    }
+    if(ch==='"' || ch==="'"){ quote=ch; triple=false; continue; }
+    if(source.startsWith(alvo,i)){
+      const before=source[i-1], after=source[i+alvo.length];
+      const isId=c=>!!c && /[A-Za-z0-9_]/.test(c);
+      if(!isId(before) && !isId(after)) return true;
+    }
+  }
+  return false;
+}
+
 function pressed(k){
   const chave=String(k);
   return keys.has(chave)||keys.has(chave.toLowerCase());
@@ -39,6 +68,7 @@ async function carregarPyodide(){
     send("status",{value:"Python local carregado."});
     return "local";
   }catch(error){
+    pyodide=null;
     throw new Error(
       "Pyodide local não pôde ser carregado. "+
       "O Py-Code está em modo OFFLINE e não usa CDN. "+
@@ -100,7 +130,7 @@ async function executar(codigo,jogo=false){
 
     // document pertence ao DOM da página principal. Este runtime roda em
     // Web Worker, portanto o usuário deve usar a API Python/Canvas do Py-Code.
-    if(/\bdocument\b/.test(fonte)){
+    if(possuiIdentificadorForaDeStringsEComentarios(fonte,"document")){
       throw new Error(
         "document não está disponível no Worker Python. "+
         "O Py-Code executa Python em um Web Worker. "+
