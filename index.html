@@ -1,620 +1,217 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0b1220">
-<meta name="description" content="Py-Code — professor de Python com árvore de decisão, chat educacional e terminal.">
-<title>Py-Code — Professor Python</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#050805">
+<title>Py-Code :: Professor Python</title>
 <style>
-:root{
-  --bg:#06111f;--panel:#0b1728;--panel2:#0f1f33;--line:#223653;
-  --text:#eaf2ff;--muted:#8fa4bf;--blue:#4da3ff;--blue2:#1769aa;
-  --green:#39d98a;--red:#ff6b6b;--yellow:#ffd166;--white:#fff;
-}
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,#07111e,#0a1422 55%,#0b1829);color:var(--text)}
-body{overflow:hidden}
-button,input,textarea{font:inherit}
-button{border:0;cursor:pointer}
-.app{height:100dvh;display:grid;grid-template-rows:auto 1fr}
-.topbar{
-  display:flex;align-items:center;justify-content:space-between;gap:16px;
-  padding:12px 16px;border-bottom:1px solid var(--line);
-  background:rgba(6,17,31,.92);backdrop-filter:blur(10px)
-}
-.brand{display:flex;align-items:center;gap:12px}
-.logo{
-  width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#1f7ae0,#56b4ff);
-  display:grid;place-items:center;color:#fff;font-weight:900;box-shadow:0 8px 24px rgba(77,163,255,.18)
-}
-.brand h1{margin:0;font-size:18px}.brand p{margin:2px 0 0;color:var(--muted);font-size:11px}
-.runtime{font-size:11px;color:var(--muted);white-space:nowrap}
-.main{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(380px,46%);gap:0}
-.chat-pane{min-width:0;display:flex;flex-direction:column;border-right:1px solid var(--line);background:linear-gradient(180deg,#0d1a2b,#0a1524)}
-.chat-head,.terminal-head{padding:11px 14px;border-bottom:1px solid var(--line);background:rgba(15,31,51,.82)}
-.chat-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.chat-title{font-weight:800;font-size:13px}.chat-sub{font-size:10px;color:var(--muted);margin-top:2px}
-#messages{flex:1;min-height:0;overflow:auto;padding:16px}
-.msg{max-width:92%;padding:11px 13px;border:1px solid var(--line);border-radius:12px;margin:0 0 10px;font-size:13px;line-height:1.48;white-space:pre-wrap;box-shadow:0 4px 12px rgba(0,0,0,.12)}
-.msg.bot{background:#102238;border-top-left-radius:4px}.msg.user{margin-left:auto;background:#12375c;border-color:#1e5b96;border-top-right-radius:4px}
-.options{display:grid;gap:8px;margin:4px 0 14px 0;padding-left:0}
-.option-btn{
-  width:100%;text-align:left;padding:10px 12px;border:1px solid #2b4564;border-radius:9px;
-  background:#0c1a2d;color:#eaf2ff;transition:.15s;font-size:12px
-}
-.option-btn:hover{background:#173451;border-color:var(--blue)}
-.option-btn .num{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;margin-right:8px;background:#163d66;color:#9ed0ff;font-weight:800}
-.chat-input{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);background:#081321}
-.chat-input input{flex:1;min-width:0;background:#06101c;border:1px solid #2a405d;color:var(--text);padding:10px 12px;border-radius:9px;outline:none}
-.chat-input input:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(77,163,255,.12)}
-.send{padding:10px 14px;border-radius:9px;background:var(--blue);color:#06111f;font-weight:800}
-.send:hover{filter:brightness(1.08)}
-.toolbar{display:flex;gap:6px;flex-wrap:wrap}
-.tool-btn{padding:7px 10px;border:1px solid #29415e;border-radius:7px;background:#0c192a;color:#dce9fa;font-size:10px}
-.tool-btn:hover{background:#173451}
-.terminal-pane{min-width:0;display:flex;flex-direction:column;background:#050a10}
-.terminal-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.terminal-title{font-family:Consolas,"Courier New",monospace;font-size:12px}
-.editor{display:grid;grid-template-rows:minmax(240px,1fr) minmax(150px,.55fr);min-height:0;flex:1}
-.editor-box,.term-box{min-height:0;display:flex;flex-direction:column;border-bottom:1px solid var(--line)}
-.editor-top,.term-top{height:32px;display:flex;align-items:center;justify-content:space-between;padding:0 11px;background:#08111d;border-bottom:1px solid #1a2a3e;font:11px Consolas,"Courier New",monospace;color:#9db0c7}
-.code-wrap{display:grid;grid-template-columns:42px minmax(0,1fr);min-height:0;flex:1}
-#lines{margin:0;padding:11px 7px 11px 0;text-align:right;overflow:hidden;background:#03070c;color:#4c6179;border-right:1px solid #162538;font:13px/1.55 Consolas,"Courier New",monospace;user-select:none}
-#code{min-width:0;min-height:0;resize:none;border:0;outline:0;padding:11px 12px;background:#03070c;color:#e6f0ff;font:13px/1.55 Consolas,"Courier New",monospace;tab-size:4}
-#terminal{min-height:0;flex:1;overflow:auto;padding:11px 13px;background:#020609;color:#d8f3e5;font:12px/1.55 Consolas,"Courier New",monospace;white-space:pre-wrap}
-.log{margin:0 0 4px}.log.info{color:#7da0c9}.log.ok{color:#5de3a1}.log.warn{color:#ffd166}.log.err{color:#ff7b7b}.log.out{color:#e1f0ff}
-.mode{display:inline-flex;align-items:center;gap:6px;font:10px Consolas,"Courier New",monospace;color:#8fa4bf}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px rgba(57,217,138,.55)}
-.kbd{padding:2px 5px;border:1px solid #334b69;border-radius:4px;color:#a9b9cc}
-.footer-note{position:absolute;left:12px;bottom:10px;color:#4b6582;font-size:9px;pointer-events:none}
-@media(max-width:900px){
-  .main{grid-template-columns:1fr}
-  .chat-pane{display:flex;min-height:52vh;border-right:0;border-bottom:1px solid var(--line)}
-  .terminal-pane{min-height:48vh}
-  .main{overflow:auto}
-  body{overflow:auto}.app{height:auto;min-height:100dvh}
-  .main{height:auto}
-  .runtime{display:none}
-}
+:root{--bg:#050805;--panel:#080c08;--line:#173017;--green:#49ff72;--dim:#6ba978;--cyan:#58e7ff;--yellow:#ffe66d;--red:#ff6262}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#020402;color:var(--green);font-family:"Courier New",Consolas,monospace}
+body{padding:0}.terminal{min-height:100vh;display:flex;flex-direction:column;background:radial-gradient(circle at 50% 0,#0a160b 0,#050805 45%,#020402 100%)}
+.header{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid var(--line);background:#071007;box-shadow:0 2px 18px #000}
+.title{font-weight:700;letter-spacing:1px}.status{font-size:11px;color:var(--dim)}
+.screen{width:min(1100px,100%);margin:0 auto;flex:1;display:flex;flex-direction:column;padding:18px 16px 10px}
+#output{flex:1;overflow:auto;white-space:pre-wrap;word-break:break-word;line-height:1.55;font-size:14px;padding-bottom:8px}
+.line{margin:0 0 5px}.bot{color:var(--green)}.user{color:var(--cyan)}.system{color:var(--dim)}.warn{color:var(--yellow)}.error{color:var(--red)}
+.menu{margin:7px 0 15px;padding-left:18px;color:#b7ffc3}
+.menu button{display:block;width:100%;max-width:760px;text-align:left;margin:5px 0;padding:7px 9px;background:#071007;color:var(--green);border:1px solid #1d481f;font:inherit;cursor:pointer}
+.menu button:hover,.menu button:focus{background:#0c1d0d;border-color:var(--green);outline:none}
+.prompt{display:flex;align-items:center;border-top:1px solid var(--line);padding:12px 0 4px;gap:8px;position:sticky;bottom:0;background:linear-gradient(#05080500,#050805 18%)}
+.prompt span{color:var(--green);font-weight:700}.prompt input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:#d8ffde;font:inherit;font-size:14px}
+.cursor{display:inline-block;width:8px;height:16px;background:var(--green);animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.codebox{display:none;position:fixed;right:18px;bottom:58px;width:min(560px,calc(100% - 36px));max-height:55vh;background:#030603;border:1px solid #255b2b;box-shadow:0 8px 40px #000;padding:0;z-index:5}
+.codehead{display:flex;justify-content:space-between;padding:7px 10px;background:#091309;color:var(--dim);border-bottom:1px solid #173017;font-size:11px}
+#code{margin:0;width:100%;height:280px;resize:vertical;background:#020402;color:#caffd1;border:0;outline:0;padding:12px;font:13px/1.5 "Courier New",monospace}
+#runout{border-top:1px solid #173017;padding:10px;max-height:150px;overflow:auto;color:#e2ffe7;white-space:pre-wrap;font-size:12px}
+.close{background:none;color:var(--green);border:0;font:inherit;cursor:pointer}
+@media(max-width:600px){.screen{padding:12px}.header{height:44px}.title{font-size:12px}.status{font-size:9px}#output{font-size:13px}.codebox{right:8px;bottom:58px;width:calc(100% - 16px)}}
 </style>
 </head>
 <body>
-<div class="app">
-<header class="topbar">
-  <div class="brand">
-    <div class="logo">Py</div>
-    <div><h1>Py-Code</h1><p>Professor Python • árvore de decisão educacional • estilo clássico com interface moderna</p></div>
-  </div>
-  <div class="runtime"><span class="dot"></span> <span id="runtimeStatus">MODO LOCAL</span></div>
+<div class="terminal">
+<header class="header">
+  <div class="title">PY-CODE :: PROFESSOR PYTHON</div>
+  <div class="status">LOCAL // TREE-CHAT // v1.0</div>
 </header>
-
-<main class="main">
-<section class="chat-pane">
-  <div class="chat-head">
-    <div><div class="chat-title">PROFESSOR BOT</div><div class="chat-sub">Respostas orientadas por fluxos rígidos e menus.</div></div>
-    <div class="toolbar">
-      <button class="tool-btn" id="resetBtn">REINICIAR</button>
-      <button class="tool-btn" id="progressBtn">PROGRESSO</button>
-    </div>
+<main class="screen">
+  <div id="output" aria-live="polite"></div>
+  <div id="menu" class="menu"></div>
+  <div class="prompt">
+    <span>&gt;</span>
+    <input id="input" autocomplete="off" autofocus aria-label="Comando do terminal" placeholder="digite uma opção..." />
+    <i class="cursor"></i>
   </div>
-  <div id="messages"></div>
-  <div class="chat-input">
-    <input id="chatInput" placeholder="Digite 1, 2, 3... ou use um botão do menu" autocomplete="off">
-    <button class="send" id="sendBtn">ENVIAR</button>
-  </div>
-</section>
-
-<section class="terminal-pane">
-  <div class="terminal-head">
-    <div><div class="terminal-title">TERMINAL / EDITOR PYTHON</div><div class="chat-sub">O código acompanha o tópico selecionado.</div></div>
-    <div class="mode"><span class="dot"></span><span id="topicLabel">MÓDULO 1</span></div>
-  </div>
-
-  <div class="editor">
-    <div class="editor-box">
-      <div class="editor-top"><span>programa.py</span><span><span class="kbd">Ctrl</span> + <span class="kbd">Enter</span> executar</span></div>
-      <div class="code-wrap">
-        <pre id="lines">1</pre>
-        <textarea id="code" spellcheck="false" aria-label="Editor de código Python"></textarea>
-      </div>
-    </div>
-    <div class="term-box">
-      <div class="term-top"><span>saída</span><span id="terminalState">PRONTO</span></div>
-      <div id="terminal"></div>
-    </div>
-  </div>
-</section>
 </main>
+</div>
+
+<div id="codebox" class="codebox">
+  <div class="codehead"><span>programa.py</span><button class="close" id="closeCode">[ fechar ]</button></div>
+  <textarea id="code" spellcheck="false"></textarea>
+  <div id="runout">SAÍDA</div>
 </div>
 
 <script>
 "use strict";
 
 /*
-  ============================================================
-  BANCO DE CONTEÚDO + ÁRVORE DE DECISÃO
-  ------------------------------------------------------------
-  Este objeto simula o banco de dados do bot no GitHub Pages.
-  O JavaScript usa os módulos abaixo para montar o fluxo:
-      módulo -> conceito -> exemplo/exercício -> avanço
-  ============================================================
+  BANCO DE CONTEÚDO:
+  Estrutura estática em JavaScript para GitHub Pages.
+  ÁRVORE:
+    menu principal -> módulo -> conceito -> exemplo/exercício -> próximo módulo
 */
-const CURSO = {
-  modulos: [
-    {
-      id: 1,
-      titulo: "Variáveis e Tipos de Dados",
-      conceito: "Variáveis guardam valores. Em Python, você pode guardar texto, inteiros, decimais e valores booleanos.",
-      exemplos: [
-        {
-          titulo: "Exemplo básico",
-          codigo: 'nome = "Ana"\nidade = 13\naltura = 1.62\naluno = True\n\nprint(nome)\nprint(idade)\nprint(altura)\nprint(aluno)',
-          saida: "Ana\n13\n1.62\nTrue"
-        },
-        {
-          titulo: "Descobrindo o tipo",
-          codigo: 'nome = "Ana"\nidade = 13\n\nprint(type(nome))\nprint(type(idade))',
-          saida: "<class 'str'>\n<class 'int'>"
-        }
-      ],
-      exercicio: {
-        pergunta: "Crie uma variável chamada pontos com o valor 100 e mostre esse valor usando print().",
-        codigo: 'pontos = 100\nprint(pontos)',
-        resposta: "A variável pontos deve guardar 100 e o print deve mostrar o valor."
-      }
-    },
-    {
-      id: 2,
-      titulo: "Estruturas Condicionais",
-      conceito: "As estruturas if, elif e else permitem que o programa tome decisões.",
-      exemplos: [
-        {
-          titulo: "if e else",
-          codigo: 'idade = 15\n\nif idade >= 18:\n    print("Maior de idade")\nelse:\n    print("Menor de idade")',
-          saida: "Menor de idade"
-        },
-        {
-          titulo: "if e elif",
-          codigo: 'nota = 8\n\nif nota >= 9:\n    print("Excelente")\nelif nota >= 6:\n    print("Aprovado")\nelse:\n    print("Estude mais")',
-          saida: "Aprovado"
-        }
-      ],
-      exercicio: {
-        pergunta: "Crie um programa que leia a idade e informe se o aluno é maior ou menor de idade.",
-        codigo: 'idade = int(input("Digite sua idade: "))\n\nif idade >= 18:\n    print("Maior de idade")\nelse:\n    print("Menor de idade")',
-        resposta: "O if deve testar idade >= 18. O else trata o caso contrário."
-      }
-    },
-    {
-      id: 3,
-      titulo: "Laços de Repetição",
-      conceito: "for e while permitem repetir instruções. for é muito usado quando sabemos quantas vezes queremos repetir; while depende de uma condição.",
-      exemplos: [
-        {
-          titulo: "for + range",
-          codigo: 'for numero in range(1, 6):\n    print(numero)',
-          saida: "1\n2\n3\n4\n5"
-        },
-        {
-          titulo: "while",
-          codigo: 'contador = 1\n\nwhile contador <= 3:\n    print(contador)\n    contador += 1',
-          saida: "1\n2\n3"
-        }
-      ],
-      exercicio: {
-        pergunta: "Mostre os números de 1 a 10 usando um laço for.",
-        codigo: 'for numero in range(1, 11):\n    print(numero)',
-        resposta: "range(1, 11) começa em 1 e para antes de 11."
-      }
-    }
-  ]
-};
+const CURSO=[
+ {id:1,nome:"Variáveis e Tipos de Dados",
+  conceito:"Variáveis armazenam valores. Python possui tipos como str, int, float e bool.",
+  exemplos:[
+   ['EXEMPLO 01','nome = "Ana"\nidade = 13\naltura = 1.62\naluno = True\n\nprint(nome)\nprint(idade)\nprint(altura)\nprint(aluno)','Ana\n13\n1.62\nTrue'],
+   ['EXEMPLO 02','nome = "Ana"\nidade = 13\n\nprint(type(nome))\nprint(type(idade))',"<class \'str\'>\n<class \'int\'>"]
+  ],
+  exercicio:['Crie uma variável chamada pontos com o valor 100 e mostre esse valor usando print().','pontos = 100\nprint(pontos)','A variável pontos guarda 100.']
+ },
+ {id:2,nome:"Estruturas Condicionais (if/else)",
+  conceito:"if, elif e else permitem que o programa tome decisões.",
+  exemplos:[
+   ['EXEMPLO 01','idade = 15\n\nif idade >= 18:\n    print("Maior de idade")\nelse:\n    print("Menor de idade")','Menor de idade'],
+   ['EXEMPLO 02','nota = 8\n\nif nota >= 9:\n    print("Excelente")\nelif nota >= 6:\n    print("Aprovado")\nelse:\n    print("Estude mais")','Aprovado']
+  ],
+  exercicio:['Leia a idade e informe se o aluno é maior ou menor de idade.','idade = int(input("Digite sua idade: "))\n\nif idade >= 18:\n    print("Maior de idade")\nelse:\n    print("Menor de idade")','A condição principal é idade >= 18.']
+ },
+ {id:3,nome:"Laços de Repetição (for/while)",
+  conceito:"for e while repetem instruções. for é comum quando conhecemos a quantidade de repetições; while depende de uma condição.",
+  exemplos:[
+   ['EXEMPLO 01','for numero in range(1, 6):\n    print(numero)','1\n2\n3\n4\n5'],
+   ['EXEMPLO 02','contador = 1\n\nwhile contador <= 3:\n    print(contador)\n    contador += 1','1\n2\n3']
+  ],
+  exercicio:['Mostre os números de 1 a 10 usando um laço for.','for numero in range(1, 11):\n    print(numero)','range(1, 11) começa em 1 e para antes de 11.']
+ }
+];
 
-const estado = {
-  modulo: 1,
-  etapa: "inicio",
-  exemplo: 0,
-  exerciciosConcluidos: 0,
-  mensagensInvalidas: 0
-};
+const state={modulo:0,etapa:"inicio",exemplo:0,exercicios:0};
+const out=document.getElementById("output"), menu=document.getElementById("menu"), input=document.getElementById("input");
+const codebox=document.getElementById("codebox"), code=document.getElementById("code"), runout=document.getElementById("runout");
 
-const $ = id => document.getElementById(id);
-const messages = $("messages");
-const input = $("chatInput");
-const code = $("code");
-const lines = $("lines");
-const terminal = $("terminal");
-const topicLabel = $("topicLabel");
-const terminalState = $("terminalState");
-const runtimeStatus = $("runtimeStatus");
-
-function normalizarEntrada(texto){
-  return String(texto || "").trim().toLowerCase();
+function print(text="",cls="bot"){
+  const el=document.createElement("div");el.className="line "+cls;el.textContent=text;out.appendChild(el);out.scrollTop=out.scrollHeight;
 }
-
-function adicionarMensagem(texto, tipo="bot"){
-  const el = document.createElement("div");
-  el.className = "msg " + tipo;
-  el.textContent = texto;
-  messages.appendChild(el);
-  messages.scrollTop = messages.scrollHeight;
-  return el;
-}
-
-function adicionarOpcoes(opcoes){
-  const box = document.createElement("div");
-  box.className = "options";
-
-  opcoes.forEach((opcao, index) => {
-    const button = document.createElement("button");
-    button.className = "option-btn";
-    button.type = "button";
-    button.innerHTML = '<span class="num">' + (index + 1) + '</span>' + opcao.texto;
-    button.addEventListener("click", () => {
-      adicionarMensagem(String(index + 1), "user");
-      processarEscolha(String(index + 1));
-    });
-    box.appendChild(button);
+function menuItems(items){
+  menu.innerHTML="";
+  items.forEach((label,i)=>{
+    const b=document.createElement("button");b.textContent="["+(i+1)+"] "+label;
+    b.onclick=()=>{print("> "+(i+1),"user");choose(String(i+1));};menu.appendChild(b);
   });
-
-  messages.appendChild(box);
-  messages.scrollTop = messages.scrollHeight;
 }
-
-function escreverTerminal(texto, classe="info"){
-  const line = document.createElement("div");
-  line.className = "log " + classe;
-  line.textContent = texto;
-  terminal.appendChild(line);
-  terminal.scrollTop = terminal.scrollHeight;
+function current(){return CURSO[state.modulo]}
+function showMain(){
+  state.etapa="inicio";
+  print("");
+  print("PY-CODE / PROFESSOR PYTHON");
+  print("---------------------------");
+  print("Olá, aluno.");
+  print("Este é um curso de Python no estilo terminal.");
+  print("");
+  print("Escolha uma opção:");
+  menuItems(["Módulo 1 — Variáveis e Tipos de Dados","Módulo 2 — Estruturas Condicionais (if/else)","Módulo 3 — Laços de Repetição (for/while)","Ver progresso"]);
 }
-
-function limparTerminal(){
-  terminal.innerHTML = "";
+function showModule(){
+  const m=current();state.etapa="modulo";state.exemplo=0;
+  print("");
+  print("MODULE "+m.id+" :: "+m.nome);
+  print("------------------------------------------------");
+  print(m.conceito);
+  print("");
+  menuItems(["Ver exemplo prático","Fazer exercício","Avançar para o próximo módulo","Voltar ao menu principal"]);
 }
-
-function atualizarLinhas(){
-  const total = Math.max(1, code.value.split("\n").length);
-  lines.textContent = Array.from({length: total}, (_, i) => i + 1).join("\n");
+function showExample(){
+  const m=current(),e=m.exemplos[state.exemplo];state.etapa="exemplo";
+  print("");
+  print(e[0]);
+  print("------------------------------------------------");
+  print("Código aberto no editor.");
+  openCode(e[1],e[2]);
+  menuItems(["Ver outro exemplo","Fazer exercício","Voltar ao módulo"]);
 }
-
-function carregarCodigo(codigo){
-  code.value = codigo;
-  atualizarLinhas();
-  try { localStorage.setItem("pycode_codigo", codigo); } catch(e) {}
+function showExercise(){
+  const m=current();state.etapa="exercicio";
+  print("");
+  print("DESAFIO");
+  print("------------------------------------------------");
+  print(m.exercicio[0]);
+  print("");
+  print("[1] Ver pista");
+  print("[2] Ver solução de referência");
+  print("[3] Voltar");
+  menuItems(["Ver pista","Mostrar solução de referência","Voltar ao módulo"]);
 }
-
-function moduloAtual(){
-  return CURSO.modulos.find(m => m.id === estado.modulo);
+function showProgress(){
+  state.etapa="progresso";
+  print("");
+  print("PROGRESSO");
+  print("------------------------------------------------");
+  print("Módulo atual: "+(state.modulo+1)+"/"+CURSO.length);
+  print("Exercícios consultados: "+state.exercicios);
+  print("");
+  menuItems(["Voltar ao menu principal","Continuar no módulo atual"]);
 }
-
-function mostrarModulo(){
-  const modulo = moduloAtual();
-
-  estado.etapa = "menu";
-  estado.exemplo = 0;
-
-  topicLabel.textContent = "MÓDULO " + modulo.id;
-  adicionarMensagem("Módulo " + modulo.id + " — " + modulo.titulo + "\n\n" + modulo.conceito);
-
-  carregarCodigo(modulo.exemplos[0].codigo);
-  limparTerminal();
-  escreverTerminal("Exemplo carregado no editor.", "info");
-  escreverTerminal(modulo.exemplos[0].saida, "out");
-
-  adicionarOpcoes([
-    {texto: "Ver exemplo prático"},
-    {texto: "Fazer exercício"},
-    {texto: "Avançar para o próximo módulo"},
-    {texto: "Voltar ao menu principal"}
-  ]);
+function invalid(){
+  print("Desculpe, não entendi o comando. Por favor, escolha uma das opções válidas do menu.","error");
+  if(state.etapa==="inicio")showMain();
+  else if(state.etapa==="modulo")showModule();
+  else if(state.etapa==="exemplo")showExample();
+  else if(state.etapa==="exercicio")showExercise();
+  else showMain();
 }
-
-function menuPrincipal(){
-  estado.etapa = "inicio";
-
-  adicionarMensagem(
-    "Olá! Eu sou o Professor Python.\n\n" +
-    "Meu método é simples: primeiro apresento o conceito, depois você escolhe uma opção numerada."
-  );
-
-  adicionarOpcoes([
-    {texto: "Módulo 1 — Variáveis e Tipos de Dados"},
-    {texto: "Módulo 2 — Estruturas Condicionais (if/else)"},
-    {texto: "Módulo 3 — Laços de Repetição (for/while)"},
-    {texto: "Ver meu progresso"}
-  ]);
-}
-
-function mostrarExemplo(){
-  const modulo = moduloAtual();
-  const exemplo = modulo.exemplos[estado.exemplo];
-
-  estado.etapa = "exemplo";
-
-  adicionarMensagem(
-    exemplo.titulo + "\n\nObserve o código no editor à direita. " +
-    "Depois de estudar, escolha o próximo passo."
-  );
-
-  carregarCodigo(exemplo.codigo);
-  limparTerminal();
-  escreverTerminal("$ python programa.py", "info");
-  escreverTerminal(exemplo.saida, "out");
-
-  if(modulo.exemplos.length > 1){
-    adicionarOpcoes([
-      {texto: "Ver outro exemplo"},
-      {texto: "Fazer exercício"},
-      {texto: "Voltar ao menu do módulo"}
-    ]);
-  }else{
-    adicionarOpcoes([
-      {texto: "Fazer exercício"},
-      {texto: "Voltar ao menu do módulo"}
-    ]);
+function choose(v){
+  const n=Number(v),m=current();
+  if(state.etapa==="inicio"){
+    if(n>=1&&n<=3){state.modulo=n-1;showModule();return}
+    if(n===4){showProgress();return}
+    invalid();return;
   }
-}
-
-function mostrarExercicio(){
-  const modulo = moduloAtual();
-  estado.etapa = "exercicio";
-
-  adicionarMensagem(
-    "DESAFIO\n\n" + modulo.exercicio.pergunta +
-    "\n\nTente primeiro no editor. Depois use [1] para ver a pista, [2] para mostrar uma solução de referência ou [3] para voltar."
-  );
-
-  carregarCodigo("# Escreva sua solução aqui\n");
-  limparTerminal();
-  escreverTerminal("Desafio carregado.", "info");
-
-  adicionarOpcoes([
-    {texto: "Ver uma pista"},
-    {texto: "Mostrar solução de referência"},
-    {texto: "Voltar ao menu do módulo"}
-  ]);
-}
-
-function mostrarProgresso(){
-  const nomes = ["variáveis", "condições", "repetições"];
-  const concluido = estado.exerciciosConcluidos;
-
-  adicionarMensagem(
-    "PROGRESSO\n\n" +
-    "Módulo atual: " + estado.modulo + "\n" +
-    "Exercícios concluídos: " + concluido + "\n" +
-    "Tópicos disponíveis: " + nomes.join(", ") + "."
-  );
-
-  adicionarOpcoes([
-    {texto: "Voltar ao menu principal"},
-    {texto: "Continuar no módulo atual"}
-  ]);
-}
-
-function processarEscolha(escolha){
-  const e = normalizarEntrada(escolha);
-  const modulo = moduloAtual();
-
-  if(estado.etapa === "inicio"){
-    if(e === "1"){ estado.modulo = 1; mostrarModulo(); return; }
-    if(e === "2"){ estado.modulo = 2; mostrarModulo(); return; }
-    if(e === "3"){ estado.modulo = 3; mostrarModulo(); return; }
-    if(e === "4"){ mostrarProgresso(); return; }
-  }
-
-  if(estado.etapa === "menu"){
-    if(e === "1"){ mostrarExemplo(); return; }
-    if(e === "2"){ mostrarExercicio(); return; }
-    if(e === "3"){
-      if(estado.modulo < CURSO.modulos.length){
-        estado.modulo += 1;
-        mostrarModulo();
-      }else{
-        adicionarMensagem("Este é o último módulo disponível. Você já chegou ao final desta trilha.");
-        menuPrincipal();
-      }
+  if(state.etapa==="modulo"){
+    if(n===1){showExample();return}
+    if(n===2){showExercise();return}
+    if(n===3){
+      if(state.modulo<CURSO.length-1){state.modulo++;showModule()}else{print("Você chegou ao último módulo.");showMain()}
       return;
     }
-    if(e === "4"){ menuPrincipal(); return; }
+    if(n===4){showMain();return}
+    invalid();return;
   }
-
-  if(estado.etapa === "exemplo"){
-    if(e === "1" && modulo.exemplos.length > 1){
-      estado.exemplo += 1;
-      if(estado.exemplo >= modulo.exemplos.length) estado.exemplo = 0;
-      mostrarExemplo();
-      return;
-    }
-    if(e === "1" && modulo.exemplos.length === 1){
-      mostrarExercicio();
-      return;
-    }
-    if(e === "2" && modulo.exemplos.length > 1){
-      mostrarExercicio();
-      return;
-    }
-    if(e === "2" && modulo.exemplos.length === 1){
-      menuDoModulo();
-      return;
-    }
-    if(e === "3"){
-      menuDoModulo();
-      return;
-    }
+  if(state.etapa==="exemplo"){
+    if(n===1){state.exemplo=(state.exemplo+1)%m.exemplos.length;showExample();return}
+    if(n===2){showExercise();return}
+    if(n===3){showModule();return}
+    invalid();return;
   }
-
-  if(estado.etapa === "exercicio"){
-    if(e === "1"){
-      adicionarMensagem("Pista: identifique primeiro quais variáveis ou estruturas o exercício precisa. Em seguida escreva uma pequena etapa e teste.", "bot");
-      return;
-    }
-    if(e === "2"){
-      carregarCodigo(modulo.exercicio.codigo);
-      limparTerminal();
-      escreverTerminal("Solução de referência carregada.", "info");
-      escreverTerminal(modulo.exercicio.resposta, "out");
-      estado.exerciciosConcluidos += 1;
-      adicionarMensagem("Veja a solução e compare com a sua tentativa. Em programação, soluções diferentes podem produzir o mesmo resultado.", "bot");
-      adicionarOpcoes([
-        {texto: "Voltar ao menu do módulo"},
-        {texto: "Avançar para o próximo módulo"}
-      ]);
-      estado.etapa = "posExercicio";
-      return;
-    }
-    if(e === "3"){ menuDoModulo(); return; }
+  if(state.etapa==="exercicio"){
+    if(n===1){print("PISTA: "+m.exercicio[2]);return}
+    if(n===2){state.exercicios++;openCode(m.exercicio[1],"Solução de referência carregada.");print("Compare a solução com a sua tentativa.");return}
+    if(n===3){showModule();return}
+    invalid();return;
   }
-
-  if(estado.etapa === "posExercicio"){
-    if(e === "1"){ menuDoModulo(); return; }
-    if(e === "2"){
-      if(estado.modulo < CURSO.modulos.length){
-        estado.modulo += 1;
-        mostrarModulo();
-      }else{
-        menuPrincipal();
-      }
-      return;
-    }
-  }
-
-  if(estado.etapa === "progresso"){
-    if(e === "1"){ menuPrincipal(); return; }
-    if(e === "2"){ mostrarModulo(); return; }
-  }
-
-  respostaInvalida();
-}
-
-function menuDoModulo(){
-  estado.etapa = "menu";
-  adicionarMensagem("Escolha uma das opções do módulo " + estado.modulo + ".");
-  adicionarOpcoes([
-    {texto: "Ver exemplo prático"},
-    {texto: "Fazer exercício"},
-    {texto: "Avançar para o próximo módulo"},
-    {texto: "Voltar ao menu principal"}
-  ]);
-}
-
-function respostaInvalida(){
-  estado.mensagensInvalidas += 1;
-  adicionarMensagem("Desculpe, não entendi o comando. Por favor, escolha uma das opções válidas do menu.", "bot");
-  if(estado.etapa === "inicio"){
-    menuPrincipal();
-  }else if(estado.etapa === "menu"){
-    menuDoModulo();
-  }else if(estado.etapa === "exemplo"){
-    mostrarExemplo();
-  }else if(estado.etapa === "exercicio"){
-    mostrarExercicio();
-  }else{
-    menuPrincipal();
+  if(state.etapa==="progresso"){
+    if(n===1){showMain();return}
+    if(n===2){showModule();return}
+    invalid();return;
   }
 }
-
-function enviar(){
-  const valor = input.value.trim();
-  if(!valor) return;
-  adicionarMensagem(valor, "user");
-  input.value = "";
-
-  if(estado.etapa === "progresso"){
-    processarEscolha(valor);
-    return;
-  }
-
-  processarEscolha(valor);
+function openCode(source,output){
+  code.value=source;runout.textContent="SAÍDA\n"+output;codebox.style.display="block";
 }
-
-$("sendBtn").addEventListener("click", enviar);
-input.addEventListener("keydown", event => {
-  if(event.key === "Enter"){
-    event.preventDefault();
-    enviar();
-  }
+document.getElementById("closeCode").onclick=()=>codebox.style.display="none";
+function send(){
+  const v=input.value.trim();if(!v)return;
+  print("> "+v,"user");input.value="";
+  choose(v);
+}
+input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();send()}});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape")codebox.style.display="none";
 });
-
-$("resetBtn").addEventListener("click", () => {
-  estado.modulo = 1;
-  estado.etapa = "inicio";
-  estado.exemplo = 0;
-  estado.exerciciosConcluidos = 0;
-  estado.mensagensInvalidas = 0;
-  messages.innerHTML = "";
-  menuPrincipal();
-});
-
-$("progressBtn").addEventListener("click", () => {
-  adicionarMensagem("progresso", "user");
-  estado.etapa = "progresso";
-  mostrarProgresso();
-});
-
-code.addEventListener("input", atualizarLinhas);
-code.addEventListener("scroll", () => {
-  lines.scrollTop = code.scrollTop;
-});
-code.addEventListener("keydown", event => {
-  if(event.key === "Tab"){
-    event.preventDefault();
-    const start = code.selectionStart;
-    const end = code.selectionEnd;
-    code.setRangeText("    ", start, end, "end");
-    atualizarLinhas();
-  }
-
-  if((event.ctrlKey || event.metaKey) && event.key === "Enter"){
-    event.preventDefault();
-    executarSimulado();
-  }
-});
-
-function executarSimulado(){
-  terminal.innerHTML = "";
-  terminalState.textContent = "EXECUTANDO";
-
-  escreverTerminal("$ python programa.py", "info");
-  escreverTerminal("Execução simulada pelo ambiente educacional.", "info");
-
-  const texto = code.value;
-
-  if(!texto.trim()){
-    escreverTerminal("Nenhum código para executar.", "warn");
-    terminalState.textContent = "VAZIO";
-    return;
-  }
-
-  if(/print\s*\(\s*["'][^"']*["']\s*\)/.test(texto)){
-    const matches = texto.matchAll(/print\s*\(\s*["']([^"']*)["']\s*\)/g);
-    for(const match of matches){
-      escreverTerminal(match[1], "out");
-    }
-  }else if(/for\s+\w+\s+in\s+range\((\d+)\s*,\s*(\d+)\)/.test(texto)){
-    const match = texto.match(/for\s+\w+\s+in\s+range\((\d+)\s*,\s*(\d+)\)/);
-    const inicio = Number(match[1]);
-    const fim = Number(match[2]);
-    for(let i=inicio;i<fim;i++) escreverTerminal(String(i), "out");
-  }else if(/print\s*\(/.test(texto)){
-    escreverTerminal("O programa contém print(). Execute no runtime Python completo para avaliar expressões.", "warn");
-  }else{
-    escreverTerminal("Código carregado. Use os exemplos do módulo para testar a lógica.", "out");
-  }
-
-  terminalState.textContent = "FINALIZADO";
-}
-
-try{
-  const salvo = localStorage.getItem("pycode_codigo");
-  if(salvo) code.value = salvo;
-}catch(e){}
-
-atualizarLinhas();
-runtimeStatus.textContent = "MODO LOCAL • SEM BACKEND";
-menuPrincipal();
+showMain();
+input.focus();
 </script>
 </body>
 </html>
