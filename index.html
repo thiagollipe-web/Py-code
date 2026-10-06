@@ -37,7 +37,7 @@ pre{margin:0;padding:12px;border-radius:10px;background:#040806;border:1px solid
 .composer{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(1100px,100%);padding:12px 16px 16px;background:linear-gradient(180deg,rgba(5,10,6,0),rgba(5,10,6,.98) 32%);z-index:2}
 .composer-inner{display:flex;gap:9px;align-items:center;background:#0b1710;border:1px solid var(--border);border-radius:14px;padding:8px}
 .prompt{color:var(--green);font-weight:800;padding-left:5px}
-input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--text);font:14px inherit;padding:9px}
+input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--text);font:inherit;font-size:14px;padding:9px}
 .send{border:1px solid #2b6337;background:#13311b;color:var(--green);padding:9px 14px;border-radius:10px;cursor:pointer;font-weight:750}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.66);z-index:10;padding:18px;align-items:center;justify-content:center}
 .modal-card{width:min(900px,100%);max-height:90vh;overflow:auto;background:#07100a;border:1px solid #2b5933;border-radius:16px;box-shadow:0 24px 80px #000}
@@ -248,11 +248,7 @@ function startLesson(key) {
   step = 0;
   const lesson = lessons[key];
 
-  addMessage("Ótima escolha! Vamos estudar " + lesson.title + ".
-
-" + lesson.intro + "
-
-Vou explicar uma linha por vez. Você controla o ritmo.", "bot", true);
+  addMessage("Ótima escolha! Vamos estudar " + lesson.title + ".\n\n" + lesson.intro + "\n\nVou explicar uma linha por vez. Você controla o ritmo.", "bot", true);
   nextStep();
 }
 
@@ -262,9 +258,7 @@ function nextStep() {
   const lesson = lessons[topic];
 
   if (step >= lesson.steps.length) {
-    addMessage("Parabéns! Terminamos a explicação de " + lesson.title + ".
-
-Agora é sua vez de praticar.", "bot", true);
+    addMessage("Parabéns! Terminamos a explicação de " + lesson.title + ".\n\nAgora é sua vez de praticar.", "bot", true);
     addMessage("Desafio: " + lesson.challenge, "bot", true);
     showActions([
       ["Tentar o desafio", "desafio"],
