@@ -33,7 +33,7 @@ body{padding:0}.terminal{min-height:100vh;display:flex;flex-direction:column;bac
 <div class="terminal">
 <header class="header">
   <div class="title">◈ Py-Code AI</div>
-  <div class="status">IA LOCAL // PRONTA</div>
+  <div class="status">PROFESSOR INTERATIVO</div>
 </header>
 <main class="screen">
   <div id="output" aria-live="polite"></div>
@@ -52,39 +52,38 @@ body{padding:0}.terminal{min-height:100vh;display:flex;flex-direction:column;bac
   <div id="runout">SAÍDA</div>
 </div>
 
-<script>"use strict";
-const STATE={modulo:0,modo:"inicio",tentativas:0};
-const CURSO=[
-{nome:"Variáveis e Tipos de Dados",palavras:["variável","variaveis","tipo","str","int","float","bool"],conceito:"Variáveis são nomes usados para guardar valores. Os tipos mais comuns no início são str, int, float e bool.",exemplo:['nome = "Ana"\\nidade = 13\\nprint(nome)\\nprint(idade)','Ana\\n13'],exercicio:"Crie uma variável chamada pontos com o valor 100 e mostre usando print().",solucao:"pontos = 100\\nprint(pontos)",pista:"Use pontos = 100 e depois print(pontos)."},
-{nome:"Estruturas Condicionais (if/else)",palavras:["if","else","elif","condição","condicional"],conceito:"if, elif e else permitem que o programa tome decisões a partir de condições.",exemplo:['idade = 15\\n\\nif idade >= 18:\\n    print("Maior de idade")\\nelse:\\n    print("Menor de idade")','Menor de idade'],exercicio:"Faça um programa que informe se uma pessoa é maior ou menor de idade.",solucao:'idade = int(input("Digite a idade: "))\\n\\nif idade >= 18:\\n    print("Maior")\\nelse:\\n    print("Menor")',pista:"Teste a condição idade >= 18."},
-{nome:"Laços de Repetição (for/while)",palavras:["for","while","laço","laco","loop","range"],conceito:"for e while repetem instruções. for é útil para percorrer sequências; while depende de uma condição.",exemplo:['for numero in range(1, 6):\\n    print(numero)','1\\n2\\n3\\n4\\n5'],exercicio:"Mostre os números de 1 a 10 usando for.",solucao:"for numero in range(1, 11):\\n    print(numero)",pista:"Use range(1, 11)."}
-];
-const out=document.getElementById("output"),menu=document.getElementById("menu"),input=document.getElementById("input"),codebox=document.getElementById("codebox"),code=document.getElementById("code"),runout=document.getElementById("runout");
-function print(text="",cls="bot"){const el=document.createElement("div");el.className="line "+cls;el.textContent=text;out.appendChild(el);out.scrollTop=out.scrollHeight}
-function current(){return CURSO[STATE.modulo]}
-function menuItems(items){menu.innerHTML="";items.forEach((label,i)=>{const b=document.createElement("button");b.textContent="["+(i+1)+"] "+label;b.onclick=()=>sendValue(String(i+1));menu.appendChild(b)})}
-function openCode(src,result){code.value=src;runout.textContent="SAÍDA\n"+result;codebox.style.display="block"}
-function welcome(){print("Olá! Eu sou o Professor Python.\n\nVou agir como seu professor: explico, faço perguntas, dou pistas, corrijo seus códigos e acompanho seu progresso.\n\nVocê pode conversar normalmente. Ex.: \"não entendi if\", \"me dê um exercício\", \"mostre um exemplo\" ou cole seu código.")}
-function teacher(q){const t=q.toLowerCase().trim(),m=current();
-if(/^(oi|olá|ola|bom dia|boa tarde|boa noite|hello)/.test(t)){print("Olá! Vamos estudar Python. Qual assunto está causando dificuldade?");return}
-if(/(começar|comecar|curso|do zero|iniciar)/.test(t)){STATE.modulo=0;STATE.modo="modulo";print("Perfeito. Vamos começar pela primeira aula: "+current().nome+".\n\n"+current().conceito);menuItems(["Ver exemplo","Fazer exercício","Próxima aula"]);return}
-if(/(exercício|exercicio|desafio|atividade|praticar)/.test(t)){STATE.modo="exercicio";STATE.tentativas++;print("Exercício:\n\n"+m.exercicio+"\n\nTente primeiro. Depois cole sua resposta aqui.");return}
-if(/^(pista|dica|ajuda)/.test(t)){print("Pista: "+m.pista);return}
-if(/(solução|solucao|resposta pronta)/.test(t)){openCode(m.solucao,"Solução de referência");print("Abri a solução. Compare com sua tentativa e tente explicar por que cada linha está ali.");return}
-if(/(exemplo|mostrar código|mostrar codigo|mostre código|mostre codigo)/.test(t)){STATE.modo="exemplo";openCode(m.exemplo[0],m.exemplo[1]);print("Exemplo aberto. Posso explicar linha por linha.");return}
-if(/(próxima aula|proxima aula|avançar|avancar|próximo módulo|proximo modulo)/.test(t)){STATE.modulo=Math.min(STATE.modulo+1,CURSO.length-1);STATE.modo="modulo";print("Agora estamos na aula "+(STATE.modulo+1)+": "+current().nome+".\n\n"+current().conceito);menuItems(["Ver exemplo","Fazer exercício","Próxima aula"]);return}
-if(/(progresso|meu progresso)/.test(t)){print("Você está na aula "+(STATE.modulo+1)+" de "+CURSO.length+". Tentativas de exercícios nesta sessão: "+STATE.tentativas+".");return}
-const found=CURSO.findIndex(x=>x.palavras.some(p=>t.includes(p)));if(found>=0){STATE.modulo=found;STATE.modo="modulo";print("Vamos estudar "+current().nome+".\n\n"+current().conceito+"\n\nQuer um exemplo, uma explicação passo a passo ou um exercício?");return}
-if(/(erro|bug|não funciona|nao funciona|corrija|corrigir|está certo|esta certo)/.test(t)){print("Cole seu código aqui. Vou analisar como um professor: identificar o erro, explicar o motivo e dar uma pista para você corrigir. Não vou entregar a resposta sem antes tentar ensinar o raciocínio.");return}
-if(/print\s*\(/.test(t)){print("print() mostra um valor na tela. Exemplo: print(\"Olá, mundo!\"). Quer praticar?");return}
-if(/input\s*\(/.test(t)){print("input() recebe texto digitado pelo usuário. Para transformar em inteiro, use int(input(...)).");return}
-print("Ainda não encontrei esse assunto no meu conteúdo local. Pergunte sobre variáveis, if/else, for, while, print, input ou cole um código Python.")
-}
-function sendValue(q){print("> "+q,"user");teacher(q)}
-function send(){const q=input.value.trim();if(!q)return;input.value="";sendValue(q)}
-input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();send()}});
-document.getElementById("closeCode").onclick=()=>codebox.style.display="none";
-document.addEventListener("keydown",e=>{if(e.key==="Escape")codebox.style.display="none"});
-welcome();input.focus();</script>
+<script>
+"use strict";
+const lessons={
+ listas:{title:"Listas Python",intro:"Uma lista guarda vários valores em uma única variável. Vamos construir uma lista de frutas.",steps:[
+ ["frutas = [\"maçã\", \"banana\", \"uva\"]","Criamos a variável frutas. Os colchetes [ ] indicam uma lista, e cada texto entre aspas é um elemento."],
+ ["print(frutas)","print mostra a lista inteira na tela."],
+ ["print(frutas[0])","O índice [0] acessa o primeiro item. Em Python, a contagem começa no zero."],
+ ["frutas.append(\"laranja\")","append adiciona um novo item ao final da lista."],
+ ["print(frutas)","Agora a lista contém quatro frutas. Você aprendeu a criar, acessar e modificar listas."]],challenge:"Crie uma lista chamada animais com três nomes e mostre o segundo item usando print()."},
+ jogos:{title:"Jogos Python",intro:"Vamos criar um jogo simples de adivinhação de números, começando pela lógica.",steps:[
+ ["numero_secreto = 7","Guardamos o número que o jogador precisa descobrir."],
+ ["palpite = int(input(\"Digite um número: \"))","input recebe o palpite; int transforma o texto digitado em número inteiro."],
+ ["if palpite == numero_secreto:","if verifica a condição. O operador == compara dois valores."],
+ ["    print(\"Você acertou!\")","Esta linha, recuada, executa quando o palpite está correto."],
+ ["else:\n    print(\"Tente novamente!\")","else define o que acontece quando o palpite está errado."]],challenge:"Modifique o número secreto e teste dois palpites diferentes."},
+ calculos:{title:"Cálculos Python",intro:"Vamos aprender a fazer operações matemáticas e guardar os resultados.",steps:[
+ ["numero1 = 10","Criamos uma variável e guardamos o número 10."],
+ ["numero2 = 5","Criamos outra variável com o número 5."],
+ ["soma = numero1 + numero2","O operador + soma os valores. O resultado fica guardado em soma."],
+ ["print(soma)","Mostramos o resultado da soma: 15."],
+ ["print(numero1 - numero2)\nprint(numero1 * numero2)\nprint(numero1 / numero2)","Os operadores -, * e / fazem subtração, multiplicação e divisão."]],challenge:"Crie duas variáveis e mostre a multiplicação entre elas."}
+};
+const out=document.getElementById("output"),menu=document.getElementById("menu"),input=document.getElementById("input"),box=document.getElementById("codebox"),editor=document.getElementById("code"),runout=document.getElementById("runout");
+let topic=null,step=0;
+function say(text,role="bot"){const el=document.createElement("div");el.className="line "+role;el.textContent=text;out.appendChild(el);out.scrollTop=out.scrollHeight}
+function options(arr){menu.replaceChildren();arr.forEach(([label,command])=>{const b=document.createElement("button");b.textContent=label;b.onclick=()=>send(command);menu.appendChild(b)})}
+function home(){topic=null;step=0;say("Prof Python: O que você quer aprender hoje?");options([["Listas Python","listas python"],["Jogos Python","jogos python"],["Cálculos Python","cálculos python"]])}
+function start(k){topic=k;step=0;say("Prof Python: Ótima escolha! "+lessons[k].title+".\n\n"+lessons[k].intro+"\n\nVou ensinar uma linha de cada vez.");next()}
+function next(){if(!topic)return home();const l=lessons[topic];if(step>=l.steps.length){say("Prof Python: Parabéns! Terminamos esta explicação.\n\nAgora tente: "+l.challenge);options([["Recomeçar aula","recomeçar"],["Escolher outro assunto","menu"]]);return}const [code,explain]=l.steps[step];say("Prof Python — passo "+(step+1)+" de "+l.steps.length+":\n\n"+code+"\n\nExplicação: "+explain);step++;options([["Entendi, próxima linha","próxima"],["Explique novamente","repita"],["Ver código completo","código completo"],["Outro assunto","menu"]])}
+function respond(q){const t=q.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();if(t.includes("lista"))return start("listas");if(t.includes("jogo"))return start("jogos");if(t.includes("calculo")||t.includes("matematica")||t.includes("conta"))return start("calculos");if(t==="menu"||t==="inicio"||t==="voltar")return home();if(t==="recomecar"&&topic)return start(topic);if(t.includes("proxim")||t==="entendi"||t==="continuar")return next();if(t.includes("repita")||t.includes("novamente")||t.includes("nao entendi")){if(!topic)return home();step=Math.max(0,step-1);return next()}if(t.includes("codigo completo")&&topic){const src=lessons[topic].steps.map(x=>x[0]).join("\n");editor.value=src;runout.textContent="Código de referência para estudo";box.style.display="block";say("Prof Python: Abri o código completo. Leia cada linha e tente explicar o que ela faz.");return}say("Prof Python: Escolha Listas Python, Jogos Python ou Cálculos Python. Durante a aula, diga próxima, repita ou menu.");if(!topic)home()}
+function send(v){const q=(v??input.value).trim();if(!q)return;input.value="";say("Você: "+q,"user");respond(q)}
+input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();send()}});document.getElementById("closeCode").onclick=()=>box.style.display="none";home();input.focus();
+</script>
 </body>
 </html>
