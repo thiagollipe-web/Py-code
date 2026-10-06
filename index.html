@@ -6,18 +6,18 @@
 <meta name="theme-color" content="#050805">
 <title>Py-Code :: Professor Python</title>
 <style>
-:root{--bg:#050805;--panel:#080c08;--line:#173017;--green:#49ff72;--dim:#6ba978;--cyan:#58e7ff;--yellow:#ffe66d;--red:#ff6262}
+:root{--bg:#080808;--panel:#080c08;--line:#173017;--green:#49ff72;--dim:#6ba978;--cyan:#58e7ff;--yellow:#ffe66d;--red:#ff6262}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#020402;color:var(--green);font-family:"Courier New",Consolas,monospace}
-body{padding:0}.terminal{min-height:100vh;display:flex;flex-direction:column;background:radial-gradient(circle at 50% 0,#0a160b 0,#050805 45%,#020402 100%)}
-.header{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid var(--line);background:#071007;box-shadow:0 2px 18px #000}
+body{padding:0}.terminal{min-height:100vh;display:flex;flex-direction:column;background:radial-gradient(circle at 50% 0,#0a160b 0,#080808 45%,#020402 100%)}
+.header{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid var(--line);background:#0b0b0b;box-shadow:0 2px 18px #000}
 .title{font-weight:700;letter-spacing:1px}.status{font-size:11px;color:var(--dim)}
 .screen{width:min(1100px,100%);margin:0 auto;flex:1;display:flex;flex-direction:column;padding:18px 16px 10px}
 #output{flex:1;overflow:auto;white-space:pre-wrap;word-break:break-word;line-height:1.55;font-size:14px;padding-bottom:8px}
 .line{margin:0 0 5px}.bot{color:var(--green)}.user{color:var(--cyan)}.system{color:var(--dim)}.warn{color:var(--yellow)}.error{color:var(--red)}
 .menu{margin:7px 0 15px;padding-left:18px;color:#b7ffc3}
-.menu button{display:block;width:100%;max-width:760px;text-align:left;margin:5px 0;padding:7px 9px;background:#071007;color:var(--green);border:1px solid #1d481f;font:inherit;cursor:pointer}
+.menu button{display:block;width:100%;max-width:760px;text-align:left;margin:5px 0;padding:7px 9px;background:#0b0b0b;color:var(--green);border:1px solid #1d481f;font:inherit;cursor:pointer}
 .menu button:hover,.menu button:focus{background:#0c1d0d;border-color:var(--green);outline:none}
-.prompt{display:flex;align-items:center;border-top:1px solid var(--line);padding:12px 0 4px;gap:8px;position:sticky;bottom:0;background:linear-gradient(#05080500,#050805 18%)}
+.prompt{display:flex;align-items:center;border-top:1px solid var(--line);padding:12px 0 4px;gap:8px;position:sticky;bottom:0;background:linear-gradient(#08080800,#080808 18%)}
 .prompt span{color:var(--green);font-weight:700}.prompt input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:#d8ffde;font:inherit;font-size:14px}
 .cursor{display:inline-block;width:8px;height:16px;background:var(--green);animation:blink 1s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
@@ -32,8 +32,8 @@ body{padding:0}.terminal{min-height:100vh;display:flex;flex-direction:column;bac
 <body>
 <div class="terminal">
 <header class="header">
-  <div class="title">PY-CODE :: PROFESSOR PYTHON</div>
-  <div class="status">LOCAL // TREE-CHAT // v1.0</div>
+  <div class="title">◈ Py-Code AI</div>
+  <div class="status">IA LOCAL // PRONTA</div>
 </header>
 <main class="screen">
   <div id="output" aria-live="polite"></div>
@@ -162,7 +162,7 @@ function invalid(){
   else if(state.etapa==="exercicio")showExercise();
   else showMain();
 }
-function choose(v){
+function naturalAnswer(v){const t=v.toLowerCase();if(/^(oi|olá|ola|hello|bom dia|boa tarde|boa noite)/.test(t)){print('Olá! Eu sou o Professor Python. Pode conversar comigo normalmente. Pergunte sobre Python, peça exemplos ou exercícios.');return true}if(/(começar|comecar|curso|do zero|iniciar)/.test(t)){state.modulo=0;showModule();return true}if(/(exercício|exercicio|desafio|praticar)/.test(t)){showExercise();return true}if(/(pista|dica)/.test(t)){print('PISTA: '+current().exercicio[2]);return true}if(/(solução|solucao|resposta)/.test(t)){openCode(current().exercicio[1],'Solução de referência');print('Abri uma solução de referência no editor.');return true}if(/(exemplo|código|codigo)/.test(t)){showExample();return true}const m=CURSO.findIndex(x=>x.palavras.some(p=>t.includes(p)));if(m>=0){state.modulo=m;showModule();return true}if(t.includes('print')){print('print() mostra um valor na tela. Exemplo: print("Olá, mundo!")');return true}if(t.includes('input')){print('input() recebe texto do usuário. Para número inteiro, use int(input(...)).');return true}if(/erro|bug|não funciona|nao funciona/.test(t)){print('Cole seu código Python e a mensagem de erro. Eu analiso o problema com você.');return true}return false}\nfunction choose(v){\n  if(naturalAnswer(v))return;
   const n=Number(v),m=current();
   if(state.etapa==="inicio"){
     if(n>=1&&n<=3){state.modulo=n-1;showModule();return}
