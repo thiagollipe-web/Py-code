@@ -3,87 +3,405 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#050805">
-<title>Py-Code :: Professor Python</title>
+<meta name="theme-color" content="#07110a">
+<title>Py-Code :: Prof Python</title>
 <style>
-:root{--bg:#080808;--panel:#080c08;--line:#173017;--green:#49ff72;--dim:#6ba978;--cyan:#58e7ff;--yellow:#ffe66d;--red:#ff6262}
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#020402;color:var(--green);font-family:"Courier New",Consolas,monospace}
-body{padding:0}.terminal{min-height:100vh;display:flex;flex-direction:column;background:radial-gradient(circle at 50% 0,#0a160b 0,#080808 45%,#020402 100%)}
-.header{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid var(--line);background:#0b0b0b;box-shadow:0 2px 18px #000}
-.title{font-weight:700;letter-spacing:1px}.status{font-size:11px;color:var(--dim)}
-.screen{width:min(1100px,100%);margin:0 auto;flex:1;display:flex;flex-direction:column;padding:18px 16px 10px}
-#output{flex:1;overflow:auto;white-space:pre-wrap;word-break:break-word;line-height:1.55;font-size:14px;padding-bottom:8px}
-.line{margin:0 0 5px}.bot{color:var(--green)}.user{color:var(--cyan)}.system{color:var(--dim)}.warn{color:var(--yellow)}.error{color:var(--red)}
-.menu{margin:7px 0 15px;padding-left:18px;color:#b7ffc3}
-.menu button{display:block;width:100%;max-width:760px;text-align:left;margin:5px 0;padding:7px 9px;background:#0b0b0b;color:var(--green);border:1px solid #1d481f;font:inherit;cursor:pointer}
-.menu button:hover,.menu button:focus{background:#0c1d0d;border-color:var(--green);outline:none}
-.prompt{display:flex;align-items:center;border-top:1px solid var(--line);padding:12px 0 4px;gap:8px;position:sticky;bottom:0;background:linear-gradient(#08080800,#080808 18%)}
-.prompt span{color:var(--green);font-weight:700}.prompt input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:#d8ffde;font:inherit;font-size:14px}
-.cursor{display:inline-block;width:8px;height:16px;background:var(--green);animation:blink 1s steps(1) infinite}
-@keyframes blink{50%{opacity:0}}
-.codebox{display:none;position:fixed;right:18px;bottom:58px;width:min(560px,calc(100% - 36px));max-height:55vh;background:#030603;border:1px solid #255b2b;box-shadow:0 8px 40px #000;padding:0;z-index:5}
-.codehead{display:flex;justify-content:space-between;padding:7px 10px;background:#091309;color:var(--dim);border-bottom:1px solid #173017;font-size:11px}
-#code{margin:0;width:100%;height:280px;resize:vertical;background:#020402;color:#caffd1;border:0;outline:0;padding:12px;font:13px/1.5 "Courier New",monospace}
-#runout{border-top:1px solid #173017;padding:10px;max-height:150px;overflow:auto;color:#e2ffe7;white-space:pre-wrap;font-size:12px}
-.close{background:none;color:var(--green);border:0;font:inherit;cursor:pointer}
-@media(max-width:600px){.screen{padding:12px}.header{height:44px}.title{font-size:12px}.status{font-size:9px}#output{font-size:13px}.codebox{right:8px;bottom:58px;width:calc(100% - 16px)}}
+:root{
+  --bg:#07110a;--panel:#0b1710;--panel2:#0f1d14;--border:#21452b;
+  --text:#e6f4e9;--muted:#91a99a;--green:#58e676;--cyan:#5dd8ff;
+  --yellow:#ffd76a;--shadow:0 18px 50px rgba(0,0,0,.35)
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#050a06;color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{display:flex;justify-content:center}
+.app{width:min(1100px,100%);min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#0a150d 0,#07110a 100%)}
+.header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);background:rgba(8,18,11,.96);position:sticky;top:0;z-index:3}
+.brand{display:flex;align-items:center;gap:10px}.logo{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:#15301c;color:var(--green);font-weight:800}
+.brand h1{font-size:15px;margin:0}.brand small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.status{font-size:11px;color:var(--green);padding:6px 9px;border:1px solid #285a34;border-radius:999px;background:#0b1d10}
+.chat{flex:1;padding:18px 16px 110px;overflow:auto}
+.message{display:flex;gap:10px;margin:0 0 14px;align-items:flex-start}
+.avatar{width:32px;height:32px;flex:0 0 32px;border-radius:10px;display:grid;place-items:center;font-size:13px;font-weight:800}
+.bot .avatar{background:#16331e;color:var(--green)}.user .avatar{background:#122635;color:var(--cyan)}
+.bubble{max-width:min(820px,calc(100% - 44px));padding:13px 15px;border:1px solid var(--border);border-radius:14px;background:var(--panel);box-shadow:var(--shadow);white-space:pre-wrap;line-height:1.55;font-size:14px}
+.user{flex-direction:row-reverse}.user .bubble{background:#0d1a24;border-color:#23455b}
+.teacher-label{color:var(--green);font-weight:750;font-size:12px;margin-bottom:7px}
+.step{margin-top:10px;padding:12px;border:1px solid #2b5333;border-radius:12px;background:#08130b}
+.step-title{color:var(--yellow);font-size:12px;font-weight:700;margin-bottom:7px}
+code.inline{font-family:"SFMono-Regular",Consolas,monospace}
+pre{margin:0;padding:12px;border-radius:10px;background:#040806;border:1px solid #1c3421;overflow:auto;color:#d7ffe0;font:13px/1.5 "SFMono-Regular",Consolas,monospace}
+.explain{margin-top:10px;color:#d7e7da}.hint{margin-top:8px;color:var(--muted);font-size:12px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px 42px}
+.action{border:1px solid #2a5632;background:#0c1a10;color:#dff8e4;padding:9px 12px;border-radius:10px;cursor:pointer;font:inherit;font-size:12px}
+.action:hover{border-color:var(--green);background:#102216}
+.composer{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(1100px,100%);padding:12px 16px 16px;background:linear-gradient(180deg,rgba(5,10,6,0),rgba(5,10,6,.98) 32%);z-index:2}
+.composer-inner{display:flex;gap:9px;align-items:center;background:#0b1710;border:1px solid var(--border);border-radius:14px;padding:8px}
+.prompt{color:var(--green);font-weight:800;padding-left:5px}
+input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--text);font:14px inherit;padding:9px}
+.send{border:1px solid #2b6337;background:#13311b;color:var(--green);padding:9px 14px;border-radius:10px;cursor:pointer;font-weight:750}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.66);z-index:10;padding:18px;align-items:center;justify-content:center}
+.modal-card{width:min(900px,100%);max-height:90vh;overflow:auto;background:#07100a;border:1px solid #2b5933;border-radius:16px;box-shadow:0 24px 80px #000}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:13px 15px;border-bottom:1px solid var(--border);font-size:13px}
+.close{background:none;border:0;color:var(--green);cursor:pointer;font:inherit}
+.modal pre{margin:15px;min-height:250px}
+.footer-note{color:var(--muted);font-size:11px;text-align:center;padding:4px 0 0}
+@media(max-width:600px){
+  .header{padding:11px 12px}.chat{padding:14px 10px 112px}.bubble{font-size:13px;padding:12px}
+  .actions{margin-left:42px}.composer{padding:9px 10px 12px}.send{padding:9px 11px}
+}
 </style>
 </head>
 <body>
-<div class="terminal">
+<div class="app">
 <header class="header">
-  <div class="title">◈ Py-Code AI</div>
-  <div class="status">PROFESSOR INTERATIVO</div>
-</header>
-<main class="screen">
-  <div id="output" aria-live="polite"></div>
-  <div id="menu" class="menu"></div>
-  <div class="prompt">
-    <span>&gt;</span>
-    <input id="input" autocomplete="off" autofocus aria-label="Comando do terminal" placeholder="digite uma opção..." />
-    <i class="cursor"></i>
+  <div class="brand">
+    <div class="logo">Py</div>
+    <div><h1>Prof Python</h1><small>Aprenda programando, uma linha por vez.</small></div>
   </div>
-</main>
+  <div class="status">AULA GUIADA</div>
+</header>
+
+<main id="chat" class="chat" aria-live="polite"></main>
+
+<div class="composer">
+  <div class="composer-inner">
+    <span class="prompt">&gt;</span>
+    <input id="input" autocomplete="off" aria-label="Mensagem para o Prof Python" placeholder="Digite sua resposta..." />
+    <button id="send" class="send">Enviar</button>
+  </div>
+  <div class="footer-note">Dica: você pode digitar “próxima”, “repita”, “código completo” ou “menu”.</div>
+</div>
 </div>
 
-<div id="codebox" class="codebox">
-  <div class="codehead"><span>programa.py</span><button class="close" id="closeCode">[ fechar ]</button></div>
-  <textarea id="code" spellcheck="false"></textarea>
-  <div id="runout">SAÍDA</div>
+<div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-card">
+    <div class="modal-head">
+      <strong id="modalTitle">Código completo</strong>
+      <button class="close" id="closeModal">Fechar</button>
+    </div>
+    <pre id="fullCode"></pre>
+  </div>
 </div>
 
 <script>
 "use strict";
-const lessons={
- listas:{title:"Listas Python",intro:"Uma lista guarda vários valores em uma única variável. Vamos construir uma lista de frutas.",steps:[
- ["frutas = [\"maçã\", \"banana\", \"uva\"]","Criamos a variável frutas. Os colchetes [ ] indicam uma lista, e cada texto entre aspas é um elemento."],
- ["print(frutas)","print mostra a lista inteira na tela."],
- ["print(frutas[0])","O índice [0] acessa o primeiro item. Em Python, a contagem começa no zero."],
- ["frutas.append(\"laranja\")","append adiciona um novo item ao final da lista."],
- ["print(frutas)","Agora a lista contém quatro frutas. Você aprendeu a criar, acessar e modificar listas."]],challenge:"Crie uma lista chamada animais com três nomes e mostre o segundo item usando print()."},
- jogos:{title:"Jogos Python",intro:"Vamos criar um jogo simples de adivinhação de números, começando pela lógica.",steps:[
- ["numero_secreto = 7","Guardamos o número que o jogador precisa descobrir."],
- ["palpite = int(input(\"Digite um número: \"))","input recebe o palpite; int transforma o texto digitado em número inteiro."],
- ["if palpite == numero_secreto:","if verifica a condição. O operador == compara dois valores."],
- ["    print(\"Você acertou!\")","Esta linha, recuada, executa quando o palpite está correto."],
- ["else:\n    print(\"Tente novamente!\")","else define o que acontece quando o palpite está errado."]],challenge:"Modifique o número secreto e teste dois palpites diferentes."},
- calculos:{title:"Cálculos Python",intro:"Vamos aprender a fazer operações matemáticas e guardar os resultados.",steps:[
- ["numero1 = 10","Criamos uma variável e guardamos o número 10."],
- ["numero2 = 5","Criamos outra variável com o número 5."],
- ["soma = numero1 + numero2","O operador + soma os valores. O resultado fica guardado em soma."],
- ["print(soma)","Mostramos o resultado da soma: 15."],
- ["print(numero1 - numero2)\nprint(numero1 * numero2)\nprint(numero1 / numero2)","Os operadores -, * e / fazem subtração, multiplicação e divisão."]],challenge:"Crie duas variáveis e mostre a multiplicação entre elas."}
+
+const lessons = {
+  listas: {
+    title: "Listas Python",
+    intro: "Uma lista permite guardar vários valores em uma única variável. Vamos montar uma lista de frutas e entender cada parte do código.",
+    steps: [
+      {
+        code:'frutas = ["maçã", "banana", "uva"]',
+        explain:'Criamos a variável frutas. O sinal = atribui um valor à variável. Os colchetes [ ] indicam uma lista e cada texto entre aspas é um elemento.'
+      },
+      {
+        code:'print(frutas)',
+        explain:'A função print() mostra o conteúdo da variável na tela. Aqui, ela mostra a lista inteira.'
+      },
+      {
+        code:'print(frutas[0])',
+        explain:'Os elementos da lista possuem índices. Em Python, a contagem começa em 0, então frutas[0] acessa o primeiro item: maçã.'
+      },
+      {
+        code:'frutas.append("laranja")',
+        explain:'O método append() adiciona um novo elemento no final da lista. Depois dessa linha, laranja passa a fazer parte de frutas.'
+      },
+      {
+        code:'print(frutas)',
+        explain:'Agora print() mostra a lista atualizada. Você acabou de aprender a criar, ler e alterar uma lista.'
+      }
+    ],
+    challenge: 'Crie uma lista chamada animais com três nomes e mostre o segundo item usando print().'
+  },
+
+  jogos: {
+    title: "Jogos Python",
+    intro: "Vamos montar a lógica de um jogo simples de adivinhação. Primeiro entendemos o código; depois você poderá modificar as regras.",
+    steps: [
+      {code:'numero_secreto = 7', explain:'Guardamos o número secreto em uma variável. O jogador precisa descobrir qual é esse número.'},
+      {code:'palpite = int(input("Digite um número: "))', explain:'input() recebe o que o jogador digita. int() transforma o texto recebido em um número inteiro.'},
+      {code:'if palpite == numero_secreto:', explain:'if verifica uma condição. O operador == compara o palpite com o número secreto. Os dois pontos : indicam o início do bloco da condição.'},
+      {code:'    print("Você acertou!")', explain:'A indentação, ou recuo, mostra que esta linha pertence ao bloco do if. Ela será executada quando o palpite estiver correto.'},
+      {code:'else:\n    print("Tente novamente!")', explain:'else define o caminho alternativo: quando a condição do if for falsa, o programa executará o bloco do else.'}
+    ],
+    challenge: 'Troque o número secreto e teste dois palpites diferentes.'
+  },
+
+  calculos: {
+    title: "Cálculos Python",
+    intro: "Vamos usar variáveis e operadores matemáticos para fazer contas com Python.",
+    steps: [
+      {code:'numero1 = 10', explain:'Criamos a variável numero1 e guardamos o valor 10 nela.'},
+      {code:'numero2 = 5', explain:'Criamos a segunda variável e guardamos o valor 5.'},
+      {code:'soma = numero1 + numero2', explain:'O operador + faz a adição. O resultado da conta, 15, fica guardado na variável soma.'},
+      {code:'print(soma)', explain:'print() mostra o valor guardado em soma na tela.'},
+      {code:'print(numero1 - numero2)\nprint(numero1 * numero2)\nprint(numero1 / numero2)', explain:'Os operadores -, * e / fazem subtração, multiplicação e divisão. Assim, um pequeno programa pode calcular várias operações.'}
+    ],
+    challenge: 'Crie duas variáveis e mostre a multiplicação entre elas.'
+  }
 };
-const out=document.getElementById("output"),menu=document.getElementById("menu"),input=document.getElementById("input"),box=document.getElementById("codebox"),editor=document.getElementById("code"),runout=document.getElementById("runout");
-let topic=null,step=0;
-function say(text,role="bot"){const el=document.createElement("div");el.className="line "+role;el.textContent=text;out.appendChild(el);out.scrollTop=out.scrollHeight}
-function options(arr){menu.replaceChildren();arr.forEach(([label,command])=>{const b=document.createElement("button");b.textContent=label;b.onclick=()=>send(command);menu.appendChild(b)})}
-function home(){topic=null;step=0;say("Prof Python: O que você quer aprender hoje?");options([["Listas Python","listas python"],["Jogos Python","jogos python"],["Cálculos Python","cálculos python"]])}
-function start(k){topic=k;step=0;say("Prof Python: Ótima escolha! "+lessons[k].title+".\n\n"+lessons[k].intro+"\n\nVou ensinar uma linha de cada vez.");next()}
-function next(){if(!topic)return home();const l=lessons[topic];if(step>=l.steps.length){say("Prof Python: Parabéns! Terminamos esta explicação.\n\nAgora tente: "+l.challenge);options([["Recomeçar aula","recomeçar"],["Escolher outro assunto","menu"]]);return}const [code,explain]=l.steps[step];say("Prof Python — passo "+(step+1)+" de "+l.steps.length+":\n\n"+code+"\n\nExplicação: "+explain);step++;options([["Entendi, próxima linha","próxima"],["Explique novamente","repita"],["Ver código completo","código completo"],["Outro assunto","menu"]])}
-function respond(q){const t=q.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();if(t.includes("lista"))return start("listas");if(t.includes("jogo"))return start("jogos");if(t.includes("calculo")||t.includes("matematica")||t.includes("conta"))return start("calculos");if(t==="menu"||t==="inicio"||t==="voltar")return home();if(t==="recomecar"&&topic)return start(topic);if(t.includes("proxim")||t==="entendi"||t==="continuar")return next();if(t.includes("repita")||t.includes("novamente")||t.includes("nao entendi")){if(!topic)return home();step=Math.max(0,step-1);return next()}if(t.includes("codigo completo")&&topic){const src=lessons[topic].steps.map(x=>x[0]).join("\n");editor.value=src;runout.textContent="Código de referência para estudo";box.style.display="block";say("Prof Python: Abri o código completo. Leia cada linha e tente explicar o que ela faz.");return}say("Prof Python: Escolha Listas Python, Jogos Python ou Cálculos Python. Durante a aula, diga próxima, repita ou menu.");if(!topic)home()}
-function send(v){const q=(v??input.value).trim();if(!q)return;input.value="";say("Você: "+q,"user");respond(q)}
-input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();send()}});document.getElementById("closeCode").onclick=()=>box.style.display="none";home();input.focus();
+
+const chat = document.getElementById("chat");
+const input = document.getElementById("input");
+const sendButton = document.getElementById("send");
+const modal = document.getElementById("modal");
+const fullCode = document.getElementById("fullCode");
+let topic = null;
+let step = 0;
+let lastMessage = "";
+
+function addMessage(text, role="bot", teacher=false) {
+  const wrap = document.createElement("div");
+  wrap.className = "message " + role;
+
+  const avatar = document.createElement("div");
+  avatar.className = "avatar";
+  avatar.textContent = role === "bot" ? "P" : "V";
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  if (teacher) {
+    const label = document.createElement("div");
+    label.className = "teacher-label";
+    label.textContent = "Prof Python";
+    bubble.appendChild(label);
+  }
+  const body = document.createElement("div");
+  body.textContent = text;
+  bubble.appendChild(body);
+
+  wrap.append(avatar, bubble);
+  chat.appendChild(wrap);
+  chat.scrollTop = chat.scrollHeight;
+  lastMessage = text;
+}
+
+function addStep(code, explain, index, total) {
+  const wrap = document.createElement("div");
+  wrap.className = "message bot";
+
+  const avatar = document.createElement("div");
+  avatar.className = "avatar";
+  avatar.textContent = "P";
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+
+  const label = document.createElement("div");
+  label.className = "teacher-label";
+  label.textContent = "Prof Python";
+
+  const stepBox = document.createElement("div");
+  stepBox.className = "step";
+
+  const title = document.createElement("div");
+  title.className = "step-title";
+  title.textContent = "Passo " + index + " de " + total;
+
+  const pre = document.createElement("pre");
+  pre.textContent = code;
+
+  const explanation = document.createElement("div");
+  explanation.className = "explain";
+  explanation.textContent = "Explicação: " + explain;
+
+  const hint = document.createElement("div");
+  hint.className = "hint";
+  hint.textContent = "Agora explique para si mesmo o que esta linha faz. Depois clique em “Próxima linha”.";
+
+  stepBox.append(title, pre, explanation, hint);
+  bubble.append(label, stepBox);
+  wrap.append(avatar, bubble);
+  chat.appendChild(wrap);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function showActions(items) {
+  const row = document.createElement("div");
+  row.className = "actions";
+  items.forEach(([label, command]) => {
+    const button = document.createElement("button");
+    button.className = "action";
+    button.textContent = label;
+    button.onclick = () => handle(command);
+    row.appendChild(button);
+  });
+  chat.appendChild(row);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function home(clear=false) {
+  topic = null;
+  step = 0;
+  if (clear) chat.replaceChildren();
+  addMessage("O que você quer aprender hoje?", "bot", true);
+  showActions([
+    ["Listas Python", "listas"],
+    ["Jogos Python", "jogos"],
+    ["Cálculos Python", "calculos"]
+  ]);
+}
+
+function startLesson(key) {
+  topic = key;
+  step = 0;
+  const lesson = lessons[key];
+
+  addMessage("Ótima escolha! Vamos estudar " + lesson.title + ".
+
+" + lesson.intro + "
+
+Vou explicar uma linha por vez. Você controla o ritmo.", "bot", true);
+  nextStep();
+}
+
+function nextStep() {
+  if (!topic) return home();
+
+  const lesson = lessons[topic];
+
+  if (step >= lesson.steps.length) {
+    addMessage("Parabéns! Terminamos a explicação de " + lesson.title + ".
+
+Agora é sua vez de praticar.", "bot", true);
+    addMessage("Desafio: " + lesson.challenge, "bot", true);
+    showActions([
+      ["Tentar o desafio", "desafio"],
+      ["Recomeçar aula", "recomecar"],
+      ["Outro assunto", "menu"]
+    ]);
+    return;
+  }
+
+  const current = lesson.steps[step];
+  step += 1;
+  addStep(current.code, current.explain, step, lesson.steps.length);
+  showActions([
+    ["Entendi, próxima linha", "proxima"],
+    ["Explique novamente", "repita"],
+    ["Ver código completo", "codigo"],
+    ["Outro assunto", "menu"]
+  ]);
+}
+
+function repeatStep() {
+  if (!topic || step <= 0) return home();
+  const lesson = lessons[topic];
+  const current = lesson.steps[step - 1];
+  addMessage("Claro. Vamos olhar a mesma linha novamente, com outra explicação.", "bot", true);
+  addStep(current.code, current.explain, step, lesson.steps.length);
+  showActions([
+    ["Entendi, próxima linha", "proxima"],
+    ["Explique novamente", "repita"],
+    ["Ver código completo", "codigo"],
+    ["Outro assunto", "menu"]
+  ]);
+}
+
+function showFullCode() {
+  if (!topic) return home();
+  const lesson = lessons[topic];
+  fullCode.textContent = lesson.steps.map(s => s.code).join("\n");
+  modal.style.display = "flex";
+}
+
+function challengeMode() {
+  addMessage("Faça o desafio no seu próprio código. Não vou entregar a resposta pronta agora: vou te dar pistas e revisar seu raciocínio.", "bot", true);
+  showActions([
+    ["Pista", "pista"],
+    ["Voltar para a aula", "voltar"],
+    ["Outro assunto", "menu"]
+  ]);
+}
+
+function giveHint() {
+  if (!topic) return home();
+  const hints = {
+    listas: "Comece por: animais = [ ... ]. Depois use print() e lembre que o segundo item possui índice 1.",
+    jogos: "Procure no código a variável que guarda o número secreto. Depois pense em como mudar esse valor.",
+    calculos: "Crie numero1 e numero2 com dois valores. Para multiplicar, use o operador *."
+  };
+  addMessage("Pista: " + hints[topic], "bot", true);
+  showActions([
+    ["Tente novamente", "desafio"],
+    ["Outro assunto", "menu"]
+  ]);
+}
+
+function normalize(value) {
+  return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+}
+
+function handle(raw) {
+  const value = normalize(raw);
+  if (!value) return;
+
+  addMessage(raw, "user");
+
+  if (value === "listas" || value.includes("lista")) return startLesson("listas");
+  if (value === "jogos" || value.includes("jogo")) return startLesson("jogos");
+  if (value === "calculos" || value.includes("calculo") || value.includes("matematica") || value.includes("conta")) return startLesson("calculos");
+
+  if (value === "menu" || value === "inicio" || value === "voltar" || value === "outro assunto") {
+    return home();
+  }
+
+  if (value === "proxima" || value.includes("proxima linha") || value === "continuar" || value === "entendi") {
+    return nextStep();
+  }
+
+  if (value === "repita" || value.includes("explique novamente") || value.includes("nao entendi") || value.includes("novamente")) {
+    return repeatStep();
+  }
+
+  if (value === "codigo" || value.includes("codigo completo") || value.includes("ver codigo")) {
+    return showFullCode();
+  }
+
+  if (value === "recomecar") {
+    return topic ? startLesson(topic) : home();
+  }
+
+  if (value === "desafio" || value.includes("tentar o desafio")) {
+    return challengeMode();
+  }
+
+  if (value === "pista" || value.includes("dica")) {
+    return giveHint();
+  }
+
+  addMessage("Não entendi esse comando ainda. Durante a aula você pode usar “próxima”, “repita”, “código completo” ou “menu”.", "bot", true);
+  showActions([
+    ["Próxima linha", "proxima"],
+    ["Explique novamente", "repita"],
+    ["Outro assunto", "menu"]
+  ]);
+}
+
+function send() {
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = "";
+  handle(text);
+  input.focus();
+}
+
+sendButton.addEventListener("click", send);
+input.addEventListener("keydown", event => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    send();
+  }
+});
+
+document.getElementById("closeModal").addEventListener("click", () => modal.style.display = "none");
+modal.addEventListener("click", event => {
+  if (event.target === modal) modal.style.display = "none";
+});
+
+home(true);
+input.focus();
 </script>
 </body>
 </html>
