@@ -139,6 +139,54 @@ const lessons = {
       {code:'print(numero1 - numero2)\nprint(numero1 * numero2)\nprint(numero1 / numero2)', explain:'Os operadores -, * e / fazem subtração, multiplicação e divisão. Assim, um pequeno programa pode calcular várias operações.'}
     ],
     challenge: 'Crie duas variáveis e mostre a multiplicação entre elas.'
+  },
+
+  bot: {
+    title: "Bot estilo ELIZA",
+    intro: "Vamos criar um pequeno chatbot baseado em regras. Ele não precisa de inteligência artificial: vai ler o que a pessoa digita, procurar palavras-chave e escolher uma resposta.",
+    steps: [
+      {
+        code:'print("Olá! Eu sou o MiniBot.")',
+        explain:'Primeiro mostramos uma mensagem de boas-vindas. A função print() escreve o texto na tela.'
+      },
+      {
+        code:'while True:',
+        explain:'while True cria um ciclo de conversa. Assim, o bot pode continuar conversando até encontrarmos uma maneira de sair.'
+      },
+      {
+        code:'    mensagem = input("Você: ").lower()',
+        explain:'input() espera o que o aluno digitar. .lower() transforma a mensagem em letras minúsculas, facilitando a comparação das palavras.'
+      },
+      {
+        code:'    if "oi" in mensagem:',
+        explain:'if verifica se a palavra oi aparece na mensagem. O operador in procura um texto dentro de outro texto.'
+      },
+      {
+        code:'        print("Olá! Como você está?")',
+        explain:'Quando a condição do if é verdadeira, o bot responde essa mensagem.'
+      },
+      {
+        code:'    elif "nome" in mensagem:',
+        explain:'elif significa “senão, se”. Aqui criamos uma segunda regra para quando o aluno perguntar sobre o nome do bot.'
+      },
+      {
+        code:'        print("Eu sou o MiniBot.")',
+        explain:'Esta é a resposta correspondente à palavra-chave nome.'
+      },
+      {
+        code:'    elif "sair" in mensagem:',
+        explain:'Criamos uma palavra especial para encerrar a conversa. Quando o aluno digitar sair, esta condição será verdadeira.'
+      },
+      {
+        code:'        break',
+        explain:'break interrompe o while e encerra o chatbot. É a saída do nosso pequeno programa.'
+      },
+      {
+        code:'    else:\n        print("Conte mais sobre isso.")',
+        explain:'else é a resposta padrão. Quando nenhuma das palavras-chave anteriores aparece, o bot usa esta resposta.'
+      }
+    ],
+    challenge: 'Adicione uma nova regra. Por exemplo: quando o aluno escrever "Python", o bot deve responder "Python é uma linguagem de programação!".'
   }
 };
 
@@ -239,7 +287,8 @@ function home(clear=false) {
   showActions([
     ["Listas Python", "listas"],
     ["Jogos Python", "jogos"],
-    ["Cálculos Python", "calculos"]
+    ["Cálculos Python", "calculos"],
+    ["Bot estilo ELIZA", "bot"]
   ]);
 }
 
@@ -314,7 +363,8 @@ function giveHint() {
   const hints = {
     listas: "Comece por: animais = [ ... ]. Depois use print() e lembre que o segundo item possui índice 1.",
     jogos: "Procure no código a variável que guarda o número secreto. Depois pense em como mudar esse valor.",
-    calculos: "Crie numero1 e numero2 com dois valores. Para multiplicar, use o operador *."
+    calculos: "Crie numero1 e numero2 com dois valores. Para multiplicar, use o operador *.",
+    bot: "Escolha uma palavra-chave nova, como Python. Depois copie a estrutura de um elif e troque a palavra e a resposta."
   };
   addMessage("Pista: " + hints[topic], "bot", true);
   showActions([
@@ -336,6 +386,7 @@ function handle(raw) {
   if (value === "listas" || value.includes("lista")) return startLesson("listas");
   if (value === "jogos" || value.includes("jogo")) return startLesson("jogos");
   if (value === "calculos" || value.includes("calculo") || value.includes("matematica") || value.includes("conta")) return startLesson("calculos");
+  if (value === "bot" || value.includes("chatbot") || value.includes("eliza")) return startLesson("bot");
 
   if (value === "menu" || value === "inicio" || value === "voltar" || value === "outro assunto") {
     return home();
@@ -365,7 +416,7 @@ function handle(raw) {
     return giveHint();
   }
 
-  addMessage("Não entendi esse comando ainda. Durante a aula você pode usar “próxima”, “repita”, “código completo” ou “menu”.", "bot", true);
+  addMessage("Não entendi esse comando ainda. Escolha um assunto ou use “próxima”, “repita”, “código completo” ou “menu”. Para criar o chatbot, você também pode escrever “bot” ou “ELIZA”.", "bot", true);
   showActions([
     ["Próxima linha", "proxima"],
     ["Explique novamente", "repita"],
