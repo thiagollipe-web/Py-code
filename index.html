@@ -2,451 +2,99 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#07110a">
-<title>Py-Code :: Prof Python</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a1324">
+<meta name="description" content="Py-Code Academia: aprenda Python com um tutor de regras, jogos simples e Google Colab.">
+<title>Py-Code Academia • Aprenda Python</title>
+<link rel="manifest" href="./manifest.webmanifest">
 <style>
-:root{
-  --bg:#07110a;--panel:#0b1710;--panel2:#0f1d14;--border:#21452b;
-  --text:#e6f4e9;--muted:#91a99a;--green:#58e676;--cyan:#5dd8ff;
-  --yellow:#ffd76a;--shadow:0 18px 50px rgba(0,0,0,.35)
-}
+:root{color-scheme:dark;--bg:#090824;--panel:#17183e;--soft:#26275c;--edge:#404579;--text:#f9f9ff;--muted:#c1c8ea;--accent:#68ffd1;--sky:#92baff;--yellow:#ffe77e}
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:#050a06;color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-body{display:flex;justify-content:center}
-.app{width:min(1100px,100%);min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#0a150d 0,#07110a 100%)}
-.header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);background:rgba(8,18,11,.96);position:sticky;top:0;z-index:3}
-.brand{display:flex;align-items:center;gap:10px}.logo{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:#15301c;color:var(--green);font-weight:800}
-.brand h1{font-size:15px;margin:0}.brand small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
-.status{font-size:11px;color:var(--green);padding:6px 9px;border:1px solid #285a34;border-radius:999px;background:#0b1d10}
-.chat{flex:1;padding:18px 16px 110px;overflow:auto}
-.message{display:flex;gap:10px;margin:0 0 14px;align-items:flex-start}
-.avatar{width:32px;height:32px;flex:0 0 32px;border-radius:10px;display:grid;place-items:center;font-size:13px;font-weight:800}
-.bot .avatar{background:#16331e;color:var(--green)}.user .avatar{background:#122635;color:var(--cyan)}
-.bubble{max-width:min(820px,calc(100% - 44px));padding:13px 15px;border:1px solid var(--border);border-radius:14px;background:var(--panel);box-shadow:var(--shadow);white-space:pre-wrap;line-height:1.55;font-size:14px}
-.user{flex-direction:row-reverse}.user .bubble{background:#0d1a24;border-color:#23455b}
-.teacher-label{color:var(--green);font-weight:750;font-size:12px;margin-bottom:7px}
-.step{margin-top:10px;padding:12px;border:1px solid #2b5333;border-radius:12px;background:#08130b}
-.step-title{color:var(--yellow);font-size:12px;font-weight:700;margin-bottom:7px}
-code.inline{font-family:"SFMono-Regular",Consolas,monospace}
-pre{margin:0;padding:12px;border-radius:10px;background:#040806;border:1px solid #1c3421;overflow:auto;color:#d7ffe0;font:13px/1.5 "SFMono-Regular",Consolas,monospace}
-.explain{margin-top:10px;color:#d7e7da}.hint{margin-top:8px;color:var(--muted);font-size:12px}
-.actions{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px 42px}
-.action{border:1px solid #2a5632;background:#0c1a10;color:#dff8e4;padding:9px 12px;border-radius:10px;cursor:pointer;font:inherit;font-size:12px}
-.action:hover{border-color:var(--green);background:#102216}
-.composer{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(1100px,100%);padding:12px 16px 16px;background:linear-gradient(180deg,rgba(5,10,6,0),rgba(5,10,6,.98) 32%);z-index:2}
-.composer-inner{display:flex;gap:9px;align-items:center;background:#0b1710;border:1px solid var(--border);border-radius:14px;padding:8px}
-.prompt{color:var(--green);font-weight:800;padding-left:5px}
-input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--text);font:inherit;font-size:14px;padding:9px}
-.send{border:1px solid #2b6337;background:#13311b;color:var(--green);padding:9px 14px;border-radius:10px;cursor:pointer;font-weight:750}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.66);z-index:10;padding:18px;align-items:center;justify-content:center}
-.modal-card{width:min(900px,100%);max-height:90vh;overflow:auto;background:#07100a;border:1px solid #2b5933;border-radius:16px;box-shadow:0 24px 80px #000}
-.modal-head{display:flex;justify-content:space-between;align-items:center;padding:13px 15px;border-bottom:1px solid var(--border);font-size:13px}
-.close{background:none;border:0;color:var(--green);cursor:pointer;font:inherit}
-.modal pre{margin:15px;min-height:250px}
-.footer-note{color:var(--muted);font-size:11px;text-align:center;padding:4px 0 0}
-@media(max-width:600px){
-  .header{padding:11px 12px}.chat{padding:14px 10px 112px}.bubble{font-size:13px;padding:12px}
-  .actions{margin-left:42px}.composer{padding:9px 10px 12px}.send{padding:9px 11px}
-}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input,textarea{font:inherit}
+button{cursor:pointer;touch-action:manipulation}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+button:disabled{opacity:.5;cursor:not-allowed}
+a{color:var(--sky)}
+.layout{width:min(1440px,100%);margin:auto;min-height:100dvh;display:grid;grid-template-columns:265px minmax(0,1fr) 340px}
+.sidebar{background:linear-gradient(180deg,#16113c,#111833 70%,#081a24);border-right:1px solid var(--edge);padding:22px 15px;display:flex;flex-direction:column;gap:18px}
+.brand{display:flex;gap:12px;align-items:center}.logo{width:43px;height:43px;border-radius:14px;background:linear-gradient(135deg,#68e5ae,#8bb9ff);color:#071325;display:grid;place-items:center;font-size:18px;font-weight:900}.brand strong{font-size:17px}.brand small{display:block;color:var(--muted);font-size:11px}
+.eyebrow{color:var(--muted);text-transform:uppercase;letter-spacing:.15em;font-size:10px;font-weight:800}
+.nav{display:grid;gap:7px}.nav button{width:100%;text-align:left;border:1px solid transparent;background:transparent;color:var(--text);padding:11px 12px;border-radius:11px;font-size:13px}.nav button:hover,.nav button.active{background:var(--soft);border-color:#3a5f73}.nav button span{display:inline-grid;place-items:center;width:25px;height:25px;background:#213650;border-radius:8px;margin-right:8px;color:var(--accent);font-weight:800}
+.progress{margin-top:auto;background:var(--panel);border:1px solid var(--edge);border-radius:14px;padding:13px}.progress p{margin:7px 0;color:var(--muted);font-size:12px}.track{height:8px;background:#25364b;border-radius:99px;overflow:hidden}.bar{height:100%;width:0;background:linear-gradient(90deg,#68e5ae,#8bb9ff);transition:width .2s}
+.main{padding:23px 24px 36px;min-width:0}
+.topline{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:20px}
+.pill{border-radius:100px;background:#253a4d;border:1px solid #3f8c91;color:var(--accent);font-size:11px;padding:7px 12px;font-weight:800}
+h1{font-size:clamp(26px,3.2vw,39px);line-height:1.12;letter-spacing:-.04em;margin:12px 0}.lead{color:var(--muted);max-width:720px;font-size:14px}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:24px 0}
+.card{background:linear-gradient(135deg,#242058,#142c4e 65%,#152e32);border:1px solid #485291;border-radius:19px;text-align:left;padding:18px;min-height:142px;color:var(--text);transition:transform .15s,border-color .15s;box-shadow:0 14px 30px #05081966}.card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 18px 35px #0008}.card:focus-visible{transform:translateY(-2px)}.card b{display:block;font-size:16px;margin:8px 0 4px}.card small{color:var(--muted);font-size:12px}.card .mark{color:var(--accent);font-weight:800;letter-spacing:.05em;font-size:12px}.card:nth-child(4n+2){background:linear-gradient(135deg,#3d225a,#242657,#162f47)}.card:nth-child(4n+3){background:linear-gradient(135deg,#1c4650,#193459,#20204f)}.card:nth-child(4n+4){background:linear-gradient(135deg,#492444,#292958,#102d46)}
+.workspace{background:linear-gradient(180deg,#1b1b49,#121d36);border:1px solid #485388;border-radius:22px;overflow:hidden;box-shadow:0 22px 50px #0005}
+.workspace-head{padding:14px 17px;border-bottom:1px solid var(--edge);display:flex;justify-content:space-between;gap:10px;align-items:center}.workspace-head b{font-size:14px}.workspace-head small{color:var(--muted)}
+.lesson-text{padding:16px 18px 3px;color:var(--muted);font-size:13px}
+.step-label{color:var(--accent);font-size:12px;font-weight:800;padding:14px 18px 0}
+#explain{padding:6px 18px 16px;font-size:13px;line-height:1.55}
+.editor{margin:0 16px;border:1px solid #334860;border-radius:12px;background:#070e1a;overflow:hidden}
+.editor-head{background:#17263c;padding:9px 12px;color:#b9c9dc;font-size:11px;font-weight:800}
+#code{display:block;width:100%;min-height:170px;max-height:360px;resize:vertical;border:0;outline:none;background:#070e1a;color:#d4fbe3;padding:14px;font:13px/1.6 "SFMono-Regular",Consolas,"Liberation Mono",monospace;tab-size:4}
+.actions{display:flex;flex-wrap:wrap;gap:8px;padding:15px 17px}.btn{border:1px solid #3b526b;background:#1b2c45;color:var(--text);padding:9px 12px;border-radius:10px;font-size:12px;font-weight:800}.btn.primary{background:linear-gradient(135deg,#67fbc8,#8fe9ff);color:#08242d;border-color:#6df3cd;box-shadow:0 5px 16px #30eaba33}.btn:hover{filter:brightness(1.13)}
+.terminal{margin:0 16px 17px;background:#060d17;border-radius:12px;border:1px solid #253950;padding:12px;min-height:72px;white-space:pre-wrap;overflow:auto;font:12px/1.5 Consolas,monospace;color:#baf3d6}
+.challenge{border-top:1px solid var(--edge);padding:15px 17px}.challenge b{color:var(--yellow);font-size:13px}.challenge p{color:var(--muted);font-size:13px;margin:7px 0}
+.assistant{border-left:1px solid var(--edge);background:linear-gradient(180deg,#121c43,#081629);display:flex;flex-direction:column;min-width:0;max-height:100dvh;position:sticky;top:0}
+.assistant-head{padding:18px;border-bottom:1px solid var(--edge);display:flex;gap:10px;align-items:center}.bot-avatar{height:38px;width:38px;background:linear-gradient(140deg,#5d4bd6,#3c9bba);border-radius:12px;display:grid;place-items:center;color:var(--accent);font-weight:900}.assistant-head small{display:block;font-size:11px;color:var(--muted)}
+#messages{flex:1;min-height:210px;overflow:auto;padding:17px 14px;display:flex;flex-direction:column;gap:12px}
+.message{max-width:95%;background:#172840;border:1px solid #2b415c;border-radius:14px;padding:10px 12px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}.message.user{background:#183a34;border-color:#285c49;align-self:flex-end}.message strong{display:block;color:var(--accent);font-size:10px;margin-bottom:5px}
+.suggestions{display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px}.suggestions button{font-size:11px;border-radius:99px;background:#1a304a;color:var(--sky);border:1px solid #355273;padding:7px 10px}
+.composer{display:flex;gap:8px;padding:12px;border-top:1px solid var(--edge)}.composer input{min-width:0;flex:1;background:#111f34;color:var(--text);border:1px solid #324b68;border-radius:9px;padding:10px;font-size:12px}
+.footer-note{font-size:11px;color:var(--muted);padding:0 14px 14px}
+.mobile-bot{display:none}
+@media(max-width:1120px){.layout{grid-template-columns:220px minmax(0,1fr)}.assistant{position:fixed;z-index:8;right:0;top:0;bottom:0;width:min(360px,94vw);box-shadow:-12px 0 50px #0009;transform:translateX(102%);transition:transform .2s}.assistant.open{transform:translateX(0)}.mobile-bot{display:inline-flex}}
+@media(max-width:680px){.layout{display:block}.sidebar{padding:13px;gap:10px;border-right:0;border-bottom:1px solid var(--edge)}.brand small{font-size:10px}.nav{display:flex;overflow:auto;padding-bottom:3px}.nav button{white-space:nowrap;width:auto;flex:0 0 auto}.progress,.sidebar .eyebrow{display:none}.main{padding:18px 12px 26px}.cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.card{padding:12px;min-height:132px}.card b{font-size:14px}.card small{font-size:11px}.workspace-head{padding:13px}.actions{padding:13px}.lesson-text,#explain{font-size:12px}}
 </style>
 </head>
 <body>
-<div class="app">
-<header class="header">
-  <div class="brand">
-    <div class="logo">Py</div>
-    <div><h1>Prof Python</h1><small>Aprenda programando, uma linha por vez.</small></div>
-  </div>
-  <div class="status">AULA GUIADA</div>
-</header>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo">Py</div><div><strong>Py-Code Academia</strong><small>Programação de verdade, do zero</small></div></div>
+    <div class="eyebrow">Trilha de aprendizagem</div>
+    <nav class="nav" id="nav" aria-label="Módulos"></nav>
+    <div class="progress"><b>Meu progresso</b><p id="progressLabel">0 de 9 módulos visitados</p><div class="track"><div id="progressBar" class="bar"></div></div><p>Seu progresso fica salvo apenas neste navegador.</p></div>
+  </aside>
 
-<main id="chat" class="chat" aria-live="polite"></main>
+  <main class="main">
+    <div class="topline"><span class="pill">MISSÕES DE PYTHON • NÍVEL INICIANTE</span><button class="btn mobile-bot" id="openBot">Professor Bot</button></div>
+    <h1 id="title">Olá, futuro programador!</h1>
+    <p id="lead" class="lead">Escolha uma aula, leia a explicação e execute um programa pequeno. O Professor Bot oferece pistas em vez de fazer toda a atividade por você.</p>
+    <p class="eyebrow">Escolha sua próxima missão</p>
+    <div class="cards" id="cards"></div>
+    <section class="workspace" aria-label="Laboratório de código">
+      <div class="workspace-head"><b id="lessonTitle">Laboratório Python</b><small id="lessonCounter">Aula guiada</small></div>
+      <div class="lesson-text" id="intro"></div>
+      <div class="step-label" id="stepLabel">Passo 1</div>
+      <div id="explain"></div>
+      <div class="editor"><div class="editor-head">programa.py — edite uma linha de cada vez</div><textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Editor Python"></textarea></div>
+      <div class="actions">
+        <button class="btn primary" id="run">Executar Python</button>
+        <button class="btn" id="next">Próxima etapa</button>
+        <button class="btn" id="hint">Pedir dica</button>
+        <button class="btn" id="reset">Recomeçar</button>
+        <button class="btn" id="download">Baixar .py</button>
+        <button class="btn" id="colab">Copiar para Colab</button>
+      </div>
+      <pre class="terminal" id="terminal" aria-live="polite">Python local: aguardando inicialização...</pre>
+      <div class="challenge"><b>Desafio do aluno</b><p id="challenge">Escolha uma aula para começar.</p><button class="btn" id="copyCode">Copiar meu código</button></div>
+    </section>
+  </main>
 
-<div class="composer">
-  <div class="composer-inner">
-    <span class="prompt">&gt;</span>
-    <input id="input" autocomplete="off" aria-label="Mensagem para o Prof Python" placeholder="Digite sua resposta..." />
-    <button id="send" class="send">Enviar</button>
-  </div>
-  <div class="footer-note">Dica: você pode digitar “próxima”, “repita”, “código completo” ou “menu”.</div>
+  <aside class="assistant" id="assistant" aria-label="Professor Bot">
+    <div class="assistant-head"><div class="bot-avatar">?</div><div><b>Professor Bot</b><small>IA clássica • regras e perguntas</small></div><button class="btn mobile-bot" id="closeBot">Fechar</button></div>
+    <div id="messages" role="log" aria-live="polite"></div>
+    <div class="suggestions" id="suggestions"></div>
+    <form class="composer" id="chatForm"><input id="chatInput" aria-label="Mensagem ao Professor Bot" autocomplete="off" placeholder="Pergunte sobre a aula..."><button class="btn primary" type="submit">Enviar</button></form>
+    <div class="footer-note">O bot é baseado em regras, não em uma LLM. Ele orienta, explica comandos e propõe exercícios.</div>
+  </aside>
 </div>
-</div>
-
-<div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-  <div class="modal-card">
-    <div class="modal-head">
-      <strong id="modalTitle">Código completo</strong>
-      <button class="close" id="closeModal">Fechar</button>
-    </div>
-    <pre id="fullCode"></pre>
-  </div>
-</div>
-
-<script>
-"use strict";
-
-const lessons = {
-  listas: {
-    title: "Listas Python",
-    intro: "Uma lista permite guardar vários valores em uma única variável. Vamos montar uma lista de frutas e entender cada parte do código.",
-    steps: [
-      {
-        code:'frutas = ["maçã", "banana", "uva"]',
-        explain:'Criamos a variável frutas. O sinal = atribui um valor à variável. Os colchetes [ ] indicam uma lista e cada texto entre aspas é um elemento.'
-      },
-      {
-        code:'print(frutas)',
-        explain:'A função print() mostra o conteúdo da variável na tela. Aqui, ela mostra a lista inteira.'
-      },
-      {
-        code:'print(frutas[0])',
-        explain:'Os elementos da lista possuem índices. Em Python, a contagem começa em 0, então frutas[0] acessa o primeiro item: maçã.'
-      },
-      {
-        code:'frutas.append("laranja")',
-        explain:'O método append() adiciona um novo elemento no final da lista. Depois dessa linha, laranja passa a fazer parte de frutas.'
-      },
-      {
-        code:'print(frutas)',
-        explain:'Agora print() mostra a lista atualizada. Você acabou de aprender a criar, ler e alterar uma lista.'
-      }
-    ],
-    challenge: 'Crie uma lista chamada animais com três nomes e mostre o segundo item usando print().'
-  },
-
-  jogos: {
-    title: "Jogos Python",
-    intro: "Vamos montar a lógica de um jogo simples de adivinhação. Primeiro entendemos o código; depois você poderá modificar as regras.",
-    steps: [
-      {code:'numero_secreto = 7', explain:'Guardamos o número secreto em uma variável. O jogador precisa descobrir qual é esse número.'},
-      {code:'palpite = int(input("Digite um número: "))', explain:'input() recebe o que o jogador digita. int() transforma o texto recebido em um número inteiro.'},
-      {code:'if palpite == numero_secreto:', explain:'if verifica uma condição. O operador == compara o palpite com o número secreto. Os dois pontos : indicam o início do bloco da condição.'},
-      {code:'    print("Você acertou!")', explain:'A indentação, ou recuo, mostra que esta linha pertence ao bloco do if. Ela será executada quando o palpite estiver correto.'},
-      {code:'else:\n    print("Tente novamente!")', explain:'else define o caminho alternativo: quando a condição do if for falsa, o programa executará o bloco do else.'}
-    ],
-    challenge: 'Troque o número secreto e teste dois palpites diferentes.'
-  },
-
-  calculos: {
-    title: "Cálculos Python",
-    intro: "Vamos usar variáveis e operadores matemáticos para fazer contas com Python.",
-    steps: [
-      {code:'numero1 = 10', explain:'Criamos a variável numero1 e guardamos o valor 10 nela.'},
-      {code:'numero2 = 5', explain:'Criamos a segunda variável e guardamos o valor 5.'},
-      {code:'soma = numero1 + numero2', explain:'O operador + faz a adição. O resultado da conta, 15, fica guardado na variável soma.'},
-      {code:'print(soma)', explain:'print() mostra o valor guardado em soma na tela.'},
-      {code:'print(numero1 - numero2)\nprint(numero1 * numero2)\nprint(numero1 / numero2)', explain:'Os operadores -, * e / fazem subtração, multiplicação e divisão. Assim, um pequeno programa pode calcular várias operações.'}
-    ],
-    challenge: 'Crie duas variáveis e mostre a multiplicação entre elas.'
-  },
-
-  bot: {
-    title: "Bot estilo ELIZA",
-    intro: "Vamos criar um pequeno chatbot baseado em regras. Ele não precisa de inteligência artificial: vai ler o que a pessoa digita, procurar palavras-chave e escolher uma resposta.",
-    steps: [
-      {
-        code:'print("Olá! Eu sou o MiniBot.")',
-        explain:'Primeiro mostramos uma mensagem de boas-vindas. A função print() escreve o texto na tela.'
-      },
-      {
-        code:'while True:',
-        explain:'while True cria um ciclo de conversa. Assim, o bot pode continuar conversando até encontrarmos uma maneira de sair.'
-      },
-      {
-        code:'    mensagem = input("Você: ").lower()',
-        explain:'input() espera o que o aluno digitar. .lower() transforma a mensagem em letras minúsculas, facilitando a comparação das palavras.'
-      },
-      {
-        code:'    if "oi" in mensagem:',
-        explain:'if verifica se a palavra oi aparece na mensagem. O operador in procura um texto dentro de outro texto.'
-      },
-      {
-        code:'        print("Olá! Como você está?")',
-        explain:'Quando a condição do if é verdadeira, o bot responde essa mensagem.'
-      },
-      {
-        code:'    elif "nome" in mensagem:',
-        explain:'elif significa “senão, se”. Aqui criamos uma segunda regra para quando o aluno perguntar sobre o nome do bot.'
-      },
-      {
-        code:'        print("Eu sou o MiniBot.")',
-        explain:'Esta é a resposta correspondente à palavra-chave nome.'
-      },
-      {
-        code:'    elif "sair" in mensagem:',
-        explain:'Criamos uma palavra especial para encerrar a conversa. Quando o aluno digitar sair, esta condição será verdadeira.'
-      },
-      {
-        code:'        break',
-        explain:'break interrompe o while e encerra o chatbot. É a saída do nosso pequeno programa.'
-      },
-      {
-        code:'    else:\n        print("Conte mais sobre isso.")',
-        explain:'else é a resposta padrão. Quando nenhuma das palavras-chave anteriores aparece, o bot usa esta resposta.'
-      }
-    ],
-    challenge: 'Adicione uma nova regra. Por exemplo: quando o aluno escrever "Python", o bot deve responder "Python é uma linguagem de programação!".'
-  }
-};
-
-const chat = document.getElementById("chat");
-const input = document.getElementById("input");
-const sendButton = document.getElementById("send");
-const modal = document.getElementById("modal");
-const fullCode = document.getElementById("fullCode");
-let topic = null;
-let step = 0;
-let lastMessage = "";
-
-function addMessage(text, role="bot", teacher=false) {
-  const wrap = document.createElement("div");
-  wrap.className = "message " + role;
-
-  const avatar = document.createElement("div");
-  avatar.className = "avatar";
-  avatar.textContent = role === "bot" ? "P" : "V";
-
-  const bubble = document.createElement("div");
-  bubble.className = "bubble";
-  if (teacher) {
-    const label = document.createElement("div");
-    label.className = "teacher-label";
-    label.textContent = "Prof Python";
-    bubble.appendChild(label);
-  }
-  const body = document.createElement("div");
-  body.textContent = text;
-  bubble.appendChild(body);
-
-  wrap.append(avatar, bubble);
-  chat.appendChild(wrap);
-  chat.scrollTop = chat.scrollHeight;
-  lastMessage = text;
-}
-
-function addStep(code, explain, index, total) {
-  const wrap = document.createElement("div");
-  wrap.className = "message bot";
-
-  const avatar = document.createElement("div");
-  avatar.className = "avatar";
-  avatar.textContent = "P";
-
-  const bubble = document.createElement("div");
-  bubble.className = "bubble";
-
-  const label = document.createElement("div");
-  label.className = "teacher-label";
-  label.textContent = "Prof Python";
-
-  const stepBox = document.createElement("div");
-  stepBox.className = "step";
-
-  const title = document.createElement("div");
-  title.className = "step-title";
-  title.textContent = "Passo " + index + " de " + total;
-
-  const pre = document.createElement("pre");
-  pre.textContent = code;
-
-  const explanation = document.createElement("div");
-  explanation.className = "explain";
-  explanation.textContent = "Explicação: " + explain;
-
-  const hint = document.createElement("div");
-  hint.className = "hint";
-  hint.textContent = "Agora explique para si mesmo o que esta linha faz. Depois clique em “Próxima linha”.";
-
-  stepBox.append(title, pre, explanation, hint);
-  bubble.append(label, stepBox);
-  wrap.append(avatar, bubble);
-  chat.appendChild(wrap);
-  chat.scrollTop = chat.scrollHeight;
-}
-
-function showActions(items) {
-  const row = document.createElement("div");
-  row.className = "actions";
-  items.forEach(([label, command]) => {
-    const button = document.createElement("button");
-    button.className = "action";
-    button.textContent = label;
-    button.onclick = () => handle(command);
-    row.appendChild(button);
-  });
-  chat.appendChild(row);
-  chat.scrollTop = chat.scrollHeight;
-}
-
-function home(clear=false) {
-  topic = null;
-  step = 0;
-  if (clear) chat.replaceChildren();
-  addMessage("O que você quer aprender hoje?", "bot", true);
-  showActions([
-    ["Listas Python", "listas"],
-    ["Jogos Python", "jogos"],
-    ["Cálculos Python", "calculos"],
-    ["Bot estilo ELIZA", "bot"]
-  ]);
-}
-
-function startLesson(key) {
-  topic = key;
-  step = 0;
-  const lesson = lessons[key];
-
-  addMessage("Ótima escolha! Vamos estudar " + lesson.title + ".\n\n" + lesson.intro + "\n\nVou explicar uma linha por vez. Você controla o ritmo.", "bot", true);
-  nextStep();
-}
-
-function nextStep() {
-  if (!topic) return home();
-
-  const lesson = lessons[topic];
-
-  if (step >= lesson.steps.length) {
-    addMessage("Parabéns! Terminamos a explicação de " + lesson.title + ".\n\nAgora é sua vez de praticar.", "bot", true);
-    addMessage("Desafio: " + lesson.challenge, "bot", true);
-    showActions([
-      ["Tentar o desafio", "desafio"],
-      ["Recomeçar aula", "recomecar"],
-      ["Outro assunto", "menu"]
-    ]);
-    return;
-  }
-
-  const current = lesson.steps[step];
-  step += 1;
-  addStep(current.code, current.explain, step, lesson.steps.length);
-  showActions([
-    ["Entendi, próxima linha", "proxima"],
-    ["Explique novamente", "repita"],
-    ["Ver código completo", "codigo"],
-    ["Outro assunto", "menu"]
-  ]);
-}
-
-function repeatStep() {
-  if (!topic || step <= 0) return home();
-  const lesson = lessons[topic];
-  const current = lesson.steps[step - 1];
-  addMessage("Claro. Vamos olhar a mesma linha novamente, com outra explicação.", "bot", true);
-  addStep(current.code, current.explain, step, lesson.steps.length);
-  showActions([
-    ["Entendi, próxima linha", "proxima"],
-    ["Explique novamente", "repita"],
-    ["Ver código completo", "codigo"],
-    ["Outro assunto", "menu"]
-  ]);
-}
-
-function showFullCode() {
-  if (!topic) return home();
-  const lesson = lessons[topic];
-  fullCode.textContent = lesson.steps.map(s => s.code).join("\n");
-  modal.style.display = "flex";
-}
-
-function challengeMode() {
-  addMessage("Faça o desafio no seu próprio código. Não vou entregar a resposta pronta agora: vou te dar pistas e revisar seu raciocínio.", "bot", true);
-  showActions([
-    ["Pista", "pista"],
-    ["Voltar para a aula", "voltar"],
-    ["Outro assunto", "menu"]
-  ]);
-}
-
-function giveHint() {
-  if (!topic) return home();
-  const hints = {
-    listas: "Comece por: animais = [ ... ]. Depois use print() e lembre que o segundo item possui índice 1.",
-    jogos: "Procure no código a variável que guarda o número secreto. Depois pense em como mudar esse valor.",
-    calculos: "Crie numero1 e numero2 com dois valores. Para multiplicar, use o operador *.",
-    bot: "Escolha uma palavra-chave nova, como Python. Depois copie a estrutura de um elif e troque a palavra e a resposta."
-  };
-  addMessage("Pista: " + hints[topic], "bot", true);
-  showActions([
-    ["Tente novamente", "desafio"],
-    ["Outro assunto", "menu"]
-  ]);
-}
-
-function normalize(value) {
-  return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-}
-
-function handle(raw) {
-  const value = normalize(raw);
-  if (!value) return;
-
-  addMessage(raw, "user");
-
-  if (value === "listas" || value.includes("lista")) return startLesson("listas");
-  if (value === "jogos" || value.includes("jogo")) return startLesson("jogos");
-  if (value === "calculos" || value.includes("calculo") || value.includes("matematica") || value.includes("conta")) return startLesson("calculos");
-  if (value === "bot" || value.includes("chatbot") || value.includes("eliza")) return startLesson("bot");
-
-  if (value === "menu" || value === "inicio" || value === "voltar" || value === "outro assunto") {
-    return home();
-  }
-
-  if (value === "proxima" || value.includes("proxima linha") || value === "continuar" || value === "entendi") {
-    return nextStep();
-  }
-
-  if (value === "repita" || value.includes("explique novamente") || value.includes("nao entendi") || value.includes("novamente")) {
-    return repeatStep();
-  }
-
-  if (value === "codigo" || value.includes("codigo completo") || value.includes("ver codigo")) {
-    return showFullCode();
-  }
-
-  if (value === "recomecar") {
-    return topic ? startLesson(topic) : home();
-  }
-
-  if (value === "desafio" || value.includes("tentar o desafio")) {
-    return challengeMode();
-  }
-
-  if (value === "pista" || value.includes("dica")) {
-    return giveHint();
-  }
-
-  addMessage("Não entendi esse comando ainda. Escolha um assunto ou use “próxima”, “repita”, “código completo” ou “menu”. Para criar o chatbot, você também pode escrever “bot” ou “ELIZA”.", "bot", true);
-  showActions([
-    ["Próxima linha", "proxima"],
-    ["Explique novamente", "repita"],
-    ["Outro assunto", "menu"]
-  ]);
-}
-
-function send() {
-  const text = input.value.trim();
-  if (!text) return;
-  input.value = "";
-  handle(text);
-  input.focus();
-}
-
-sendButton.addEventListener("click", send);
-input.addEventListener("keydown", event => {
-  if (event.key === "Enter") {
-    event.preventDefault();
-    send();
-  }
-});
-
-document.getElementById("closeModal").addEventListener("click", () => modal.style.display = "none");
-modal.addEventListener("click", event => {
-  if (event.target === modal) modal.style.display = "none";
-});
-
-home(true);
-input.focus();
-</script>
+<script src="./curriculo.js?v=38" defer></script>
+<script src="./tutor.js?v=38" defer></script>
+<script src="./academia.js?v=38" defer></script>
 </body>
 </html>

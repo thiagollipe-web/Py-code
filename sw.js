@@ -1,7 +1,10 @@
-const CACHE="py-code-v37";
+const CACHE="py-code-v38";
 const APP_SHELL=[
   "./",
   "./index.html",
+  "./curriculo.js?v=38",
+  "./tutor.js?v=38",
+  "./academia.js?v=38",
   "./manifest.webmanifest",
   "./pycode-worker.js?v=37",
   "./pycode_worker.py",

@@ -1,92 +1,27 @@
-# Py-Code
+# Py-Code Academia
 
-> Um terminal Python leve, direto e pensado para uso offline.
+Plataforma educativa e responsiva para aprender Python com aulas guiadas e um Professor Bot clássico, **baseado em regras (não é uma LLM)**.
 
-O Py-Code é um pequeno ambiente para escrever e executar Python localmente no navegador, usando cache local do runtime.
+## Trilhas
 
-## Interface
+1. O que é Python?
+2. Listas Python
+3. Cálculos e decisões
+4. Cobrinha
+5. Ping-Pong
+6. Tetris
+7. RPG textual
+8. Bot clássico ELIZA
+9. Primeira LLM leve no Google Colab
 
-A proposta é deliberadamente simples:
+Cada módulo inclui exemplos pequenos e progressivos, explicações, dicas e desafios. Os jogos são protótipos **textuais de lógica**, não versões gráficas completas. O aluno pode executar código Python simples no próprio site usando o Pyodide local. A atividade final com SmolLM2-135M-Instruct é executada **no Google Colab**, requer internet e instalação de dependências.
 
-**editor Python → executar → terminal**
-
-Não há designer, canvas, blocos ou painel gráfico. A interface é um terminal de programação em preto e branco, com distinção visual para saída, informações, avisos e erros.
-
-## Recursos
-
-- editor Python simples;
-- execução no navegador com Pyodide;
-- Web Worker para manter o runtime separado da interface;
-- terminal de saída;
-- mensagens de erro;
-- botão PARAR;
-- limite de tempo para processos travados;
-- salvamento automático do código no navegador;
-- Ctrl + Enter para executar;
-- indentação com Tab;
-- download do programa como `.py`;
-- layout responsivo para computador e celular;
-- PWA;
-- runtime Pyodide empacotado no build do GitHub Pages;
-- execução sem CDN durante o uso;
-- shell e biblioteca Python em cache local.
-
-## Exemplo
-
-    print("Olá, mundo!")
-
-    for numero in range(5):
-        print("Número:", numero)
-
-## Jogos e gráficos
-
-O runtime Python ainda contém uma pequena API experimental para jogos e Canvas no Worker. A interface atual, porém, é propositalmente apenas um terminal. O foco desta versão é manter o ambiente leve e estável para programação textual.
-
-## Arquitetura
-
-    index.html
-       ↓
-    Web Worker
-       ↓
-    Pyodide
-       ↓
-    Python
-       ↓
-    terminal
-
-O código Python é executado localmente no navegador. O projeto não precisa de um servidor Python próprio.
+O Professor Bot usa reconhecimento de palavras-chave, contexto da aula e pistas progressivas. Ele não substitui um professor nem resolve atividades automaticamente.
 
 ## Publicação
 
-O projeto pode ser publicado como site estático no GitHub Pages:
+O GitHub Pages publica os arquivos estáticos. O workflow prepara a distribuição local do Pyodide. Depois da primeira visita conectada e do armazenamento pelo navegador, o ambiente pode funcionar offline; o Colab não é offline.
 
-https://thiagollipe-web.github.io/Py-code/
+Site: https://thiagollipe-web.github.io/Py-code/
 
-## Estrutura
-
-    Py-code/
-    ├── index.html
-    ├── pycode-worker.js
-    ├── pycode_worker.py
-    ├── sw.js
-    ├── manifest.webmanifest
-    ├── .github/workflows/pages.yml
-    └── pyodide/ (gerado no build do Pages)
-    ├── assets/
-    │   └── py-code-banner.svg
-    └── README.md
-
-## Limitação
-
-O runtime Pyodide é baixado durante o build do GitHub Pages e publicado dentro de `pyodide/` junto com o editor. O navegador não precisa buscar Pyodide em CDN para executar os programas. O Service Worker coloca o shell e o runtime local em cache para uso posterior sem conexão.
-
----
-
-**Py-Code — Python simples, direto no terminal.**
-## Professor Bot
-
-- tutor local integrado ao editor;
-- dicas progressivas e desafios;
-- leitura de erros reais do runtime;
-- referências para exemplos da AWS Code Library;
-- execução local sem dependência de um servidor de IA remoto.
+Principais arquivos: `index.html`, `curriculo.js`, `tutor.js`, `academia.js`, `pycode-worker.js`, `pycode_worker.py`, `sw.js`.
