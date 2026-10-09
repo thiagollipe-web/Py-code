@@ -23,7 +23,7 @@ function create(options={}){
  let moduleId=options.moduleId||"inicio",step=0,hintIndex=0,lastError="";
  function current(){return global.PyCodeCurriculo?.byId[moduleId]||global.PyCodeCurriculo.byId.inicio}
  function setLesson(id,index=0){moduleId=id;step=index;hintIndex=0;lastError=""}
- function hint(){const a=current().hints;const h=a[Math.min(hintIndex,a.length-1)];hintIndex++;return "Pista "+Math.min(hintIndex,a.length)+": "+h+"\nAgora tente mudar apenas uma linha do programa."}
+ function hint(){const a=current().hints;const h=a[Math.min(hintIndex,a.length-1)];hintIndex++;return "Pista "+Math.min(hintIndex,a.length)+": "+h.replace(/:[^:]*[=\[\(][^.!?]*/g,": tente descobrir a sintaxe no exemplo da aula")+"\nO que você tentaria escrever agora?"}
  function error(message){lastError=String(message||"");const n=normalize(lastError);
   if(n.includes("syntaxerror"))return "O Python encontrou um erro de escrita. Confira parênteses, aspas e dois pontos.";
   if(n.includes("indentationerror"))return "O recuo está inconsistente. Depois de if, for ou def use quatro espaços.";
