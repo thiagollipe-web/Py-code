@@ -1,16 +1,16 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 function game(id){
  const window={};vm.runInNewContext(fs.readFileSync('ascii-games.js','utf8'),{window});
- const html=window.PyCodeASCII[id].match(/jogo = r"""([\s\S]+?)"""/)[1];
- const script=html.match(/<script>([\s\S]+?)<\/script>/)[1];
+ const script=window.PyCodeASCII[id].match(/Javascript\(r"""([\s\S]+?)"""\)/)[1].replace(/^\(\(\) => \{\n/,'').replace(/\n\}\)\(\);$/,'');
  const elements={};const listeners={};let next=0;const timers=new Map();
  const element=id=>elements[id]??={textContent:'',addEventListener:(name,fn)=>{listeners[id+':'+name]=fn},focus(){},dataset:{}};
- const context=vm.createContext({document:{getElementById:element,querySelectorAll:()=>[],addEventListener:(n,f)=>{listeners[n]=f},hidden:false},window:{addEventListener:(n,f)=>{listeners[n]=f}},setInterval:f=>{timers.set(++next,f);return next},clearInterval:i=>timers.delete(i),console});
+ const panel={isConnected:true,querySelector:sel=>element(sel==='pre'?'tela':sel.includes('restart')?'inicio':sel.includes('pause')?'pausa':'aviso'),querySelectorAll:()=>[]};
+ const context=vm.createContext({document:{createElement:()=>panel,body:{appendChild(){}},getElementById:element,querySelectorAll:()=>[],addEventListener:(n,f)=>{listeners[n]=f},hidden:false},window:{addEventListener:(n,f)=>{listeners[n]=f}},setInterval:f=>{timers.set(++next,f);return next},clearInterval:i=>timers.delete(i),console});
  vm.runInContext(script,context);const run=s=>vm.runInContext(s,context);
  return {run,elements,listeners,timers};
 }
 for(const id of ['cobrinha','pong','tetris','rpg'])test(id+' initializes, renders, restarts and pauses without duplicate timers',()=>{
- const g=game(id);assert.ok(g.elements.tela.textContent.includes('\n'),'must render real newlines');assert.equal(g.timers.size,0);g.elements.inicio.onclick();g.elements.inicio.onclick();assert.equal(g.timers.size,id==='rpg'?0:1);assert.equal(g.run('rodando'),true);g.elements.pausa.onclick();assert.equal(g.timers.size,0);assert.equal(g.run('rodando'),false);
+ const g=game(id);assert.ok(g.elements.tela.textContent.includes('\n'),'must render real newlines');assert.equal(g.timers.size,id==='rpg'?0:1);g.elements.inicio.onclick();g.elements.inicio.onclick();assert.equal(g.timers.size,id==='rpg'?0:1);assert.equal(g.run('rodando'),true);g.elements.pausa.onclick();assert.equal(g.timers.size,0);assert.equal(g.run('rodando'),false);
 });
 test('snake wraps, rejects reverse and only turns once per tick',()=>{const g=game('cobrinha');g.run('iniciar(); cobra=[[19,5],[18,5]];direcao=[1,0];comida=[10,1];atualizar()');assert.equal(g.run('cobra[0][0]'),0);g.run('comando("ArrowLeft")');assert.equal(g.run('direcao[0]'),1);g.run('comando("ArrowUp");comando("ArrowLeft")');assert.equal(g.run('direcao[1]'),-1);g.run('atualizar();comando("ArrowLeft")');assert.equal(g.run('direcao[0]'),-1)});
 test('snake grows and never places food inside body',()=>{const g=game('cobrinha');g.run('iniciar();comida=[6,5];atualizar()');assert.equal(g.run('pontos'),10);assert.equal(g.run('cobra.length'),3);assert.equal(g.run('cobra.some(p=>p[0]===comida[0]&&p[1]===comida[1])'),false)});
@@ -25,4 +25,14 @@ test('RPG blocks a locked door and has a reachable key and exit',()=>{
  while(queue.length){const n=queue.shift(),tag=[n.x,n.y,n.key].join(',');if(seen.has(tag))continue;seen.add(tag);if(map[n.y][n.x]==='D'&&n.key){route=n.path;break}for(const [k,dx,dy] of moves){const x=n.x+dx,y=n.y+dy,t=map[y]?.[x];if(t&&t!=='#'&&(t!=='D'||n.key))queue.push({x,y,key:n.key||t==='K',path:[...n.path,k]})}}
  assert.ok(route,'key and exit must be reachable');for(const k of route)g.run('comando('+JSON.stringify(k)+')');assert.equal(g.run('terminou'),true);assert.equal(g.run('chave'),true);
 });
-test('keyboard events prevent scrolling and stop modifying a paused game',()=>{const g=game('rpg');g.run('iniciar()');let prevented=false;g.listeners['tela:keydown']({key:'ArrowRight',preventDefault(){prevented=true}});assert.equal(prevented,true);assert.equal(g.run('x'),2);g.elements.pausa.onclick();g.listeners['tela:keydown']({key:'ArrowRight',preventDefault(){}});assert.equal(g.run('x'),2)});
+test('keyboard events prevent scrolling and stop modifying a paused game',()=>{const g=game('rpg');g.run('iniciar()');let prevented=false;g.elements.tela.onkeydown({key:'ArrowRight',preventDefault(){prevented=true}});assert.equal(prevented,true);assert.equal(g.run('x'),2);g.elements.pausa.onclick();g.elements.tela.onkeydown({key:'ArrowRight',preventDefault(){}});assert.equal(g.run('x'),2)});
+test('ASCII board has a separate row for every line, without literal backslash-n',()=>{
+ for(const id of ['cobrinha','pong','tetris']){
+  const g=game(id),text=g.elements.tela.textContent,rows=text.split('\n');
+  const height=g.run('altura'),width=g.run('largura');
+  assert.equal(rows[0],'+'+'-'.repeat(width)+'+');
+  for(let i=1;i<=height;i++){assert.equal(rows[i].length,width+2);assert.ok(rows[i].startsWith('|')&&rows[i].endsWith('|'));}
+  assert.equal(rows[height+1],rows[0]);
+  assert.equal(text.includes('\\n'),false);
+ }
+});

@@ -1,4 +1,4 @@
-/* Aulas guiadas: fundamentos em Python e jogos ASCII interativos no Colab. */
+/* Aulas guiadas: fundamentos e programas completos para copiar. */
 (function(global){
 "use strict";
 const modules=[
@@ -106,11 +106,12 @@ const modules=[
       },
       {
         "code": global.PyCodeASCII.cobrinha,
-        "explain": "Jogo completo para uma célula do Colab. Execute, clique em Iniciar e no desenho; depois use as setas ou os botões. O invólucro Python exibe HTML em um quadro isolado; o JavaScript faz a animação e os controles. Não é Python puro e não precisa de pip.",
+        "explain": "Jogo completo: copie toda esta célula para o Colab e execute. Ele começa automaticamente. Clique no desenho e use as setas ou botões. Python chama Javascript para receber as teclas e desenhar o ASCII. As etapas 1 e 2 são exercícios preparatórios; não são o jogo completo.",
         "colabOnly": true,
         "asciiGame": true
       }
-    ]
+    ],
+    "defaultStep": 2
   },
   {
     "id": "pong",
@@ -135,11 +136,12 @@ const modules=[
       },
       {
         "code": global.PyCodeASCII.pong,
-        "explain": "Jogo completo para uma célula do Colab. Execute, clique em Iniciar e no desenho; depois use as setas ou os botões. O invólucro Python exibe HTML em um quadro isolado; o JavaScript faz a animação e os controles. Não é Python puro e não precisa de pip.",
+        "explain": "Jogo completo: copie toda esta célula para o Colab e execute. Ele começa automaticamente. Clique no desenho e use as setas ou botões. Python chama Javascript para receber as teclas e desenhar o ASCII. As etapas 1 e 2 são exercícios preparatórios; não são o jogo completo.",
         "colabOnly": true,
         "asciiGame": true
       }
-    ]
+    ],
+    "defaultStep": 2
   },
   {
     "id": "tetris",
@@ -164,11 +166,12 @@ const modules=[
       },
       {
         "code": global.PyCodeASCII.tetris,
-        "explain": "Jogo completo para uma célula do Colab. Execute, clique em Iniciar e no desenho; depois use as setas ou os botões. O invólucro Python exibe HTML em um quadro isolado; o JavaScript faz a animação e os controles. Não é Python puro e não precisa de pip.",
+        "explain": "Jogo completo: copie toda esta célula para o Colab e execute. Ele começa automaticamente. Clique no desenho e use as setas ou botões. Python chama Javascript para receber as teclas e desenhar o ASCII. As etapas 1 e 2 são exercícios preparatórios; não são o jogo completo.",
         "colabOnly": true,
         "asciiGame": true
       }
-    ]
+    ],
+    "defaultStep": 2
   },
   {
     "id": "rpg",
@@ -193,23 +196,24 @@ const modules=[
       },
       {
         "code": global.PyCodeASCII.rpg,
-        "explain": "Jogo completo para uma célula do Colab. Execute, clique em Iniciar e no desenho; depois use as setas ou os botões. O invólucro Python exibe HTML em um quadro isolado; o JavaScript faz a animação e os controles. Não é Python puro e não precisa de pip.",
+        "explain": "Jogo completo: copie toda esta célula para o Colab e execute. Ele começa automaticamente. Clique no desenho e use as setas ou botões. Python chama Javascript para receber as teclas e desenhar o ASCII. As etapas 1 e 2 são exercícios preparatórios; não são o jogo completo.",
         "colabOnly": true,
         "asciiGame": true
       }
-    ]
+    ],
+    "defaultStep": 2
   },
   {
     "id": "bot",
     "name": "Bot clássico ELIZA",
     "tag": "08 • IA sem LLM",
     "subtitle": "Palavras-chave, regras e menus",
-    "intro": "Antes das LLMs, vários chatbots usavam regras. Um chatbot de palavras-chave não entende tudo: ele procura padrões e entrega uma resposta programada.",
-    "challenge": "Acrescente uma regra para a palavra lista que responda com uma dica sobre colchetes.",
+    "intro": "Programe uma ELIZA didática que lê suas frases e faz perguntas usando padrões. O programa completo abre uma conversa com input no Colab. Não é uma LLM nem uma reprodução integral da ELIZA original.",
+    "challenge": "Adicione uma regra para frases que começam com \"eu gosto de\". Teste com duas frases diferentes e confira se o bot usa o restante da sua mensagem.",
     "hints": [
-      "Converta o texto para minúsculas com lower().",
-      "Use in para procurar um texto dentro de outro. A palavra procurada precisa de aspas.",
-      "Coloque a regra mais específica antes da resposta padrão."
+      "A regra deve capturar a parte da frase que muda.",
+      "(.+) captura um trecho não vazio; re.fullmatch verifica a frase inteira.",
+      "O laço while recebe várias mensagens. Digite sair para encerrar."
     ],
     "steps": [
       {
@@ -221,10 +225,12 @@ const modules=[
         "explain": "Uma função reúne várias regras. Ela retorna uma resposta por vez."
       },
       {
-        "code": "def bot(frase):\n    frase = frase.lower()\n    if \"erro\" in frase:\n        return \"Leia a última linha do erro.\"\n    if \"python\" in frase:\n        return \"Python é uma linguagem de programação.\"\n    return \"Quer estudar listas ou jogos?\"\n\nperguntas = [\"O que é Python?\", \"Deu erro\"]\nfor pergunta in perguntas:\n    print(\"Você:\", pergunta)\n    print(\"Bot:\", bot(pergunta))",
-        "explain": "O chatbot responde a perguntas de exemplo sem input, para você executar e modificar no Colab."
+        "code": "# ELIZA didática: padrões e perguntas, sem LLM.\nimport re\nimport unicodedata\n\n\ndef normalizar(texto):\n    texto = unicodedata.normalize(\"NFD\", texto.lower())\n    return \"\".join(c for c in texto if not unicodedata.combining(c)).strip()\n\n\ndef refletir(texto):\n    trocas = {\"eu\": \"você\", \"meu\": \"seu\", \"minha\": \"sua\",\n              \"meus\": \"seus\", \"minhas\": \"suas\", \"mim\": \"você\"}\n    return re.sub(r\"\\b\\w+\\b\", lambda m: trocas.get(m[0], m[0]), texto)\n\n\ndef responder(frase):\n    frase = normalizar(frase).rstrip(\".!?\")\n    regras = [\n        (r\"(?:eu )?sinto (.+)\", \"O que faz você sentir {}?\"),\n        (r\"(?:eu )?estou (.+)\", \"Há quanto tempo você está {}?\"),\n        (r\"(?:eu )?sou (.+)\", \"O que faz você dizer que é {}?\"),\n        (r\"(?:eu )?quero (.+)\", \"Por que você quer {}?\"),\n        (r\"(?:eu )?nao consigo (.+)\", \"O que dificulta {}?\"),\n        (r\"porque (.+)\", \"Essa é a única razão para {}?\"),\n    ]\n    for padrao, pergunta in regras:\n        resultado = re.fullmatch(padrao, frase)\n        if resultado:\n            return pergunta.format(refletir(resultado[1]))\n    if re.search(r\"\\b(oi|ola)\\b\", frase):\n        return \"Olá! Sobre o que você quer conversar?\"\n    return \"Pode explicar melhor ou dar um exemplo?\"\n\n\nprint(\"ELIZA: Olá! Sou um bot de regras. Digite sair para encerrar.\")\ntry:\n    while True:\n        frase = input(\"Você: \").strip()\n        if normalizar(frase) == \"sair\":\n            print(\"ELIZA: Até a próxima!\")\n            break\n        if frase:\n            print(\"ELIZA:\", responder(frase))\nexcept (EOFError, KeyboardInterrupt):\n    print(\"\\nELIZA: Conversa encerrada.\")\n",
+        "explain": "Conversa completa em Python: execute uma célula e digite no campo Você. Teste \"eu estou feliz\" e \"eu quero aprender Python\". A resposta usa o trecho da sua frase. Digite sair para terminar.",
+        "interactiveBot": true
       }
-    ]
+    ],
+    "defaultStep": 2
   },
   {
     "id": "colab",

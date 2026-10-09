@@ -28,3 +28,13 @@ Não houve inspeção visual em navegador real nesta varredura. Os jogos continu
 Referências verificadas:
 - https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct
 - https://huggingface.co/docs/transformers/main_classes/pipelines
+
+## Revisão de programas completos e ELIZA
+
+- Jogos e ELIZA abrem diretamente em Programa completo; etapas preparatórias continuam acessíveis.
+- Saída dos jogos simplificada para `display(Javascript(...))`, sem iframe aninhado, com início automático e controles de pausa/reinício.
+- ELIZA agora mantém conversa com `input`, padrões, reflexão de possessivos e saída por `sair`; não é uma LLM.
+- 57 testes automatizados passaram, incluindo execução real de exemplos Python e diálogo da ELIZA.
+- Chromium real: quatro jogos renderizados; animação dos três jogos temporizados, pausa, controles e reinício verificados; viewport de 375px sem transbordamento da página. RPG funciona por turnos.
+- Site em Chromium: cinco trilhas abrem o programa completo; texto da área de transferência é idêntico ao código exibido; link de notebook visível.
+- Limites: nenhuma sessão real do Colab foi executada; download/inferência da trilha de LLM não executados. Jogos usam JavaScript para interação, apresentado por uma célula Python.
