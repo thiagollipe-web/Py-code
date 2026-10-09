@@ -12,7 +12,7 @@ A Py é um tutor local determinístico, **não uma LLM**. Usa contexto da aula, 
 
 Sem dependências de produção ou build. Sirva a pasta com `python3 -m http.server 8000` e abra `http://localhost:8000`.
 
-`node --test tests/tutor.test.cjs` verifica comportamento do tutor. O workflow publica somente os arquivos da experiência guiada, sem o antigo runtime. Os arquivos legados continuam no histórico/pasta de origem, fora da publicação.
+`node --test tests/*.test.cjs` verifica o tutor e executa os 24 exemplos básicos com `python3`, comparando saídas. A LLM exige a mesma sessão para as etapas sequenciais: a interface permite copiar todas até a etapa atual. Veja `AUDITORIA_2026-10-09.md` para correções e limites da verificação. O workflow publica somente os arquivos da experiência guiada, sem o antigo runtime. Os arquivos legados continuam no histórico/pasta de origem, fora da publicação.
 
 O service worker guarda a interface e as aulas após um primeiro acesso bem-sucedido em HTTPS/localhost. O Colab e o download do modelo exigem internet; a trilha de LLM depende de pacotes externos e dos recursos da sessão. O bot continua disponível sem serviços de IA remotos.
 

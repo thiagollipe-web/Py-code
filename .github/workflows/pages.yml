@@ -27,7 +27,7 @@ jobs:
           node --check tutor.js
           node --check curriculo.js
           node --check sw.js
-          node --test tests/tutor.test.cjs
+          node --test tests/*.test.cjs
           python3 -m json.tool manifest.webmanifest >/dev/null
 
       - name: Prepare site

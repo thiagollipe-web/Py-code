@@ -1,4 +1,4 @@
-/* Trilha didática Py-Code. Cada exemplo é um programa completo e curto. */
+/* Exemplos básicos independentes; células da LLM são sequenciais na mesma sessão. */
 (function(global){
 "use strict";
 const modules=[
@@ -29,7 +29,7 @@ const modules=[
 {
  id:"pong",name:"Ping-Pong",tag:"05 • Jogos",subtitle:"Bola e colisão",intro:"O Pong é um ótimo primeiro projeto: posição, velocidade e um teste if para a bola rebater.",challenge:"Altere os limites da quadra para 0 e 6 e observe quando a bola troca de direção.",hints:["A velocidade pode ser 1 ou -1.","Se a bola encostar no limite, inverta a velocidade.","Teste o movimento com print a cada passo."],steps:[
 {code:'bola = 0\nvelocidade = 1\nbola = bola + velocidade\nprint(bola)',explain:"A posição aumenta quando a velocidade é positiva."},
-{code:'bola = 4\nvelocidade = 1\nif bola >= 5:\n    velocidade = -1\nprint("Direção:", velocidade)',explain:"Ao tocar a borda a velocidade fica negativa e a bola volta."},
+{code:'bola = 4\nvelocidade = 1\nbola = bola + velocidade\nif bola >= 5:\n    velocidade = -1\nprint("Direção:", velocidade)',explain:"A bola anda da posição 4 até a borda 5. O if muda a velocidade para -1: no próximo movimento ela voltará."},
 {code:'bola = 2\nvelocidade = 1\nfor tempo in range(10):\n    bola = bola + velocidade\n    if bola == 5 or bola == 0:\n        velocidade = -velocidade\n    print(tempo, bola)',explain:"Este é um Pong textual. A mesma lógica controla um jogo gráfico maior."}
 ]},
 {
@@ -42,7 +42,7 @@ const modules=[
  id:"rpg",name:"RPG textual",tag:"07 • Jogos",subtitle:"Escolhas e histórias",intro:"Um RPG textual pode funcionar com variáveis, inventário, escolhas e if. Não precisa instalar nenhuma biblioteca.",challenge:"Adicione a opção 3, que encontra uma moeda e guarda o item no inventário.",hints:["Use uma variável escolha.","A variável escolha guarda texto: compare com \"3\", entre aspas.","Crie a lista inventario antes de usá-la e adicione o texto \"moeda\" com append."],steps:[
 {code:'nome = "Aventureiro"\nvida = 10\nprint(nome, "tem", vida, "de vida")',explain:"Uma ficha de personagem pode ser feita só com duas variáveis."},
 {code:'inventario = ["mapa", "espada"]\nprint("Itens:", inventario)',explain:"A lista funciona como mochila do herói."},
-{code:'escolha = "1"\nif escolha == "1":\n    print("Você entrou na floresta.")\nelif escolha == "2":\n    print("Você voltou à cidade.")\nelse:\n    print("Escolha novamente.")',explain:"Troque o valor de escolha para ver os diferentes caminhos."}
+{code:'inventario = ["mapa", "espada"]\nescolha = "1"\nif escolha == "1":\n    print("Você entrou na floresta.")\nelif escolha == "2":\n    print("Você voltou à cidade.")\nelse:\n    print("Escolha novamente.")',explain:"Este exemplo já cria o inventário. Troque o texto em escolha por \"1\" ou \"2\" para testar os caminhos; ainda não há entrada pelo teclado."}
 ]},
 {
  id:"bot",name:"Bot clássico ELIZA",tag:"08 • IA sem LLM",subtitle:"Palavras-chave, regras e menus",intro:"Antes das LLMs, vários chatbots usavam regras. Um chatbot de palavras-chave não entende tudo: ele procura padrões e entrega uma resposta programada.",challenge:"Acrescente uma regra para a palavra lista que responda com uma dica sobre colchetes.",hints:["Converta o texto para minúsculas com lower().","Use in para procurar um texto dentro de outro. A palavra procurada precisa de aspas.","Coloque a regra mais específica antes da resposta padrão."],steps:[
@@ -53,8 +53,8 @@ const modules=[
 {
  id:"colab",name:"Minha primeira LLM no Colab",tag:"09 • Projeto final",subtitle:"LLM leve e responsável",intro:"Esta etapa exige internet e uma sessão do Google Colab. O site continua sendo um tutor por regras: a LLM será executada somente no Colab. Começaremos carregando um modelo pequeno e limitado, sem treinar um modelo do zero.",challenge:"No Colab, modifique a pergunta e compare a resposta da LLM com uma resposta do seu bot de regras. Registre três diferenças.",hints:["Primeiro execute a célula de instalação no Colab.","Execute cada célula na ordem.","Modelos pequenos podem produzir respostas incorretas: sempre teste."],steps:[
 {code:'!pip -q install transformers torch',explain:"Esta célula instala os pacotes no Colab. O símbolo ! executa um comando de terminal — não é uma instrução da linguagem Python.",colabOnly:true},
-{code:'from transformers import pipeline\n\ngerador = pipeline("text-generation", model="HuggingFaceTB/SmolLM2-135M-Instruct", device=-1)',explain:"Baixa um modelo de aproximadamente 135 milhões de parâmetros para o ambiente da sessão. O primeiro carregamento precisa de internet e pode demorar.",colabOnly:true},
-{code:'mensagens = [{"role": "user", "content": "Explique o que é uma lista Python em duas frases."}]\nsaida = gerador(mensagens, max_new_tokens=80, do_sample=False)\nprint(saida[0]["generated_text"][-1]["content"])',explain:"Enviamos uma pergunta, limitamos a resposta e imprimimos apenas a última mensagem do assistente.",colabOnly:true}
+{code:'from transformers import pipeline\n\ngerador = pipeline("text-generation", model="HuggingFaceTB/SmolLM2-135M-Instruct", device=-1)',explain:"Baixa um modelo de aproximadamente 135 milhões de parâmetros para o ambiente da sessão. Execute a instalação primeiro; espere este carregamento terminar antes da etapa 3. O primeiro carregamento precisa de internet e pode demorar.",colabOnly:true,requiresPrevious:true},
+{code:'mensagens = [{"role": "user", "content": "Explique o que é uma lista Python em duas frases."}]\nsaida = gerador(mensagens, max_new_tokens=80, do_sample=False)\nprint(saida[0]["generated_text"][-1]["content"])',explain:"Use a MESMA sessão em que gerador foi criado na etapa 2. Se reiniciar a sessão, execute novamente as etapas anteriores. Enviamos uma pergunta e imprimimos a última mensagem.",colabOnly:true,requiresPrevious:true}
 ]}
 ];
 const byId=Object.fromEntries(modules.map(x=>[x.id,x]));
