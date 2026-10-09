@@ -1,5 +1,5 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-const window={};const ctx=vm.createContext({window});for(const file of ['curriculo.js','tutor.js'])vm.runInContext(fs.readFileSync(file,'utf8'),ctx);
+const window={};const ctx=vm.createContext({window});for(const file of ['ascii-games.js','curriculo.js','tutor.js'])vm.runInContext(fs.readFileSync(file,'utf8'),ctx);
 const create=()=>window.PyCodeTutor.create();
 test('prioritizes errors over topic words',()=>assert.match(create().respond('IndexError: list index out of range'),/posição acessada/));
 test('follows selected lesson and explains an exact line',()=>{const t=create();t.setLesson('listas',1);assert.match(t.respond('explique linha 2'),/print\(frutas\[0\]\)/);assert.match(t.respond('linha 99'),/2 linhas/)});

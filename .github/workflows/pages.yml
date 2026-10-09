@@ -23,6 +23,8 @@ jobs:
 
       - name: Validate guided learning site
         run: |
+          node scripts/build-ascii.cjs
+          git diff --exit-code -- ascii-games.js notebooks/
           node --check academia.js
           node --check tutor.js
           node --check curriculo.js
@@ -33,7 +35,7 @@ jobs:
       - name: Prepare site
         run: |
           mkdir -p _site
-          cp index.html academia.css academia.js curriculo.js tutor.js sw.js manifest.webmanifest _site/
+          cp index.html academia.css ascii-games.js academia.js curriculo.js tutor.js sw.js manifest.webmanifest _site/
           cp -R assets _site/assets
 
       - name: Configure Pages
