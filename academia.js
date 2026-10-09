@@ -62,7 +62,7 @@ function renderCards(){
   cards.append(b);
  });
 }
-function starter(stage){if(stage.colabOnly)return stage.code; const lines=stage.code.split("\n");return lines.map((line,i)=>i===0?line:(line.trim()&&!line.trim().startsWith("#")&&i%2===1?"# SUA VEZ: escreva a próxima instrução":line)).join("\n")}\nfunction lesson(){
+function starter(stage){return stage.code}\nfunction lesson(){
  const mod=catalog.byId[active],s=mod.steps[step];
  $("title").textContent=active==="inicio"?"Sua jornada começa com Python":mod.name;
  $("lead").textContent=mod.intro;
@@ -163,8 +163,8 @@ $("download").onclick=()=>{
  a.href=url;a.download=active+".py";document.body.append(a);a.click();a.remove();
  setTimeout(()=>URL.revokeObjectURL(url),1000);
 };
-$("colab").onclick=()=>copy(code.value).then(()=>{
- bot("Código copiado! Abra https://colab.research.google.com/ em outra aba, crie um notebook, cole em uma célula e execute com ▶. A primeira etapa da LLM instala bibliotecas e só funciona no Colab.");
+$("colab").onclick=()=>{\n const popup=window.open("https://colab.research.google.com/#create=true","_blank");\n copy(code.value).then(()=>{
+ bot("Código copiado! No Google Colab, toque em uma célula de código, cole e execute com ▶. Por segurança, o navegador não permite que este site cole automaticamente em outro site.");
  window.open("https://colab.research.google.com/","_blank","noopener,noreferrer");
 }).catch(()=>bot("Selecione e copie o código no editor, depois abra colab.research.google.com."));
 $("chatForm").addEventListener("submit",e=>{e.preventDefault();const input=$("chatInput");
