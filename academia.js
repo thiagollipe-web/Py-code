@@ -21,14 +21,21 @@ function navigation(){
  const count=modules.filter(m=>isDone(m.id)).length;$('progressLabel').textContent=count+' / '+modules.length;$('progressBar').value=count;$('progressBar').setAttribute('aria-label',count+' de '+modules.length+' trilhas concluídas');
 }
 function render(){
+ const manual=document.getElementById('manualCopy');if(manual)manual.remove();
  const mod=catalog.byId[active],s=mod.steps[step];tutor.setLesson(active,step);$('lessonTitle').textContent=mod.name;$('lessonTag').textContent=mod.tag;$('lessonCounter').textContent='Etapa '+(step+1)+' de '+mod.steps.length;$('intro').textContent=mod.intro;$('explain').textContent=s.explain;$('exampleCode').textContent=s.code;$('challenge').textContent=mod.challenge;$('chatContext').textContent='Estudando: '+mod.name+' · etapa '+(step+1);$('checkQuestion').textContent='Explique o objetivo desta etapa e preveja o resultado antes de executar no Colab.';$('reflection').value=typeof drafts[active+':'+step]==='string'?drafts[active+':'+step]:'';
+ $('gameNotebook').hidden=!(s.asciiGame||s.interactiveBot);
+ $('gameNotebook').textContent=s.interactiveBot?'Abrir ELIZA no Colab':'Abrir jogo no Colab';
+ $('copy').textContent=s.asciiGame?'Copiar jogo completo':s.interactiveBot?'Copiar ELIZA completa':'Copiar exercício';
+ $('gameNotebook').href='https://colab.research.google.com/github/thiagollipe-web/Py-code/blob/main/notebooks/'+(s.interactiveBot?'eliza.ipynb':active+'-ascii.ipynb');
+ $('executionNote').textContent=s.interactiveBot?'Cole a célula inteira no Colab, execute e digite sua mensagem no campo Você. Digite sair para encerrar.':s.asciiGame?'Jogo ASCII jogável: copie a célula completa ou abra o notebook. O jogo começa automaticamente. Clique no desenho para usar as setas. Python exibe a saída; JavaScript controla o jogo.':s.requiresPrevious?'Esta célula depende das etapas anteriores na MESMA sessão do Colab. Copie a sequência abaixo se estiver começando em um notebook vazio.':s.colabOnly?'Execute esta instalação em uma célula de código do Colab e aguarde terminar. As próximas etapas usam a mesma sessão.':'Copie o exemplo inteiro para uma célula vazia do Colab, preservando os espaços no início das linhas. Este exemplo funciona sozinho. Nas trilhas de jogos, a etapa 3 traz a versão ASCII jogável.';
+ $('copySequence').hidden=!s.requiresPrevious;
  $('previous').disabled=step===0;$('next').textContent=step===mod.steps.length-1?'Marcar trilha como concluída ✓':'Entendi, próximo passo →';$('lessonStatus').textContent=done[active+':'+step]===true?'Você marcou esta etapa como entendida.':'';
- $('stepTabs').replaceChildren();mod.steps.forEach((_,i)=>{const b=document.createElement('button');b.type='button';b.textContent='0'+(i+1)+(done[active+':'+i]===true?' ✓':'');b.className=i===step?'active':'';b.setAttribute('aria-label','Etapa '+(i+1));b.setAttribute('aria-current',i===step?'step':'false');b.onclick=()=>{step=i;render();save()};$('stepTabs').append(b)});
- $('lineNotes').replaceChildren();s.code.split('\n').forEach((line,i)=>{if(!line.trim())return;const row=document.createElement('div');row.className='line-note';const number=document.createElement('span');number.textContent=String(i+1).padStart(2,'0');row.append(number,document.createTextNode(window.PyCodeTutor.explainLine(line)));$('lineNotes').append(row)});
+ $('stepTabs').replaceChildren();mod.steps.forEach((_,i)=>{const b=document.createElement('button');b.type='button';b.textContent=(mod.defaultStep===2?(i===2?'Programa completo':'Aprender '+(i+1)):'Etapa '+(i+1))+(done[active+':'+i]===true?' ✓':'');b.className=i===step?'active':'';b.setAttribute('aria-label','Etapa '+(i+1));b.setAttribute('aria-current',i===step?'step':'false');b.onclick=()=>{step=i;render();save()};$('stepTabs').append(b)});
+ $('lineNotes').classList.toggle('game-notes',!!s.asciiGame);$('lineNotes').replaceChildren();s.code.split('\n').forEach((line,i)=>{if(!line.trim())return;const row=document.createElement('div');row.className='line-note';const number=document.createElement('span');number.textContent=String(i+1).padStart(2,'0');row.append(number,document.createTextNode(window.PyCodeTutor.explainLine(line)));$('lineNotes').append(row)});
  navigation();$('continue').textContent=Object.keys(done).length?'Continuar minha jornada →':'Começar a aprender →';
 }
 function scrollLesson(){$('lesson').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});$('lesson').focus({preventScroll:true})}
-function select(id){active=id;step=0;render();save();bot('Vamos estudar '+catalog.byId[id].name+'. '+catalog.byId[id].steps[0].explain+' Quer uma explicação ou uma pista?');scrollLesson()}
+function select(id){active=id;step=catalog.byId[id].defaultStep||0;render();save();bot('Vamos estudar '+catalog.byId[id].name+'. '+catalog.byId[id].steps[step].explain+' Quer uma explicação ou uma pista?');scrollLesson()}
 $('continue').onclick=scrollLesson;$('openBot').onclick=openBot;$('botFab').onclick=openBot;$('closeBot').onclick=closeBot;
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('assistant').hidden)closeBot()});
 $('previous').onclick=()=>{if(step>0){step--;render();save()}};
@@ -39,7 +46,25 @@ $('discuss').onclick=()=>{const text=$('reflection').value.trim();openBot();if(t
 $('chatForm').addEventListener('submit',e=>{e.preventDefault();const text=$('chatInput').value.trim();if(text){ask(text);$('chatInput').value='';$('chatInput').focus()}});
 $('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('chatForm').requestSubmit()}});
 ['Explique esta etapa','Não entendi','Uma pista','Deu erro no Colab'].forEach((text,i)=>{const b=document.createElement('button');b.type='button';b.textContent=text;b.onclick=()=>ask(['explique esta etapa','não entendi','dica','deu erro'][i]);$('suggestions').append(b)});
-$('copy').onclick=async()=>{const text=catalog.byId[active].steps[step].code;try{if(!navigator.clipboard)throw new Error('Clipboard indisponível');await navigator.clipboard.writeText(text);toast('Exemplo copiado. Cole em uma célula do Colab.')}catch(_){const selection=getSelection(),range=document.createRange();range.selectNodeContents($('exampleCode'));selection.removeAllRanges();selection.addRange(range);toast('Selecionei o exemplo. Use Copiar no navegador.')}};
+async function copyExample(text,sequence=false){
+ try{
+  if(!navigator.clipboard)throw new Error('Clipboard indisponível');
+  await navigator.clipboard.writeText(text);
+  toast(sequence?'Sequência copiada. Cole numa célula do Colab e aguarde as etapas terminarem.':'Exemplo copiado. Cole em uma célula do Colab.');
+ }catch(_){
+  // Keep the exact text selectable even for a sequence that is not on screen.
+  const old=document.getElementById('manualCopy');if(old)old.remove();
+  const box=document.createElement('div');box.id='manualCopy';
+  const label=document.createElement('label');label.htmlFor='manualCopyText';label.textContent='Cópia automática indisponível. Selecione e copie este conteúdo:';
+  const field=document.createElement('textarea');field.id='manualCopyText';field.readOnly=true;field.value=text;field.rows=6;field.style.width='100%';
+  const close=document.createElement('button');close.className='text-button';close.textContent='Fechar área de cópia';close.onclick=()=>{box.remove();$('copy').focus()};
+  box.append(label,field,close);$('exampleCode').closest('.example').after(box);field.focus();field.select();
+  toast('Conteúdo selecionado. Use Copiar no navegador.');
+ }
+}
+$('copy').onclick=()=>copyExample(catalog.byId[active].steps[step].code);
+$('copySequence').onclick=()=>copyExample(catalog.byId[active].steps.slice(0,step+1).map(s=>s.code).join('\n\n'),true);
+
 render();bot('Olá! Eu sou a Py, sua cobrinha professora. Você cria seus programas no Colab; eu ajudo a entender cada passo aqui.\nEstamos em '+catalog.byId[active].name+'. Pergunte sobre uma linha, peça uma dica ou cole um erro do Colab.');
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).catch(()=>{});
 })();
