@@ -1,100 +1,37 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0a1324">
-<meta name="description" content="Py-Code Academia: aprenda Python com um tutor de regras, jogos simples e Google Colab.">
-<title>Py-Code Academia • Aprenda Python</title>
-<link rel="manifest" href="./manifest.webmanifest">
-<style>
-:root{color-scheme:dark;--bg:#090824;--panel:#17183e;--soft:#26275c;--edge:#404579;--text:#f9f9ff;--muted:#c1c8ea;--accent:#68ffd1;--sky:#92baff;--yellow:#ffe77e}
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
-button,input,textarea{font:inherit}
-button{cursor:pointer;touch-action:manipulation}
-button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
-button:disabled{opacity:.5;cursor:not-allowed}
-a{color:var(--sky)}
-.layout{width:min(1440px,100%);margin:auto;min-height:100dvh;display:grid;grid-template-columns:265px minmax(0,1fr)}
-.sidebar{background:linear-gradient(180deg,#16113c,#111833 70%,#081a24);border-right:1px solid var(--edge);padding:22px 15px;display:flex;flex-direction:column;gap:18px}
-.brand{display:flex;gap:12px;align-items:center}.logo{width:43px;height:43px;border-radius:14px;background:linear-gradient(135deg,#68e5ae,#8bb9ff);color:#071325;display:grid;place-items:center;font-size:18px;font-weight:900}.brand strong{font-size:17px}.brand small{display:block;color:var(--muted);font-size:11px}
-.eyebrow{color:var(--muted);text-transform:uppercase;letter-spacing:.15em;font-size:10px;font-weight:800}
-.nav{display:grid;gap:7px}.nav button{width:100%;text-align:left;border:1px solid transparent;background:transparent;color:var(--text);padding:11px 12px;border-radius:11px;font-size:13px}.nav button:hover,.nav button.active{background:var(--soft);border-color:#3a5f73}.nav button span{display:inline-grid;place-items:center;width:25px;height:25px;background:#213650;border-radius:8px;margin-right:8px;color:var(--accent);font-weight:800}
-.progress{margin-top:auto;background:var(--panel);border:1px solid var(--edge);border-radius:14px;padding:13px}.progress p{margin:7px 0;color:var(--muted);font-size:12px}.track{height:8px;background:#25364b;border-radius:99px;overflow:hidden}.bar{height:100%;width:0;background:linear-gradient(90deg,#68e5ae,#8bb9ff);transition:width .2s}
-.main{padding:23px 24px 36px;min-width:0}
-.topline{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:20px}
-.pill{border-radius:100px;background:#253a4d;border:1px solid #3f8c91;color:var(--accent);font-size:11px;padding:7px 12px;font-weight:800}
-h1{font-size:clamp(26px,3.2vw,39px);line-height:1.12;letter-spacing:-.04em;margin:12px 0}.lead{color:var(--muted);max-width:720px;font-size:14px}
-.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:24px 0}
-.card{background:linear-gradient(135deg,#242058,#142c4e 65%,#152e32);border:1px solid #485291;border-radius:19px;text-align:left;padding:18px;min-height:142px;color:var(--text);transition:transform .15s,border-color .15s;box-shadow:0 14px 30px #05081966}.card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 18px 35px #0008}.card:focus-visible{transform:translateY(-2px)}.card b{display:block;font-size:16px;margin:8px 0 4px}.card small{color:var(--muted);font-size:12px}.card .mark{color:var(--accent);font-weight:800;letter-spacing:.05em;font-size:12px}.card:nth-child(4n+2){background:linear-gradient(135deg,#3d225a,#242657,#162f47)}.card:nth-child(4n+3){background:linear-gradient(135deg,#1c4650,#193459,#20204f)}.card:nth-child(4n+4){background:linear-gradient(135deg,#492444,#292958,#102d46)}
-.workspace{background:linear-gradient(180deg,#1b1b49,#121d36);border:1px solid #485388;border-radius:22px;overflow:hidden;box-shadow:0 22px 50px #0005}
-.workspace-head{padding:14px 17px;border-bottom:1px solid var(--edge);display:flex;justify-content:space-between;gap:10px;align-items:center}.workspace-head b{font-size:14px}.workspace-head small{color:var(--muted)}
-.lesson-text{padding:16px 18px 3px;color:var(--muted);font-size:13px}
-.step-label{color:var(--accent);font-size:12px;font-weight:800;padding:14px 18px 0}
-#explain{padding:6px 18px 16px;font-size:13px;line-height:1.55}
-.editor{margin:0 16px;border:1px solid #334860;border-radius:12px;background:#070e1a;overflow:hidden}
-.editor-head{background:#17263c;padding:9px 12px;color:#b9c9dc;font-size:11px;font-weight:800}
-#code{display:block;width:100%;min-height:170px;max-height:360px;resize:vertical;border:0;outline:none;background:#070e1a;color:#d4fbe3;padding:14px;font:13px/1.6 "SFMono-Regular",Consolas,"Liberation Mono",monospace;tab-size:4}
-.actions{display:flex;flex-wrap:wrap;gap:8px;padding:15px 17px}.btn{border:1px solid #3b526b;background:#1b2c45;color:var(--text);padding:9px 12px;border-radius:10px;font-size:12px;font-weight:800}.btn.primary{background:linear-gradient(135deg,#67fbc8,#8fe9ff);color:#08242d;border-color:#6df3cd;box-shadow:0 5px 16px #30eaba33}.btn:hover{filter:brightness(1.13)}
-.terminal{margin:0 16px 17px;background:#060d17;border-radius:12px;border:1px solid #253950;padding:12px;min-height:72px;white-space:pre-wrap;overflow:auto;font:12px/1.5 Consolas,monospace;color:#baf3d6}
-.challenge{border-top:1px solid var(--edge);padding:15px 17px}.challenge b{color:var(--yellow);font-size:13px}.challenge p{color:var(--muted);font-size:13px;margin:7px 0}
-.assistant{width:min(410px,calc(100vw - 24px));height:min(650px,calc(100dvh - 95px));position:fixed;right:18px;bottom:82px;z-index:30;border:1px solid var(--edge);border-radius:22px;box-shadow:0 24px 70px #000b;transform:translateY(20px) scale(.96);opacity:0;visibility:hidden;pointer-events:none;transition:transform .2s,opacity .2s,visibility .2s}.assistant.open{transform:none;opacity:1;visibility:visible;pointer-events:auto}.assistant{border-left:1px solid var(--edge);background:linear-gradient(180deg,#121c43,#081629);display:flex;flex-direction:column;min-width:0;max-height:100dvh;position:sticky;top:0}
-.assistant-head{padding:18px;border-bottom:1px solid var(--edge);display:flex;gap:10px;align-items:center}.bot-avatar{height:38px;width:38px;background:linear-gradient(140deg,#5d4bd6,#3c9bba);border-radius:12px;display:grid;place-items:center;color:var(--accent);font-weight:900}.assistant-head small{display:block;font-size:11px;color:var(--muted)}
-#messages{flex:1;min-height:210px;overflow:auto;padding:17px 14px;display:flex;flex-direction:column;gap:12px}
-.message{max-width:95%;background:#172840;border:1px solid #2b415c;border-radius:14px;padding:10px 12px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}.message.user{background:#183a34;border-color:#285c49;align-self:flex-end}.message strong{display:block;color:var(--accent);font-size:10px;margin-bottom:5px}
-.suggestions{display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px}.suggestions button{font-size:11px;border-radius:99px;background:#1a304a;color:var(--sky);border:1px solid #355273;padding:7px 10px}
-.composer{display:flex;gap:8px;padding:12px;border-top:1px solid var(--edge)}.composer input{min-width:0;flex:1;background:#111f34;color:var(--text);border:1px solid #324b68;border-radius:9px;padding:10px;font-size:12px}
-.footer-note{font-size:11px;color:var(--muted);padding:0 14px 14px}
-.mobile-bot{display:inline-flex}.bot-fab{position:fixed;z-index:31;bottom:16px;right:18px;border:0;border-radius:999px;padding:14px 19px;background:linear-gradient(135deg,#70ffce,#a2b9ff);color:#101338;font-weight:900;box-shadow:0 10px 30px #0009}.bot-fab:hover{transform:translateY(-2px)}
-@media(max-width:680px){.layout{display:block}.sidebar{padding:13px;gap:10px;border-right:0;border-bottom:1px solid var(--edge)}.brand small{font-size:10px}.nav{display:flex;overflow:auto;padding-bottom:3px}.nav button{white-space:nowrap;width:auto;flex:0 0 auto}.progress,.sidebar .eyebrow{display:none}.main{padding:18px 12px 26px}.cards{gap:8px}.card{padding:12px;min-height:132px}.card b{font-size:14px}.card small{font-size:11px}.assistant{right:8px;bottom:76px;width:calc(100vw - 16px);height:min(70dvh,610px)}.bot-fab{right:12px}.workspace-head{padding:13px}.actions{padding:13px}}
-</style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f6f7fb"><meta name="description" content="Aprenda Python passo a passo com a Py, sua cobrinha professora. Aulas, desafios e orientação para programar no Google Colab.">
+<title>Py-Code — Pequenos passos, grandes ideias</title>
+<link rel="manifest" href="./manifest.webmanifest"><link rel="stylesheet" href="./academia.css?v=40">
+<script src="./curriculo.js?v=40" defer></script><script src="./tutor.js?v=40" defer></script><script src="./academia.js?v=40" defer></script>
 </head>
 <body>
+<a class="skip" href="#lesson">Pular para a aula</a>
 <div class="layout">
-  <aside class="sidebar">
-    <div class="brand"><div class="logo">Py</div><div><strong>Py-Code Academia</strong><small>Programação de verdade, do zero</small></div></div>
-    <div class="eyebrow">Trilha de aprendizagem</div>
-    <nav class="nav" id="nav" aria-label="Módulos"></nav>
-    <div class="progress"><b>Meu progresso</b><p id="progressLabel">0 de 9 módulos visitados</p><div class="track"><div id="progressBar" class="bar"></div></div><p>Seu progresso fica salvo apenas neste navegador.</p></div>
-  </aside>
-
-  <main class="main">
-    <div class="topline"><span class="pill">MISSÕES DE PYTHON • NÍVEL INICIANTE</span><button class="btn mobile-bot" id="openBot">Conversar com o professor</button></div>
-    <h1 id="title">Olá, futuro programador!</h1>
-    <p id="lead" class="lead">Escolha uma aula, leia a explicação e execute um programa pequeno. O Professor Bot oferece pistas em vez de fazer toda a atividade por você.</p>
-    <p class="eyebrow">Escolha sua próxima missão</p>
-    <div class="cards" id="cards"></div>
-    <section class="workspace" aria-label="Laboratório de código">
-      <div class="workspace-head"><b id="lessonTitle">Laboratório Python</b><small id="lessonCounter">Aula guiada</small></div>
-      <div class="lesson-text" id="intro"></div>
-      <div class="step-label" id="stepLabel">Passo 1</div>
-      <div id="explain"></div>
-      <div class="editor"><div class="editor-head">programa.py — edite uma linha de cada vez</div><textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Editor Python"></textarea></div>
-      <div class="actions">
-        <button class="btn primary" id="run">Executar Python</button>
-        <button class="btn" id="next">Próxima etapa</button>
-        <button class="btn" id="hint">Pedir dica</button>
-        <button class="btn" id="reset">Recomeçar</button>
-        <button class="btn" id="download">Baixar .py</button>
-        <button class="btn" id="colab">Copiar para Colab</button>
-      </div>
-      <pre class="terminal" id="terminal" aria-live="polite">Python local: aguardando inicialização...</pre>
-      <div class="challenge"><b>Desafio do aluno</b><p id="challenge">Escolha uma aula para começar.</p><button class="btn" id="copyCode">Copiar meu código</button></div>
-    </section>
-  </main>
-
-  <button class="bot-fab" id="botFab" aria-controls="assistant" aria-expanded="false">Conversar com Professor Python</button>
-  <aside class="assistant" id="assistant" aria-label="Professor Python" role="dialog" aria-modal="false">
-    <div class="assistant-head"><div class="bot-avatar">?</div><div><b>Professor Python</b><small>IA clássica • regras e perguntas</small></div><button class="btn" id="closeBot" aria-label="Fechar chat">✕</button></div>
-    <div id="messages" role="log" aria-live="polite"></div>
-    <div class="suggestions" id="suggestions"></div>
-    <form class="composer" id="chatForm"><input id="chatInput" aria-label="Mensagem ao Professor Bot" autocomplete="off" placeholder="Pergunte sobre a aula..."><button class="btn primary" type="submit">Enviar</button></form>
-    <div class="footer-note">O bot é baseado em regras, não em uma LLM. Ele orienta, explica comandos e propõe exercícios.</div>
-  </aside>
-</div>
-<script src="./curriculo.js?v=38" defer></script>
-<script src="./tutor.js?v=38" defer></script>
-<script src="./academia.js?v=39" defer></script>
-</body>
-</html>
+<aside class="sidebar">
+<a class="brand" href="./" aria-label="Py-Code início"><span class="brand-symbol">py<span>.</span></span><span>Py-Code<small>UM PASSO DE CADA VEZ</small></span></a>
+<p class="nav-caption">SEU CAMINHO</p><nav id="nav" aria-label="Trilhas de aprendizagem"></nav>
+<div class="sidebar-tip"><span class="tiny-label">APRENDER FAZENDO</span><p>Uma ideia.<br>Algumas linhas.<br><strong>Algo que é seu.</strong></p><a href="https://colab.research.google.com/" target="_blank" rel="noopener noreferrer">Abrir Google Colab <span aria-hidden="true">↗</span></a></div>
+<div class="progress-card"><div><strong>Seu progresso</strong><span id="progressLabel"></span></div><progress id="progressBar" value="0" max="9"></progress><small>Etapas marcadas por você neste navegador.</small></div>
+</aside>
+<main>
+<header class="topbar"><span>SEU ESPAÇO PARA APRENDER PYTHON</span><button id="openBot" class="button subtle">Conheça sua professora <span aria-hidden="true">↗</span></button></header>
+<section class="hero"><div><span class="eyebrow"><span class="dot"></span> DO PRIMEIRO PRINT À PRIMEIRA IA</span><h1>Pequenos passos.<br><span>Grandes ideias.</span></h1><p>Você escreve o código. A Py ajuda a entender.<br>Escolha uma trilha e transforme curiosidade em criação.</p><button class="button primary" id="continue">Começar a aprender <span aria-hidden="true">→</span></button><span class="hero-note">No seu ritmo. Sem precisar saber programar.</span></div><div class="hero-art"><span class="float-label label-one">Olá, eu sou a Py!</span><img src="./assets/py-mentor.svg" alt="Py, uma cobrinha verde com óculos e um livro de Python" width="300" height="300"><span class="float-label label-two"><span class="dot"></span> Sua parceira de descobertas</span></div></section>
+<section class="paths" aria-labelledby="pathsTitle"><div class="section-heading"><div><span class="eyebrow">EXPLORE E DESCUBRA</span><h2 id="pathsTitle">O que vamos criar hoje?</h2></div><span class="muted">9 trilhas · do zero à IA</span></div><div class="cards" id="cards"></div></section>
+<section id="lesson" class="lesson" aria-labelledby="lessonTitle" tabindex="-1">
+<div class="lesson-heading"><div><span class="eyebrow" id="lessonTag"></span><h2 id="lessonTitle"></h2></div><span class="stage-badge" id="lessonCounter"></span></div><p id="intro" class="lesson-intro"></p>
+<div id="stepTabs" class="step-tabs" aria-label="Etapas da aula"></div>
+<div class="lesson-grid"><div><span class="tiny-label">ENTENDA A IDEIA</span><p id="explain" class="explanation"></p><div class="example"><div class="example-head"><span>EXEMPLO PARA ESTUDAR</span><button id="copy" class="text-button">Copiar exemplo</button></div><pre><code id="exampleCode"></code></pre></div><p class="example-note">Um exemplo curto para entender. Seu desafio vem depois, com suas próprias ideias.</p><div id="lineNotes" class="line-notes"></div></div><aside class="practice"><span class="practice-icon" aria-hidden="true">↗</span><span class="eyebrow">AGORA É COM VOCÊ</span><h3>Leve a ideia para o Colab</h3><ol><li>Abra um notebook no Google Colab.</li><li>Escreva o exemplo em uma célula de código.</li><li>Execute com Shift + Enter e observe.</li></ol><a class="button dark" href="https://colab.research.google.com/" target="_blank" rel="noopener noreferrer">Abrir o Colab <span aria-hidden="true">↗</span></a><button class="text-button" id="colabHelp">Primeira vez no Colab?</button><div class="practice-divider"></div><strong>Seu desafio</strong><p id="challenge"></p><button id="hint" class="button outline">Uma pista, Py?</button></aside></div>
+<div class="check"><label for="reflection">Antes de seguir: o que você entendeu?</label><p id="checkQuestion"></p><div class="reflection-row"><input id="reflection" autocomplete="off" maxlength="600" placeholder="Explique com suas palavras…"><button id="discuss" class="button subtle">Conversar com a Py</button></div></div>
+<div class="lesson-footer"><button id="previous" class="button outline">← Voltar</button><span id="lessonStatus" role="status"></span><button id="next" class="button primary">Entendi, próximo passo →</button></div>
+</section><footer class="page-footer"><span class="brand-word">Py-Code<span>.</span></span><p>Aprender é tentar, perguntar e tentar de novo.</p><small>Tutor local por regras · prática no Colab · sem executor Python no site</small></footer>
+</main></div>
+<div class="mascot-dock"><div class="mascot-bubble" id="mascotBubble">Travou em uma ideia?<br><strong>Vamos pensar juntos.</strong></div><button class="bot-fab" id="botFab" aria-controls="assistant" aria-expanded="false" aria-label="Abrir conversa com a Py, professora Python"><img src="./assets/py-mentor.svg" alt="" width="92" height="92"><span>Pergunte à Py</span></button></div>
+<aside class="assistant" id="assistant" role="dialog" aria-modal="false" aria-labelledby="assistantTitle" hidden>
+<header class="assistant-head"><img src="./assets/py-mentor.svg" alt="" width="48" height="48"><div><h2 id="assistantTitle">Py, sua professora</h2><span><span class="dot"></span> Vamos pensar passo a passo</span></div><button id="closeBot" aria-label="Fechar conversa" class="close-button">×</button></header>
+<div class="chat-context" id="chatContext"></div><div id="messages" role="log" aria-live="polite" aria-relevant="additions" aria-label="Conversa com a professora"></div><div class="suggestions" id="suggestions"></div>
+<form id="chatForm" class="composer"><label class="sr-only" for="chatInput">Pergunte ou cole um trecho de código do Colab</label><textarea id="chatInput" rows="2" maxlength="6000" placeholder="Sua dúvida, seu código ou um erro…"></textarea><button type="submit" aria-label="Enviar mensagem">↑</button></form><p class="chat-disclaimer">Tutor por regras, sem LLM. Analisa pistas; não executa nem valida Python.</p>
+</aside><div class="toast" id="toast" role="status" hidden></div><noscript>Ative o JavaScript para abrir as aulas e conversar com a Py.</noscript>
+</body></html>

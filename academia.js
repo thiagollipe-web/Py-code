@@ -1,184 +1,45 @@
-/* Interface, editor, chat e execução no Pyodide. */
 (function(){
-"use strict";
-const $=id=>document.getElementById(id);
-const catalog=window.PyCodeCurriculo;
-const tutor=window.PyCodeTutor.create();
-const code=$("code"),terminal=$("terminal"),cards=$("cards"),nav=$("nav"),chat=$("messages");
-const modules=catalog.modules;
-let active="inicio",step=0,worker=null,ready=false,busy=false,bootWatch=null,runWatch=null;
-let completed=new Set();
-const STORE="pycode-academia-progress-v1";
-try{completed=new Set(JSON.parse(localStorage.getItem(STORE)||"[]"))}catch(_){}
-function persist(){try{localStorage.setItem(STORE,JSON.stringify([...completed]))}catch(_){}}
-function saveCode(){try{localStorage.setItem("pycode-academia-draft-"+active,code.value)}catch(_){}}
-function log(s){terminal.textContent+=(terminal.textContent?"\n":"")+String(s);terminal.scrollTop=terminal.scrollHeight}
-function updateProgress(){
- $("progressLabel").textContent=completed.size+" de "+modules.length+" módulos visitados";
- $("progressBar").style.width=(completed.size/modules.length*100)+"%";
-}
-function setBusy(v){busy=v;$("run").disabled=v||!ready}
-function greeting(){
- bot("Olá! Eu sou o Professor Bot, um chatbot de regras, inspirado nos assistentes anteriores às LLMs.");
- bot("Escolha um módulo, leia cada passo e execute programas pequenos. Digite 'dica', 'desafio', 'erro' ou pergunte algo sobre Python.");
-}
-function bot(text,isUser=false){
- const item=document.createElement("div");
- item.className="message"+(isUser?" user":"");
- const strong=document.createElement("strong");
- strong.textContent=isUser?"Você":"Professor Bot";
- const p=document.createElement("div");
- p.textContent=String(text);
- item.append(strong,p);chat.append(item);
- while(chat.childElementCount>90)chat.firstChild.remove();
- chat.scrollTop=chat.scrollHeight;
-}
-function quick(){
- const sug=$("suggestions");sug.replaceChildren();
- [["Dica","dica"],["Desafio","desafio"],["O que é Python?","o que é python"],["Menu","menu"]].forEach(([label,value])=>{
-  const b=document.createElement("button");b.type="button";b.textContent=label;
-  b.onclick=()=>ask(value);sug.append(b);
- });
-}
+'use strict';
+const $=id=>document.getElementById(id),catalog=window.PyCodeCurriculo,modules=catalog.modules,tutor=window.PyCodeTutor.create();
+const STORE='pycode-guided-v40';
+let active='inicio',step=0,done={},drafts={},returnFocus=null,toastTimer;
+try{const saved=JSON.parse(localStorage.getItem(STORE)||'null');if(saved&&typeof saved==='object'){if(catalog.byId[saved.active])active=saved.active;if(Number.isInteger(saved.step))step=Math.max(0,Math.min(saved.step,catalog.byId[active].steps.length-1));if(saved.done&&typeof saved.done==='object'&&!Array.isArray(saved.done))done=saved.done;if(saved.drafts&&typeof saved.drafts==='object'&&!Array.isArray(saved.drafts))drafts=saved.drafts}}catch(_){}
+function save(){try{localStorage.setItem(STORE,JSON.stringify({active,step,done,drafts}))}catch(_){}}
+function toast(text){$('toast').textContent=text;$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,3500)}
+function bot(text,user=false){const div=document.createElement('div');div.className='message'+(user?' user':'');const who=document.createElement('strong');who.textContent=user?'VOCÊ':'PY · PROFESSORA';const content=document.createElement('div');content.textContent=text;div.append(who,content);$('messages').append(div);while($('messages').childElementCount>80)$('messages').firstChild.remove();$('messages').scrollTop=$('messages').scrollHeight}
+function openBot(){if($('assistant').hidden)returnFocus=document.activeElement;$('assistant').hidden=false;$('botFab').setAttribute('aria-expanded','true');$('mascotBubble').hidden=true;$('chatInput').focus()}
+function closeBot(){$('assistant').hidden=true;$('botFab').setAttribute('aria-expanded','false');$('mascotBubble').hidden=false;if(returnFocus&&returnFocus.isConnected)returnFocus.focus()}
 function ask(text){bot(text,true);bot(tutor.respond(text))}
-function renderNav(){
- nav.replaceChildren();
- modules.forEach((item,i)=>{
-  const b=document.createElement("button");b.type="button";b.dataset.module=item.id;
-  b.className=item.id===active?"active":"";
-  const badge=document.createElement("span");badge.textContent=completed.has(item.id)?"✓":String(i+1);
-  b.append(badge,document.createTextNode(item.name));b.onclick=()=>select(item.id);
-  nav.append(b);
+const marks=['>_','[ ]','x+y','~','↔','▦','?','{ }','ai'];
+function isDone(id){return catalog.byId[id].steps.every((_,i)=>done[id+':'+i]===true)}
+function navigation(){
+ $('nav').replaceChildren();$('cards').replaceChildren();
+ modules.forEach((m,i)=>{
+  const nav=document.createElement('button');nav.type='button';nav.className=m.id===active?'active':'';nav.setAttribute('aria-current',m.id===active?'step':'false');const number=document.createElement('span');number.className='nav-number';number.textContent=isDone(m.id)?'✓':String(i+1).padStart(2,'0');nav.append(number,document.createTextNode(m.name));nav.onclick=()=>select(m.id);$('nav').append(nav);
+  const card=document.createElement('button');card.type='button';card.className='card'+(m.id===active?' active':'');card.setAttribute('aria-label','Estudar '+m.name);const icon=document.createElement('span');icon.className='card-icon';icon.textContent=marks[i];icon.setAttribute('aria-hidden','true');const title=document.createElement('b');title.textContent=m.name;const sub=document.createElement('small');sub.textContent=m.subtitle;const meta=document.createElement('span');meta.className='card-bottom';meta.textContent=isDone(m.id)?'ETAPAS CONCLUÍDAS':m.steps.length+' ETAPAS · '+(i<3?'FUNDAMENTOS':i<7?'CRIAR E EXPLORAR':'INTELIGÊNCIA ARTIFICIAL');const arrow=document.createElement('span');arrow.className='card-arrow';arrow.textContent='↗';arrow.setAttribute('aria-hidden','true');card.append(icon,title,sub,meta,arrow);card.onclick=()=>select(m.id);$('cards').append(card);
  });
+ const count=modules.filter(m=>isDone(m.id)).length;$('progressLabel').textContent=count+' / '+modules.length;$('progressBar').value=count;$('progressBar').setAttribute('aria-label',count+' de '+modules.length+' trilhas concluídas');
 }
-function renderCards(){
- cards.replaceChildren();
- modules.filter(m=>m.id!==active).slice(0,4).forEach(m=>{
-  const b=document.createElement("button");b.type="button";b.className="card";
-  const tag=document.createElement("span");tag.className="mark";tag.textContent=m.tag;
-  const title=document.createElement("b");title.textContent=m.name;
-  const sub=document.createElement("small");sub.textContent=m.subtitle;
-  b.append(tag,title,sub);b.onclick=()=>select(m.id);
-  cards.append(b);
- });
+function render(){
+ const mod=catalog.byId[active],s=mod.steps[step];tutor.setLesson(active,step);$('lessonTitle').textContent=mod.name;$('lessonTag').textContent=mod.tag;$('lessonCounter').textContent='Etapa '+(step+1)+' de '+mod.steps.length;$('intro').textContent=mod.intro;$('explain').textContent=s.explain;$('exampleCode').textContent=s.code;$('challenge').textContent=mod.challenge;$('chatContext').textContent='Estudando: '+mod.name+' · etapa '+(step+1);$('checkQuestion').textContent='Explique o objetivo desta etapa e preveja o resultado antes de executar no Colab.';$('reflection').value=typeof drafts[active+':'+step]==='string'?drafts[active+':'+step]:'';
+ $('previous').disabled=step===0;$('next').textContent=step===mod.steps.length-1?'Marcar trilha como concluída ✓':'Entendi, próximo passo →';$('lessonStatus').textContent=done[active+':'+step]===true?'Você marcou esta etapa como entendida.':'';
+ $('stepTabs').replaceChildren();mod.steps.forEach((_,i)=>{const b=document.createElement('button');b.type='button';b.textContent='0'+(i+1)+(done[active+':'+i]===true?' ✓':'');b.className=i===step?'active':'';b.setAttribute('aria-label','Etapa '+(i+1));b.setAttribute('aria-current',i===step?'step':'false');b.onclick=()=>{step=i;render();save()};$('stepTabs').append(b)});
+ $('lineNotes').replaceChildren();s.code.split('\n').forEach((line,i)=>{if(!line.trim())return;const row=document.createElement('div');row.className='line-note';const number=document.createElement('span');number.textContent=String(i+1).padStart(2,'0');row.append(number,document.createTextNode(window.PyCodeTutor.explainLine(line)));$('lineNotes').append(row)});
+ navigation();$('continue').textContent=Object.keys(done).length?'Continuar minha jornada →':'Começar a aprender →';
 }
-function starter(stage){return stage.code}\nfunction lesson(){
- const mod=catalog.byId[active],s=mod.steps[step];
- $("title").textContent=active==="inicio"?"Sua jornada começa com Python":mod.name;
- $("lead").textContent=mod.intro;
- $("lessonTitle").textContent=mod.name;
- $("lessonCounter").textContent="Etapa "+(step+1)+" / "+mod.steps.length;
- $("intro").textContent=mod.subtitle;
- $("stepLabel").textContent="ETAPA "+(step+1)+" — APRENDA FAZENDO";
- $("explain").textContent=s.explain;
- $("challenge").textContent=mod.challenge;
- $("next").textContent=step===mod.steps.length-1?"Concluir módulo":"Próxima etapa";
- $("run").textContent=s.colabOnly?"Executar no Colab":"Executar Python";
- $("run").disabled=!!s.colabOnly||!ready||busy;
- $("terminal").textContent=s.colabOnly?
-  "Esta etapa usa comandos e pacotes do Google Colab.\nClique em “Copiar para Colab”.":"";
- const key="pycode-academia-draft-"+active;
- if(step===0){
-  let draft=null;try{draft=localStorage.getItem(key)}catch(_){}
-  code.value=draft||starter(s);
- }else code.value=starter(s);
- tutor.setLesson(active,step);
- renderNav();renderCards();updateProgress();
-}
-function select(id){
- if(!catalog.byId[id])return;
- active=id;step=0;completed.add(id);persist();lesson();
- bot("Vamos estudar "+catalog.byId[id].name+"! Leia o exemplo e execute. Se não compreender, escreva 'dica'.");
- toggleBot(false);
-}
-function next(){
- const mod=catalog.byId[active];
- if(step<mod.steps.length-1){step++;lesson();bot("Agora teste a etapa "+(step+1)+". "+mod.steps[step].explain)}
- else{
-  bot("Módulo concluído! Desafio: "+mod.challenge+" Escolha outra aula ou use o editor para praticar.");
-  const i=modules.findIndex(m=>m.id===active);if(i<modules.length-1)select(modules[i+1].id);
- }
-}
-function copy(text){
- if(navigator.clipboard&&isSecureContext)return navigator.clipboard.writeText(text);
- const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.left="-9999px";
- document.body.append(ta);ta.select();const ok=document.execCommand("copy");ta.remove();
- return ok?Promise.resolve():Promise.reject(new Error("Cópia não permitida"));
-}
-function boot(){
- if(worker){worker.terminate();worker=null}
- clearTimeout(bootWatch);clearTimeout(runWatch);ready=false;busy=false;
- $("run").disabled=true;
- terminal.textContent="Preparando Python local... (a primeira execução pode demorar)";
- try{worker=new Worker("./pycode-worker.js?v=37",{type:"module"})}
- catch(e){log("Worker não disponível: "+e.message);return}
- const current=worker;
- bootWatch=setTimeout(()=>{if(!ready&&current===worker){
-  log("Tempo limite ao preparar Pyodide. Confira a rede no primeiro acesso, ou recarregue.");
-  current.terminate();worker=null;
- }},45000);
- current.onerror=e=>{clearTimeout(bootWatch);clearTimeout(runWatch);ready=false;busy=false;
-  log("Erro de inicialização: "+(e.message||"Worker interrompido"));$("run").disabled=true;
- };
- current.onmessage=e=>{
-  if(current!==worker)return;
-  const m=e.data||{};
-  if(m.type==="ready"){clearTimeout(bootWatch);ready=true;setBusy(false);
-   if(!catalog.byId[active].steps[step].colabOnly)terminal.textContent="Python pronto. Clique em Executar Python.";
-   return}
-  if(m.type==="status"){if(!ready)terminal.textContent=m.value;return}
-  if(m.type==="stdout"||m.type==="stderr"){log(m.value||"");return}
-  if(m.type==="done"){clearTimeout(runWatch);setBusy(false);log("✓ Programa finalizado.");return}
-  if(m.type==="fatal"||m.type==="error"){
-    clearTimeout(runWatch);clearTimeout(bootWatch);
-    setBusy(false);
-    if(m.type==="fatal"){ready=false;$("run").disabled=true}
-    const desc=String(m.value||"Erro desconhecido");
-    log("Erro: "+desc);bot(tutor.error(desc));return;
-  }
- };
- current.postMessage({type:"boot"});
-}
-function run(){
- const stage=catalog.byId[active].steps[step];
- if(stage.colabOnly){bot("Esta etapa roda no Colab, não no navegador. Use Copiar para Colab.");return}
- if(!ready||busy){bot("Aguarde o Python iniciar ou terminar a execução anterior.");return}
- setBusy(true);terminal.textContent="$ python programa.py";
- worker.postMessage({type:"run",code:code.value});
- runWatch=setTimeout(()=>{
-  if(busy){
-   log("Execução excedeu 12 segundos. Reiniciando Python...");
-   boot();
-  }
- },12000);
-}
-$("run").onclick=run;
-$("next").onclick=next;
-$("hint").onclick=()=>bot(tutor.hint());
-$("reset").onclick=()=>{step=0;try{localStorage.removeItem("pycode-academia-draft-"+active)}catch(_){}lesson()};
-$("copyCode").onclick=()=>copy(code.value).then(()=>bot("Código copiado. Cole em uma célula de código no Colab.")).catch(()=>bot("Não foi possível copiar automaticamente. Selecione o código no editor."));
-$("download").onclick=()=>{
- const blob=new Blob([code.value+"\n"],{type:"text/x-python;charset=utf-8"});
- const url=URL.createObjectURL(blob),a=document.createElement("a");
- a.href=url;a.download=active+".py";document.body.append(a);a.click();a.remove();
- setTimeout(()=>URL.revokeObjectURL(url),1000);
-};
-$("colab").onclick=()=>{\n const popup=window.open("https://colab.research.google.com/#create=true","_blank");\n copy(code.value).then(()=>{
- bot("Código copiado! No Google Colab, toque em uma célula de código, cole e execute com ▶. Por segurança, o navegador não permite que este site cole automaticamente em outro site.");
- window.open("https://colab.research.google.com/","_blank","noopener,noreferrer");
-}).catch(()=>bot("Selecione e copie o código no editor, depois abra colab.research.google.com."));
-$("chatForm").addEventListener("submit",e=>{e.preventDefault();const input=$("chatInput");
- const text=input.value.trim();if(text){ask(text);input.value=""}});
-$("openBot").onclick=()=>$("assistant").classList.add("open");
-$("closeBot").onclick=()=>$("assistant").classList.remove("open");
-code.addEventListener("input",saveCode);
-code.addEventListener("keydown",e=>{
- if(e.key==="Tab"){e.preventDefault();const a=code.selectionStart,b=code.selectionEnd;
-  code.setRangeText("    ",a,b,"end");saveCode()}
- if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();run()}
-});
-quick();greeting();
-completed.add(active);persist();
-lesson();boot();
-if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js",{updateViaCache:"none"}).catch(()=>{});
+function scrollLesson(){$('lesson').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});$('lesson').focus({preventScroll:true})}
+function select(id){active=id;step=0;render();save();bot('Vamos estudar '+catalog.byId[id].name+'. '+catalog.byId[id].steps[0].explain+' Quer uma explicação ou uma pista?');scrollLesson()}
+$('continue').onclick=scrollLesson;$('openBot').onclick=openBot;$('botFab').onclick=openBot;$('closeBot').onclick=closeBot;
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('assistant').hidden)closeBot()});
+$('previous').onclick=()=>{if(step>0){step--;render();save()}};
+$('next').onclick=()=>{done[active+':'+step]=true;if(step<catalog.byId[active].steps.length-1){step++;render();save();scrollLesson()}else{render();save();toast('Trilha marcada como concluída. Escolha sua próxima descoberta!');bot('Você concluiu as etapas de '+catalog.byId[active].name+'. Agora teste seu desafio no Colab: '+catalog.byId[active].challenge);openBot()}};
+$('hint').onclick=()=>{openBot();bot(tutor.hint())};$('colabHelp').onclick=()=>{openBot();ask('Como usar o Colab?')};
+$('reflection').addEventListener('input',()=>{drafts[active+':'+step]=$('reflection').value;save()});
+$('discuss').onclick=()=>{const text=$('reflection').value.trim();openBot();if(text){bot(text,true);bot('Sua explicação ficou registrada nesta etapa. Vamos conferir pela prática: '+catalog.byId[active].steps[step].explain+'\nQual saída no Colab confirmaria o que você explicou?')}else bot('Tente descrever o que esta etapa faz com suas palavras. Pode começar com “Primeiro o programa…”; não precisa usar termos técnicos.')};
+$('chatForm').addEventListener('submit',e=>{e.preventDefault();const text=$('chatInput').value.trim();if(text){ask(text);$('chatInput').value='';$('chatInput').focus()}});
+$('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('chatForm').requestSubmit()}});
+['Explique esta etapa','Não entendi','Uma pista','Deu erro no Colab'].forEach((text,i)=>{const b=document.createElement('button');b.type='button';b.textContent=text;b.onclick=()=>ask(['explique esta etapa','não entendi','dica','deu erro'][i]);$('suggestions').append(b)});
+$('copy').onclick=async()=>{const text=catalog.byId[active].steps[step].code;try{if(!navigator.clipboard)throw new Error('Clipboard indisponível');await navigator.clipboard.writeText(text);toast('Exemplo copiado. Cole em uma célula do Colab.')}catch(_){const selection=getSelection(),range=document.createRange();range.selectNodeContents($('exampleCode'));selection.removeAllRanges();selection.addRange(range);toast('Selecionei o exemplo. Use Copiar no navegador.')}};
+render();bot('Olá! Eu sou a Py, sua cobrinha professora. Você cria seus programas no Colab; eu ajudo a entender cada passo aqui.\nEstamos em '+catalog.byId[active].name+'. Pergunte sobre uma linha, peça uma dica ou cole um erro do Colab.');
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).catch(()=>{});
 })();

@@ -1,10 +1,1 @@
-{
-  "name":"Py-Code",
-  "short_name":"Py-Code",
-  "start_url":"./",
-  "scope":"./",
-  "display":"standalone",
-  "background_color":"#000000",
-  "theme_color":"#05070c",
-  "description":"Terminal Python leve e colorido para programar offline."
-}
+{"name":"Py-Code — Aprenda com a Py","short_name":"Py-Code","start_url":"./","scope":"./","display":"standalone","background_color":"#f6f7fb","theme_color":"#f6f7fb","description":"Aulas guiadas de Python com uma cobrinha professora e prática no Google Colab.","icons":[{"src":"./assets/py-mentor.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}]}
