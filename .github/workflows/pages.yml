@@ -85,8 +85,8 @@ jobs:
             echo "Referência proibida a CDN do Pyodide encontrada nas fontes do projeto." >&2
             exit 1
           fi
-          grep -q 'pycode-worker.js?v=37' index.html jogo.html diagnostico.html sw.js
-          grep -q 'CACHE="py-code-v37"' sw.js
+          grep -q 'pycode-worker.js?v=37' academia.js jogo.html diagnostico.html sw.js
+          grep -q 'CACHE="py-code-v38"' sw.js
           echo "Offline/runtime invariants: OK"
       - name: Configure Pages
         uses: actions/configure-pages@v5
