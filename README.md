@@ -1,27 +1,19 @@
-# Py-Code Academia
+# Py-Code · Aprenda com a Py
 
-Plataforma educativa e responsiva para aprender Python com aulas guiadas e um Professor Bot clássico, **baseado em regras (não é uma LLM)**.
+Site responsivo de aulas guiadas de Python, com a Py, uma cobrinha professora em um popup acessível. A prática acontece no Google Colab: a página não contém editor nem executor Python e não baixa Pyodide.
 
-## Trilhas
+## Aprendizagem
 
-1. O que é Python?
-2. Listas Python
-3. Cálculos e decisões
-4. Cobrinha
-5. Ping-Pong
-6. Tetris
-7. RPG textual
-8. Bot clássico ELIZA
-9. Primeira LLM leve no Google Colab
+Nove trilhas: primeiros comandos, listas, cálculos, lógica de Cobrinha, Pong, Tetris, RPG textual, bot de regras inspirado em ELIZA e introdução a uma LLM pequena no Colab. Os jogos são exercícios textuais, não jogos gráficos completos. Exemplos curtos, explicações por linha, pistas graduais e desafios que o aluno constrói.
 
-Cada módulo inclui exemplos pequenos e progressivos, explicações, dicas e desafios. Os jogos são protótipos **textuais de lógica**, não versões gráficas completas. O aluno pode executar código Python simples no próprio site usando o Pyodide local. A atividade final com SmolLM2-135M-Instruct é executada **no Google Colab**, requer internet e instalação de dependências.
+A Py é um tutor local determinístico, **não uma LLM**. Usa contexto da aula, conceitos, perguntas de compreensão e pistas sobre erros colados do Colab. Não executa nem valida código, não compreende qualquer pergunta e não fornece avaliação automática das reflexões. As etapas são marcadas pelo aluno, e progresso e reflexões ficam apenas neste navegador. O chat fica em memória e não é enviado a um servidor.
 
-O Professor Bot usa reconhecimento de palavras-chave, contexto da aula e pistas progressivas. Ele não substitui um professor nem resolve atividades automaticamente.
+## Executar e verificar
 
-## Publicação
+Sem dependências de produção ou build. Sirva a pasta com `python3 -m http.server 8000` e abra `http://localhost:8000`.
 
-O GitHub Pages publica os arquivos estáticos. O workflow prepara a distribuição local do Pyodide. Depois da primeira visita conectada e do armazenamento pelo navegador, o ambiente pode funcionar offline; o Colab não é offline.
+`node --test tests/tutor.test.cjs` verifica comportamento do tutor. O workflow publica somente os arquivos da experiência guiada, sem o antigo runtime. Os arquivos legados continuam no histórico/pasta de origem, fora da publicação.
+
+O service worker guarda a interface e as aulas após um primeiro acesso bem-sucedido em HTTPS/localhost. O Colab e o download do modelo exigem internet; a trilha de LLM depende de pacotes externos e dos recursos da sessão. O bot continua disponível sem serviços de IA remotos.
 
 Site: https://thiagollipe-web.github.io/Py-code/
-
-Principais arquivos: `index.html`, `curriculo.js`, `tutor.js`, `academia.js`, `pycode-worker.js`, `pycode_worker.py`, `sw.js`.

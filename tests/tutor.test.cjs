@@ -1,0 +1,12 @@
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const window={};const ctx=vm.createContext({window});for(const file of ['curriculo.js','tutor.js'])vm.runInContext(fs.readFileSync(file,'utf8'),ctx);
+const create=()=>window.PyCodeTutor.create();
+test('prioritizes errors over topic words',()=>assert.match(create().respond('IndexError: list index out of range'),/posição acessada/));
+test('follows selected lesson and explains an exact line',()=>{const t=create();t.setLesson('listas',1);assert.match(t.respond('explique linha 2'),/print\(frutas\[0\]\)/);assert.match(t.respond('linha 99'),/2 linhas/)});
+test('hints progress and reset when switching lessons',()=>{const t=create();t.setLesson('listas');assert.match(t.hint(),/Pista 1/);assert.match(t.hint(),/Pista 2/);t.setLesson('rpg');assert.match(t.hint(),/Pista 1/)});
+test('Colab question is separate from LLM topic',()=>assert.match(create().respond('como usar o Colab?'),/novo notebook/));
+test('declines finished homework and suggests a first decision',()=>assert.match(create().respond('me dê o código completo'),/quais informações/));
+test('follows up on topic and checks index comprehension',()=>{const t=create();t.respond('explique índice');assert.match(t.respond('2'),/Isso!/)});
+test('no false header warning for colon in string',()=>assert.equal(window.PyCodeTutor.diagnose('print("if voce")'),null));
+test('detects missing header colon as a hint',()=>assert.match(create().respond('if pontos > 2\n    print(pontos)'),/dois pontos/));
+test('no executor or worker referenced in entry point',()=>{const html=fs.readFileSync('index.html','utf8'),app=fs.readFileSync('academia.js','utf8');assert.doesNotMatch(html+app,/new Worker|pyodide|id="code"|id="run"/)});
