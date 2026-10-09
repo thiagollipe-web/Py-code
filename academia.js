@@ -62,7 +62,7 @@ function renderCards(){
   cards.append(b);
  });
 }
-function lesson(){
+function starter(stage){if(stage.colabOnly)return stage.code; const lines=stage.code.split("\n");return lines.map((line,i)=>i===0?line:(line.trim()&&!line.trim().startsWith("#")&&i%2===1?"# SUA VEZ: escreva a próxima instrução":line)).join("\n")}\nfunction lesson(){
  const mod=catalog.byId[active],s=mod.steps[step];
  $("title").textContent=active==="inicio"?"Sua jornada começa com Python":mod.name;
  $("lead").textContent=mod.intro;
@@ -80,8 +80,8 @@ function lesson(){
  const key="pycode-academia-draft-"+active;
  if(step===0){
   let draft=null;try{draft=localStorage.getItem(key)}catch(_){}
-  code.value=draft||s.code;
- }else code.value=s.code;
+  code.value=draft||starter(s);
+ }else code.value=starter(s);
  tutor.setLesson(active,step);
  renderNav();renderCards();updateProgress();
 }
@@ -89,7 +89,7 @@ function select(id){
  if(!catalog.byId[id])return;
  active=id;step=0;completed.add(id);persist();lesson();
  bot("Vamos estudar "+catalog.byId[id].name+"! Leia o exemplo e execute. Se não compreender, escreva 'dica'.");
- if(innerWidth<1120)$("assistant").classList.remove("open");
+ toggleBot(false);
 }
 function next(){
  const mod=catalog.byId[active];
