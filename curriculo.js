@@ -9,7 +9,7 @@ const modules=[
 {code:'nome = "Ana"\nprint("Olá,", nome)',explain:"O mesmo programa pode juntar texto e variável sem complicar o código."}
 ]},
 {
- id:"listas",name:"Listas Python",tag:"02 • Coleções",subtitle:"Guardar e percorrer valores",intro:"Listas guardam vários elementos na mesma variável. Os índices começam em zero. Experimente alterar as frutas.",challenge:"Crie uma lista de três animais, adicione um quarto com append e mostre o segundo item.",hints:["Use os colchetes: animais = ["gato", "cão"].","Para adicionar: animais.append("peixe").","O segundo elemento usa o índice 1: animais[1]."],steps:[
+ id:"listas",name:"Listas Python",tag:"02 • Coleções",subtitle:"Guardar e percorrer valores",intro:"Listas guardam vários elementos na mesma variável. Os índices começam em zero. Experimente alterar as frutas.",challenge:"Crie uma lista de três animais, adicione um quarto com append e mostre o segundo item.",hints:["Use os colchetes: animais = [gato, cão].","Para adicionar: animais.append(peixe).","O segundo elemento usa o índice 1: animais[1]."],steps:[
 {code:'frutas = ["maçã", "uva", "banana"]\nprint(frutas)',explain:"Uma lista aparece entre colchetes. Os três itens são textos."},
 {code:'frutas = ["maçã", "uva", "banana"]\nprint(frutas[0])',explain:"frutas[0] pega o primeiro elemento. Python começa a contar em zero."},
 {code:'frutas = ["maçã", "uva"]\nfrutas.append("banana")\nfor fruta in frutas:\n    print(fruta)',explain:"append adiciona um elemento. for percorre cada item e print o mostra."}
@@ -39,7 +39,7 @@ const modules=[
 {code:'peca = [[0, 1, 0], [1, 1, 1]]\nfor linha in peca:\n    desenho = ""\n    for bloco in linha:\n        desenho += "[]" if bloco else "  "\n    print(desenho)',explain:"Transformamos os números em desenho textual. A lógica é curta e funciona no Colab."}
 ]},
 {
- id:"rpg",name:"RPG textual",tag:"07 • Jogos",subtitle:"Escolhas e histórias",intro:"Um RPG textual pode funcionar com variáveis, inventário, escolhas e if. Não precisa instalar nenhuma biblioteca.",challenge:"Adicione a opção 3, que encontra uma moeda e guarda o item no inventário.",hints:["Use uma variável escolha.","elif escolha == "3": cria uma terceira opção.","Adicione a moeda com inventario.append("moeda")."],steps:[
+ id:"rpg",name:"RPG textual",tag:"07 • Jogos",subtitle:"Escolhas e histórias",intro:"Um RPG textual pode funcionar com variáveis, inventário, escolhas e if. Não precisa instalar nenhuma biblioteca.",challenge:"Adicione a opção 3, que encontra uma moeda e guarda o item no inventário.",hints:["Use uma variável escolha.","elif escolha == 3: cria uma terceira opção.","Adicione a moeda com inventario.append(moeda)."],steps:[
 {code:'nome = "Aventureiro"\nvida = 10\nprint(nome, "tem", vida, "de vida")',explain:"Uma ficha de personagem pode ser feita só com duas variáveis."},
 {code:'inventario = ["mapa", "espada"]\nprint("Itens:", inventario)',explain:"A lista funciona como mochila do herói."},
 {code:'escolha = "1"\nif escolha == "1":\n    print("Você entrou na floresta.")\nelif escolha == "2":\n    print("Você voltou à cidade.")\nelse:\n    print("Escolha novamente.")',explain:"Troque o valor de escolha para ver os diferentes caminhos."}
