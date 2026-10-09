@@ -86,7 +86,7 @@ jobs:
             exit 1
           fi
           grep -q 'pycode-worker.js?v=37' academia.js jogo.html diagnostico.html sw.js
-          grep -q 'CACHE="py-code-v38"' sw.js
+          grep -q 'CACHE="py-code-v39"' sw.js
           echo "Offline/runtime invariants: OK"
       - name: Configure Pages
         uses: actions/configure-pages@v5
