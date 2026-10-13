@@ -1,4 +1,4 @@
-/* Aulas de Python e projetos interativos para Google Colab. */
+/* Aulas alinhadas aos mesmos arquivos Python dos projetos interativos. */
 (function(global){
 "use strict";
 const modules=[
@@ -88,36 +88,100 @@ const modules=[
     "name": "Cobrinha",
     "tag": "04 • Jogos",
     "subtitle": "Aprenda coordenadas e listas",
-    "intro": "Cobrinha jogável com tabuleiro, alimento, pontuação e colisão. Na etapa 4, instale os widgets; na etapa 5, execute o programa inteiro, clique em Iniciar e use os botões de direção. Os primeiros exemplos continuam ensinando os fundamentos. A interface abre na saída do Colab, com uma sessão conectada; estes códigos não executam dentro do site.",
+    "intro": "Aprenda a construir Cobrinha com o mesmo código Python do projeto interativo. A sequência ensina estado, regras e interface. Cada trecho é parte do programa final; os recuos devem ser mantidos. A instalação vai em uma célula separada e o programa completo em outra.",
     "challenge": "Altere o intervalo de asyncio.sleep de 0.28 para 0.4 e compare a velocidade.",
     "hints": [
-      "A cabeça é a posição de índice 0.",
-      "Para andar, some 1 à coordenada x.",
-      "Use inserir no início e remover no final para simular movimento."
+      "Comece pelo estado: quais valores mudam durante a execução?",
+      "Leia a regra da etapa e identifique a condição ou função responsável.",
+      "Compare o trecho com a última etapa, que reúne exatamente todas as partes. Preserve os espaços antes de cada linha."
     ],
     "steps": [
       {
-        "code": "cobra = [(2, 2), (1, 2), (0, 2)]\nprint(cobra)",
-        "explain": "Cada tupla (x, y) representa uma parte da cobrinha."
-      },
-      {
-        "code": "cobra = [(2, 2), (1, 2), (0, 2)]\nx, y = cobra[0]\ncobra.insert(0, (x + 1, y))\ncobra.pop()\nprint(cobra)",
-        "explain": "A nova cabeça vai para x+1. pop remove a última parte, mantendo o tamanho."
-      },
-      {
-        "code": "cobra = [(2, 2), (1, 2), (0, 2)]\nfor passo in range(3):\n    x, y = cobra[0]\n    cobra.insert(0, (x + 1, y))\n    cobra.pop()\n    print(\"Passo\", passo + 1, cobra)",
-        "explain": "for repete o movimento. O objetivo é compreender a regra antes do desenho."
-      },
-      {
+        "title": "Preparar o Colab",
         "code": "%pip install -q \"ipywidgets>=8.1,<9\"",
-        "explain": "Preparação: execute esta célula no Google Colab. Se houver pedido de reinício, reinicie a sessão e execute a etapa seguinte. Esta instalação é comum aos quatro projetos.",
-        "colabOnly": true
+        "explain": "Execute esta instalação em uma célula separada do Colab. Os próximos trechos pertencem ao mesmo programa: copie em ordem, mantendo os recuos, para uma única célula. Execute depois de reunir todas as partes, ou copie a última etapa, que já contém o código completo.",
+        "colabOnly": true,
+        "question": "Em qual célula a instalação deve ser executada?"
       },
       {
-        "code": "import random\n\nclass Cobrinha:\n    def __init__(self, tamanho=16):\n        self.tamanho = tamanho\n        self.corpo = [(5, 7), (4, 7), (3, 7)]\n        self.direcao = (1, 0)\n        self.proxima = self.direcao\n        self.pontos = 0\n        self.fim = False\n        self.comida = self.sortear_comida()\n\n    def sortear_comida(self):\n        livres = [(x, y) for x in range(self.tamanho) for y in range(self.tamanho)\n                  if (x, y) not in self.corpo]\n        return random.choice(livres) if livres else None\n\n    def virar(self, dx, dy):\n        if (dx, dy) in [(1, 0), (-1, 0), (0, 1), (0, -1)]:\n            if (dx, dy) != (-self.direcao[0], -self.direcao[1]):\n                self.proxima = (dx, dy)\n\n    def passo(self):\n        if self.fim:\n            return\n        self.direcao = self.proxima\n        x, y = self.corpo[0]\n        cabeca = (x + self.direcao[0], y + self.direcao[1])\n        cresce = cabeca == self.comida\n        obstaculos = self.corpo if cresce else self.corpo[:-1]\n        if not (0 <= cabeca[0] < self.tamanho and 0 <= cabeca[1] < self.tamanho) or cabeca in obstaculos:\n            self.fim = True\n            return\n        self.corpo.insert(0, cabeca)\n        if cresce:\n            self.pontos += 1\n            self.comida = self.sortear_comida()\n            if self.comida is None:\n                self.fim = True\n        else:\n            self.corpo.pop()\n\nif __name__ == \"__main__\":\n    import asyncio\n    import ipywidgets as w\n    from IPython.display import display\n    try:\n        from google.colab import output\n        output.enable_custom_widget_manager()\n    except ImportError:\n        pass\n\n    # Encerra a partida anterior quando a célula é executada novamente.\n    if \"tarefa_cobrinha\" in globals():\n        tarefa_cobrinha.cancel()\n    jogo = Cobrinha()\n    rodando = False\n    painel = w.HTML()\n    iniciar = w.Button(description=\"Iniciar / Pausar\")\n    reiniciar = w.Button(description=\"Reiniciar\")\n\n    def desenhar():\n        blocos = \"\"\n        for i, (x, y) in enumerate(jogo.corpo):\n            cor = \"#a3e635\" if i == 0 else \"#22c55e\"\n            blocos += f'<rect x=\"{x*20+1}\" y=\"{y*20+1}\" width=\"18\" height=\"18\" rx=\"4\" fill=\"{cor}\"/>'\n        if jogo.comida is not None:\n            x, y = jogo.comida\n            blocos += f'<circle cx=\"{x*20+10}\" cy=\"{y*20+10}\" r=\"7\" fill=\"#fb7185\"/>'\n        estado = \"Fim de jogo — Reinicie\" if jogo.fim else (\"Jogando\" if rodando else \"Pausado — clique em Iniciar\")\n        painel.value = f'<p><b>Cobrinha | Pontos: {jogo.pontos}</b> | {estado}</p><svg viewBox=\"0 0 320 320\" width=\"320\" style=\"max-width:100%;background:#0f172a\">{blocos}</svg>'\n\n    def alternar(_):\n        global rodando\n        if not jogo.fim:\n            rodando = not rodando\n        desenhar()\n\n    def resetar(_):\n        global jogo, rodando\n        jogo = Cobrinha()\n        rodando = False\n        desenhar()\n\n    iniciar.on_click(alternar)\n    reiniciar.on_click(resetar)\n    botoes = []\n    for texto, dx, dy in [(\"↑\", 0, -1), (\"←\", -1, 0), (\"↓\", 0, 1), (\"→\", 1, 0)]:\n        b = w.Button(description=texto, layout=w.Layout(width=\"65px\", height=\"45px\"))\n        b.on_click(lambda _, dx=dx, dy=dy: jogo.virar(dx, dy))\n        botoes.append(b)\n\n    async def atualizar():\n        while True:\n            await asyncio.sleep(0.28)\n            if rodando and not jogo.fim:\n                jogo.passo()\n                desenhar()\n\n    display(w.VBox([painel, w.HBox(botoes), w.HBox([iniciar, reiniciar])]))\n    desenhar()\n    tarefa_cobrinha = asyncio.get_running_loop().create_task(atualizar())\n",
-        "explain": "Cobrinha jogável com tabuleiro, alimento, pontuação e colisão. Na etapa 4, instale os widgets; na etapa 5, execute o programa inteiro, clique em Iniciar e use os botões de direção. Não use um arquivo .py no terminal para esta interface: ela depende do ambiente de notebook e, nos dois jogos de tabuleiro, do loop assíncrono do Colab.",
+        "title": "Criar o estado da cobra",
+        "code": "import random\n\nclass Cobrinha:\n    def __init__(self, tamanho=16):\n        self.tamanho = tamanho\n        self.corpo = [(5, 7), (4, 7), (3, 7)]\n        self.direcao = (1, 0)\n        self.proxima = self.direcao\n        self.pontos = 0\n        self.fim = False\n        self.comida = self.sortear_comida()\n\n",
+        "explain": "import random permite sortear o alimento. A classe Cobrinha reúne o estado e as regras. __init__ cria o corpo, a direção, os pontos e o estado de fim de jogo. self identifica a partida atual. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
         "colabOnly": true,
-        "interactive": true
+        "fragment": true,
+        "question": "Por que cada parte do corpo é uma tupla (x, y)?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Sortear alimento em uma casa livre",
+        "code": "    def sortear_comida(self):\n        livres = [(x, y) for x in range(self.tamanho) for y in range(self.tamanho)\n                  if (x, y) not in self.corpo]\n        return random.choice(livres) if livres else None\n\n",
+        "explain": "A compreensão de lista enumera as casas do tabuleiro e exclui as ocupadas pela cobra. random.choice escolhe uma casa livre. Se não houver nenhuma, a função retorna None. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "Por que o alimento não pode aparecer dentro da cobra?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Controlar a direção",
+        "code": "    def virar(self, dx, dy):\n        if (dx, dy) in [(1, 0), (-1, 0), (0, 1), (0, -1)]:\n            if (dx, dy) != (-self.direcao[0], -self.direcao[1]):\n                self.proxima = (dx, dy)\n\n",
+        "explain": "virar recebe dx e dy. A condição aceita somente as quatro direções e rejeita a direção oposta à direção do movimento atual. proxima guarda a mudança para o próximo passo. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "O que aconteceria se a cobra pudesse inverter a direção imediatamente?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Mover, crescer e detectar colisões",
+        "code": "    def passo(self):\n        if self.fim:\n            return\n        self.direcao = self.proxima\n        x, y = self.corpo[0]\n        cabeca = (x + self.direcao[0], y + self.direcao[1])\n        cresce = cabeca == self.comida\n        obstaculos = self.corpo if cresce else self.corpo[:-1]\n        if not (0 <= cabeca[0] < self.tamanho and 0 <= cabeca[1] < self.tamanho) or cabeca in obstaculos:\n            self.fim = True\n            return\n        self.corpo.insert(0, cabeca)\n        if cresce:\n            self.pontos += 1\n            self.comida = self.sortear_comida()\n            if self.comida is None:\n                self.fim = True\n        else:\n            self.corpo.pop()\n\n",
+        "explain": "passo calcula a próxima cabeça. Se ela alcançar comida, o corpo cresce; caso contrário, a cauda sai. Testamos limites e corpo antes de inserir a cabeça. A cauda que vai sair não conta como obstáculo. Ao comer, somamos um ponto e sorteamos outro alimento. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "Em qual situação devemos evitar corpo.pop()?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Preparar a interface",
+        "code": "if __name__ == \"__main__\":\n    import asyncio\n    import ipywidgets as w\n    from IPython.display import display\n    try:\n        from google.colab import output\n        output.enable_custom_widget_manager()\n    except ImportError:\n        pass\n\n    # Encerra a partida anterior quando a célula é executada novamente.\n    if \"tarefa_cobrinha\" in globals():\n        tarefa_cobrinha.cancel()\n    jogo = Cobrinha()\n    rodando = False\n    painel = w.HTML()\n    iniciar = w.Button(description=\"Iniciar / Pausar\")\n    reiniciar = w.Button(description=\"Reiniciar\")\n\n",
+        "explain": "Este bloco prepara asyncio, ipywidgets e display no notebook. Cancela o temporizador de uma execução anterior, cria uma partida e começa pausado. HTML mostra o tabuleiro; Button cria os controles. Todo o bloco permanece com quatro espaços de recuo. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "Por que cancelar o temporizador ao executar a célula novamente?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Desenhar o tabuleiro",
+        "code": "    def desenhar():\n        blocos = \"\"\n        for i, (x, y) in enumerate(jogo.corpo):\n            cor = \"#a3e635\" if i == 0 else \"#22c55e\"\n            blocos += f'<rect x=\"{x*20+1}\" y=\"{y*20+1}\" width=\"18\" height=\"18\" rx=\"4\" fill=\"{cor}\"/>'\n        if jogo.comida is not None:\n            x, y = jogo.comida\n            blocos += f'<circle cx=\"{x*20+10}\" cy=\"{y*20+10}\" r=\"7\" fill=\"#fb7185\"/>'\n        estado = \"Fim de jogo — Reinicie\" if jogo.fim else (\"Jogando\" if rodando else \"Pausado — clique em Iniciar\")\n        painel.value = f'<p><b>Cobrinha | Pontos: {jogo.pontos}</b> | {estado}</p><svg viewBox=\"0 0 320 320\" width=\"320\" style=\"max-width:100%;background:#0f172a\">{blocos}</svg>'\n\n",
+        "explain": "desenhar constrói um SVG: cada segmento vira um retângulo e a comida vira um círculo. Multiplicar as coordenadas por 20 converte casas em pixels. painel.value atualiza a saída sem abrir outra janela. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "Qual é a diferença entre a coordenada de uma casa e sua posição em pixels?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Ligar os botões às regras",
+        "code": "    def alternar(_):\n        global rodando\n        if not jogo.fim:\n            rodando = not rodando\n        desenhar()\n\n    def resetar(_):\n        global jogo, rodando\n        jogo = Cobrinha()\n        rodando = False\n        desenhar()\n\n    iniciar.on_click(alternar)\n    reiniciar.on_click(resetar)\n    botoes = []\n    for texto, dx, dy in [(\"↑\", 0, -1), (\"←\", -1, 0), (\"↓\", 0, 1), (\"→\", 1, 0)]:\n        b = w.Button(description=texto, layout=w.Layout(width=\"65px\", height=\"45px\"))\n        b.on_click(lambda _, dx=dx, dy=dy: jogo.virar(dx, dy))\n        botoes.append(b)\n\n",
+        "explain": "alternar muda rodando; resetar cria outra partida. on_click registra funções, sem executá-las naquele momento. Os valores dx=dx e dy=dy preservam a direção de cada botão criado no laço. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "Por que não chamamos a função com parênteses ao registrar on_click?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Atualizar a partida sem bloquear",
+        "code": "    async def atualizar():\n        while True:\n            await asyncio.sleep(0.28)\n            if rodando and not jogo.fim:\n                jogo.passo()\n                desenhar()\n\n    display(w.VBox([painel, w.HBox(botoes), w.HBox([iniciar, reiniciar])]))\n    desenhar()\n    tarefa_cobrinha = asyncio.get_running_loop().create_task(atualizar())\n",
+        "explain": "O laço espera 0.28 segundo usando await. Quando a partida está rodando, calcula um passo e redesenha. display mostra os widgets e create_task agenda o laço no ambiente do notebook. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "Qual é o efeito de aumentar o tempo de asyncio.sleep?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Código completo: executar e testar",
+        "code": "import random\n\nclass Cobrinha:\n    def __init__(self, tamanho=16):\n        self.tamanho = tamanho\n        self.corpo = [(5, 7), (4, 7), (3, 7)]\n        self.direcao = (1, 0)\n        self.proxima = self.direcao\n        self.pontos = 0\n        self.fim = False\n        self.comida = self.sortear_comida()\n\n    def sortear_comida(self):\n        livres = [(x, y) for x in range(self.tamanho) for y in range(self.tamanho)\n                  if (x, y) not in self.corpo]\n        return random.choice(livres) if livres else None\n\n    def virar(self, dx, dy):\n        if (dx, dy) in [(1, 0), (-1, 0), (0, 1), (0, -1)]:\n            if (dx, dy) != (-self.direcao[0], -self.direcao[1]):\n                self.proxima = (dx, dy)\n\n    def passo(self):\n        if self.fim:\n            return\n        self.direcao = self.proxima\n        x, y = self.corpo[0]\n        cabeca = (x + self.direcao[0], y + self.direcao[1])\n        cresce = cabeca == self.comida\n        obstaculos = self.corpo if cresce else self.corpo[:-1]\n        if not (0 <= cabeca[0] < self.tamanho and 0 <= cabeca[1] < self.tamanho) or cabeca in obstaculos:\n            self.fim = True\n            return\n        self.corpo.insert(0, cabeca)\n        if cresce:\n            self.pontos += 1\n            self.comida = self.sortear_comida()\n            if self.comida is None:\n                self.fim = True\n        else:\n            self.corpo.pop()\n\nif __name__ == \"__main__\":\n    import asyncio\n    import ipywidgets as w\n    from IPython.display import display\n    try:\n        from google.colab import output\n        output.enable_custom_widget_manager()\n    except ImportError:\n        pass\n\n    # Encerra a partida anterior quando a célula é executada novamente.\n    if \"tarefa_cobrinha\" in globals():\n        tarefa_cobrinha.cancel()\n    jogo = Cobrinha()\n    rodando = False\n    painel = w.HTML()\n    iniciar = w.Button(description=\"Iniciar / Pausar\")\n    reiniciar = w.Button(description=\"Reiniciar\")\n\n    def desenhar():\n        blocos = \"\"\n        for i, (x, y) in enumerate(jogo.corpo):\n            cor = \"#a3e635\" if i == 0 else \"#22c55e\"\n            blocos += f'<rect x=\"{x*20+1}\" y=\"{y*20+1}\" width=\"18\" height=\"18\" rx=\"4\" fill=\"{cor}\"/>'\n        if jogo.comida is not None:\n            x, y = jogo.comida\n            blocos += f'<circle cx=\"{x*20+10}\" cy=\"{y*20+10}\" r=\"7\" fill=\"#fb7185\"/>'\n        estado = \"Fim de jogo — Reinicie\" if jogo.fim else (\"Jogando\" if rodando else \"Pausado — clique em Iniciar\")\n        painel.value = f'<p><b>Cobrinha | Pontos: {jogo.pontos}</b> | {estado}</p><svg viewBox=\"0 0 320 320\" width=\"320\" style=\"max-width:100%;background:#0f172a\">{blocos}</svg>'\n\n    def alternar(_):\n        global rodando\n        if not jogo.fim:\n            rodando = not rodando\n        desenhar()\n\n    def resetar(_):\n        global jogo, rodando\n        jogo = Cobrinha()\n        rodando = False\n        desenhar()\n\n    iniciar.on_click(alternar)\n    reiniciar.on_click(resetar)\n    botoes = []\n    for texto, dx, dy in [(\"↑\", 0, -1), (\"←\", -1, 0), (\"↓\", 0, 1), (\"→\", 1, 0)]:\n        b = w.Button(description=texto, layout=w.Layout(width=\"65px\", height=\"45px\"))\n        b.on_click(lambda _, dx=dx, dy=dy: jogo.virar(dx, dy))\n        botoes.append(b)\n\n    async def atualizar():\n        while True:\n            await asyncio.sleep(0.28)\n            if rodando and not jogo.fim:\n                jogo.passo()\n                desenhar()\n\n    display(w.VBox([painel, w.HBox(botoes), w.HBox([iniciar, reiniciar])]))\n    desenhar()\n    tarefa_cobrinha = asyncio.get_running_loop().create_task(atualizar())\n",
+        "explain": "Este é exatamente o programa montado nas etapas anteriores e usado no notebook vinculado. Depois da instalação, copie este bloco inteiro para outra célula e execute. Clique em Iniciar / Pausar e use os botões. Mantenha a sessão do Colab conectada.",
+        "colabOnly": true,
+        "interactive": true,
+        "question": "Qual regra você quer mudar no programa e como vai testar o resultado?"
       }
     ]
   },
@@ -153,36 +217,109 @@ const modules=[
     "name": "Tetris",
     "tag": "06 • Jogos",
     "subtitle": "Matrizes e peças",
-    "intro": "Tetris jogável com sete peças, rotação, queda automática, remoção de linhas e pontuação. Execute a instalação da etapa 4 e o programa da etapa 5; clique em Iniciar e use os botões. Os primeiros exemplos continuam ensinando os fundamentos. A interface abre na saída do Colab, com uma sessão conectada; estes códigos não executam dentro do site.",
+    "intro": "Aprenda a construir Tetris com o mesmo código Python do projeto interativo. A sequência ensina estado, regras e interface. Cada trecho é parte do programa final; os recuos devem ser mantidos. A instalação vai em uma célula separada e o programa completo em outra.",
     "challenge": "Altere a pontuação de uma linha de 100 para 150 e complete uma linha.",
     "hints": [
-      "A matriz é uma lista de linhas.",
-      "Use 0 para espaço vazio e 1 para bloco.",
-      "Um for dentro de outro for pode visitar cada número."
+      "Comece pelo estado: quais valores mudam durante a execução?",
+      "Leia a regra da etapa e identifique a condição ou função responsável.",
+      "Compare o trecho com a última etapa, que reúne exatamente todas as partes. Preserve os espaços antes de cada linha."
     ],
     "steps": [
       {
-        "code": "peca = [[1, 1], [1, 1]]\nprint(peca)",
-        "explain": "Uma peça é representada por duas linhas com dois blocos cada."
-      },
-      {
-        "code": "peca = [[0, 1, 0], [1, 1, 1]]\nfor linha in peca:\n    print(linha)",
-        "explain": "Cada sublista é uma linha da peça, percorrida com for."
-      },
-      {
-        "code": "peca = [[0, 1, 0], [1, 1, 1]]\nfor linha in peca:\n    desenho = \"\"\n    for bloco in linha:\n        desenho += \"[]\" if bloco else \"  \"\n    print(desenho)",
-        "explain": "Transformamos os números em desenho textual. A lógica é curta e funciona no Colab."
-      },
-      {
+        "title": "Preparar o Colab",
         "code": "%pip install -q \"ipywidgets>=8.1,<9\"",
-        "explain": "Preparação: execute esta célula no Google Colab. Se houver pedido de reinício, reinicie a sessão e execute a etapa seguinte. Esta instalação é comum aos quatro projetos.",
-        "colabOnly": true
+        "explain": "Execute esta instalação em uma célula separada do Colab. Os próximos trechos pertencem ao mesmo programa: copie em ordem, mantendo os recuos, para uma única célula. Execute depois de reunir todas as partes, ou copie a última etapa, que já contém o código completo.",
+        "colabOnly": true,
+        "question": "Em qual célula a instalação deve ser executada?"
       },
       {
-        "code": "import random\n\nclass Tetris:\n    PECAS = [ [[1,1,1,1]], [[2,2],[2,2]], [[0,3,0],[3,3,3]],\n              [[0,4,4],[4,4,0]], [[5,5,0],[0,5,5]],\n              [[6,0,0],[6,6,6]], [[0,0,7],[7,7,7]] ]\n\n    def __init__(self):\n        self.tabuleiro = [[0]*10 for _ in range(20)]\n        self.pontos = 0\n        self.linhas = 0\n        self.fim = False\n        self.nova_peca()\n\n    def nova_peca(self):\n        self.peca = [linha[:] for linha in random.choice(self.PECAS)]\n        self.x = (10-len(self.peca[0]))//2\n        self.y = 0\n        if not self.cabe(self.peca, self.x, self.y):\n            self.fim = True\n\n    def cabe(self, peca, x, y):\n        for dy, linha in enumerate(peca):\n            for dx, valor in enumerate(linha):\n                if valor and (not 0 <= x+dx < 10 or not 0 <= y+dy < 20 or self.tabuleiro[y+dy][x+dx]):\n                    return False\n        return True\n\n    def mover(self, dx):\n        if not self.fim and self.cabe(self.peca, self.x+dx, self.y):\n            self.x += dx\n\n    def girar(self):\n        if self.fim:\n            return\n        girada = [list(linha) for linha in zip(*self.peca[::-1])]\n        for ajuste in [0, -1, 1, -2, 2]:\n            if self.cabe(girada, self.x+ajuste, self.y):\n                self.peca = girada\n                self.x += ajuste\n                return\n\n    def descer(self):\n        if self.fim:\n            return\n        if self.cabe(self.peca, self.x, self.y+1):\n            self.y += 1\n            return\n        for dy, linha in enumerate(self.peca):\n            for dx, valor in enumerate(linha):\n                if valor:\n                    self.tabuleiro[self.y+dy][self.x+dx] = valor\n        restantes = [linha for linha in self.tabuleiro if not all(linha)]\n        removidas = 20-len(restantes)\n        self.tabuleiro = [[0]*10 for _ in range(removidas)] + restantes\n        self.linhas += removidas\n        self.pontos += [0, 100, 300, 500, 800][removidas]\n        self.nova_peca()\n\n    def soltar(self):\n        if self.fim:\n            return\n        while self.cabe(self.peca, self.x, self.y+1):\n            self.y += 1\n        self.descer()\n\nif __name__ == \"__main__\":\n    import asyncio\n    import ipywidgets as w\n    from IPython.display import display\n    try:\n        from google.colab import output\n        output.enable_custom_widget_manager()\n    except ImportError:\n        pass\n    if \"tarefa_tetris\" in globals():\n        tarefa_tetris.cancel()\n    jogo_tetris = Tetris()\n    tetris_rodando = False\n    painel_tetris = w.HTML()\n    cores = [\"#0f172a\", \"#22d3ee\", \"#facc15\", \"#c084fc\", \"#4ade80\", \"#fb7185\", \"#60a5fa\", \"#fb923c\"]\n\n    def desenhar_tetris():\n        j = jogo_tetris\n        quadro = [linha[:] for linha in j.tabuleiro]\n        if not j.fim:\n            for dy, linha in enumerate(j.peca):\n                for dx, valor in enumerate(linha):\n                    if valor:\n                        quadro[j.y+dy][j.x+dx] = valor\n        blocos = \"\".join(f'<rect x=\"{x*20+1}\" y=\"{y*20+1}\" width=\"18\" height=\"18\" rx=\"2\" fill=\"{cores[v]}\"/>'\n                         for y, linha in enumerate(quadro) for x, v in enumerate(linha))\n        estado = \"Fim de jogo\" if j.fim else (\"Jogando\" if tetris_rodando else \"Pausado\")\n        painel_tetris.value = f'<p><b>Tetris | Pontos: {j.pontos} | Linhas: {j.linhas}</b> | {estado}</p><svg viewBox=\"0 0 200 400\" width=\"200\" style=\"max-width:100%;background:#1e293b\">{blocos}</svg>'\n\n    def acao_tetris(acao):\n        if not tetris_rodando or jogo_tetris.fim:\n            return\n        acao()\n        desenhar_tetris()\n\n    def pausar_tetris(_):\n        global tetris_rodando\n        if not jogo_tetris.fim:\n            tetris_rodando = not tetris_rodando\n        desenhar_tetris()\n\n    def reiniciar_tetris(_):\n        global jogo_tetris, tetris_rodando\n        jogo_tetris = Tetris()\n        tetris_rodando = False\n        desenhar_tetris()\n\n    controles = []\n    for texto, acao in [(\"←\", lambda: jogo_tetris.mover(-1)), (\"Girar\", lambda: jogo_tetris.girar()),\n                         (\"→\", lambda: jogo_tetris.mover(1)), (\"↓\", lambda: jogo_tetris.descer()),\n                         (\"Soltar\", lambda: jogo_tetris.soltar())]:\n        b = w.Button(description=texto, layout=w.Layout(width=\"65px\", height=\"42px\"))\n        b.on_click(lambda _, acao=acao: acao_tetris(acao))\n        controles.append(b)\n    pausa = w.Button(description=\"Iniciar / Pausar\")\n    pausa.on_click(pausar_tetris)\n    reset = w.Button(description=\"Reiniciar\")\n    reset.on_click(reiniciar_tetris)\n\n    async def atualizar_tetris():\n        while True:\n            await asyncio.sleep(max(0.15, 0.7-jogo_tetris.linhas*0.02))\n            if tetris_rodando and not jogo_tetris.fim:\n                jogo_tetris.descer()\n                desenhar_tetris()\n\n    display(w.VBox([painel_tetris, w.HBox(controles, layout=w.Layout(flex_flow=\"row wrap\")), w.HBox([pausa, reset])]))\n    desenhar_tetris()\n    tarefa_tetris = asyncio.get_running_loop().create_task(atualizar_tetris())\n",
-        "explain": "Tetris jogável com sete peças, rotação, queda automática, remoção de linhas e pontuação. Execute a instalação da etapa 4 e o programa da etapa 5; clique em Iniciar e use os botões. Não use um arquivo .py no terminal para esta interface: ela depende do ambiente de notebook e, nos dois jogos de tabuleiro, do loop assíncrono do Colab.",
+        "title": "Criar peças e tabuleiro",
+        "code": "import random\n\nclass Tetris:\n    PECAS = [ [[1,1,1,1]], [[2,2],[2,2]], [[0,3,0],[3,3,3]],\n              [[0,4,4],[4,4,0]], [[5,5,0],[0,5,5]],\n              [[6,0,0],[6,6,6]], [[0,0,7],[7,7,7]] ]\n\n    def __init__(self):\n        self.tabuleiro = [[0]*10 for _ in range(20)]\n        self.pontos = 0\n        self.linhas = 0\n        self.fim = False\n        self.nova_peca()\n\n",
+        "explain": "PECAS guarda as sete matrizes. Zero é espaço vazio e os números 1 a 7 identificam cores. __init__ cria vinte linhas independentes, com dez casas cada, e inicia pontos, linhas e uma peça. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
         "colabOnly": true,
-        "interactive": true
+        "fragment": true,
+        "question": "Por que criamos cada linha separadamente em vez de repetir a mesma lista?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Posicionar a peça e testar espaço",
+        "code": "    def nova_peca(self):\n        self.peca = [linha[:] for linha in random.choice(self.PECAS)]\n        self.x = (10-len(self.peca[0]))//2\n        self.y = 0\n        if not self.cabe(self.peca, self.x, self.y):\n            self.fim = True\n\n    def cabe(self, peca, x, y):\n        for dy, linha in enumerate(peca):\n            for dx, valor in enumerate(linha):\n                if valor and (not 0 <= x+dx < 10 or not 0 <= y+dy < 20 or self.tabuleiro[y+dy][x+dx]):\n                    return False\n        return True\n\n",
+        "explain": "nova_peca copia a matriz para não alterar o catálogo de peças. cabe percorre as células ocupadas e verifica paredes, chão e blocos já fixos. Se uma peça não cabe na entrada, a partida termina. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "Por que ignorar os zeros da matriz ao verificar colisão?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Mover e girar com colisão",
+        "code": "    def mover(self, dx):\n        if not self.fim and self.cabe(self.peca, self.x+dx, self.y):\n            self.x += dx\n\n    def girar(self):\n        if self.fim:\n            return\n        girada = [list(linha) for linha in zip(*self.peca[::-1])]\n        for ajuste in [0, -1, 1, -2, 2]:\n            if self.cabe(girada, self.x+ajuste, self.y):\n                self.peca = girada\n                self.x += ajuste\n                return\n\n",
+        "explain": "mover altera x somente se a posição estiver livre. girar inverte linhas e transpõe a matriz com zip. Os pequenos ajustes laterais permitem girar perto da parede quando há espaço. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "O que cabe precisa verificar antes de aceitar um giro?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Fixar blocos e remover linhas",
+        "code": "    def descer(self):\n        if self.fim:\n            return\n        if self.cabe(self.peca, self.x, self.y+1):\n            self.y += 1\n            return\n        for dy, linha in enumerate(self.peca):\n            for dx, valor in enumerate(linha):\n                if valor:\n                    self.tabuleiro[self.y+dy][self.x+dx] = valor\n        restantes = [linha for linha in self.tabuleiro if not all(linha)]\n        removidas = 20-len(restantes)\n        self.tabuleiro = [[0]*10 for _ in range(removidas)] + restantes\n        self.linhas += removidas\n        self.pontos += [0, 100, 300, 500, 800][removidas]\n        self.nova_peca()\n\n",
+        "explain": "descer tenta avançar uma linha. Se não puder, grava os blocos no tabuleiro. all(linha) identifica linhas completas; elas saem e novas linhas vazias entram pelo topo. Pontos dependem do total removido de uma vez. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "Por que o tabuleiro deve continuar com vinte linhas após a remoção?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Implementar queda até o chão",
+        "code": "    def soltar(self):\n        if self.fim:\n            return\n        while self.cabe(self.peca, self.x, self.y+1):\n            self.y += 1\n        self.descer()\n\n",
+        "explain": "soltar avança enquanto a posição seguinte cabe. Depois chama descer para fixar a peça, remover linhas e criar a próxima. Não há espera neste laço: no máximo vinte posições são examinadas. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "Por que chamamos descer depois de chegar à última posição livre?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Preparar widgets e cores",
+        "code": "if __name__ == \"__main__\":\n    import asyncio\n    import ipywidgets as w\n    from IPython.display import display\n    try:\n        from google.colab import output\n        output.enable_custom_widget_manager()\n    except ImportError:\n        pass\n    if \"tarefa_tetris\" in globals():\n        tarefa_tetris.cancel()\n    jogo_tetris = Tetris()\n    tetris_rodando = False\n    painel_tetris = w.HTML()\n    cores = [\"#0f172a\", \"#22d3ee\", \"#facc15\", \"#c084fc\", \"#4ade80\", \"#fb7185\", \"#60a5fa\", \"#fb923c\"]\n\n",
+        "explain": "Importamos os recursos do notebook, cancelamos uma tarefa anterior e criamos painel, partida e paleta. O jogo começa pausado. A lista cores usa os mesmos números da matriz das peças. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "Como a cor de cada quadrado é escolhida?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Desenhar peça e blocos fixos",
+        "code": "    def desenhar_tetris():\n        j = jogo_tetris\n        quadro = [linha[:] for linha in j.tabuleiro]\n        if not j.fim:\n            for dy, linha in enumerate(j.peca):\n                for dx, valor in enumerate(linha):\n                    if valor:\n                        quadro[j.y+dy][j.x+dx] = valor\n        blocos = \"\".join(f'<rect x=\"{x*20+1}\" y=\"{y*20+1}\" width=\"18\" height=\"18\" rx=\"2\" fill=\"{cores[v]}\"/>'\n                         for y, linha in enumerate(quadro) for x, v in enumerate(linha))\n        estado = \"Fim de jogo\" if j.fim else (\"Jogando\" if tetris_rodando else \"Pausado\")\n        painel_tetris.value = f'<p><b>Tetris | Pontos: {j.pontos} | Linhas: {j.linhas}</b> | {estado}</p><svg viewBox=\"0 0 200 400\" width=\"200\" style=\"max-width:100%;background:#1e293b\">{blocos}</svg>'\n\n",
+        "explain": "Copiamos o tabuleiro para criar um quadro temporário. A peça atual é desenhada nessa cópia; o estado fixo só muda em descer. O SVG mostra os blocos, pontos e linhas. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "Por que desenhar a peça em uma cópia do tabuleiro?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Programar controles e reinício",
+        "code": "    def acao_tetris(acao):\n        if not tetris_rodando or jogo_tetris.fim:\n            return\n        acao()\n        desenhar_tetris()\n\n    def pausar_tetris(_):\n        global tetris_rodando\n        if not jogo_tetris.fim:\n            tetris_rodando = not tetris_rodando\n        desenhar_tetris()\n\n    def reiniciar_tetris(_):\n        global jogo_tetris, tetris_rodando\n        jogo_tetris = Tetris()\n        tetris_rodando = False\n        desenhar_tetris()\n\n    controles = []\n    for texto, acao in [(\"←\", lambda: jogo_tetris.mover(-1)), (\"Girar\", lambda: jogo_tetris.girar()),\n                         (\"→\", lambda: jogo_tetris.mover(1)), (\"↓\", lambda: jogo_tetris.descer()),\n                         (\"Soltar\", lambda: jogo_tetris.soltar())]:\n        b = w.Button(description=texto, layout=w.Layout(width=\"65px\", height=\"42px\"))\n        b.on_click(lambda _, acao=acao: acao_tetris(acao))\n        controles.append(b)\n    pausa = w.Button(description=\"Iniciar / Pausar\")\n    pausa.on_click(pausar_tetris)\n    reset = w.Button(description=\"Reiniciar\")\n    reset.on_click(reiniciar_tetris)\n\n",
+        "explain": "acao_tetris evita movimentos durante pausa ou fim de jogo. Os botões chamam mover, girar, descer e soltar. Reiniciar cria um novo Tetris. As lambdas preservam a ação de cada botão. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "Por que uma partida pausada deve ignorar movimentos?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Adicionar queda automática",
+        "code": "    async def atualizar_tetris():\n        while True:\n            await asyncio.sleep(max(0.15, 0.7-jogo_tetris.linhas*0.02))\n            if tetris_rodando and not jogo_tetris.fim:\n                jogo_tetris.descer()\n                desenhar_tetris()\n\n    display(w.VBox([painel_tetris, w.HBox(controles, layout=w.Layout(flex_flow=\"row wrap\")), w.HBox([pausa, reset])]))\n    desenhar_tetris()\n    tarefa_tetris = asyncio.get_running_loop().create_task(atualizar_tetris())\n",
+        "explain": "O laço aguarda antes de descer. A velocidade aumenta com as linhas removidas, mas max mantém um intervalo mínimo. display apresenta os controles e create_task inicia o temporizador do notebook. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "Qual variável faz a dificuldade aumentar?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Código completo: executar e testar",
+        "code": "import random\n\nclass Tetris:\n    PECAS = [ [[1,1,1,1]], [[2,2],[2,2]], [[0,3,0],[3,3,3]],\n              [[0,4,4],[4,4,0]], [[5,5,0],[0,5,5]],\n              [[6,0,0],[6,6,6]], [[0,0,7],[7,7,7]] ]\n\n    def __init__(self):\n        self.tabuleiro = [[0]*10 for _ in range(20)]\n        self.pontos = 0\n        self.linhas = 0\n        self.fim = False\n        self.nova_peca()\n\n    def nova_peca(self):\n        self.peca = [linha[:] for linha in random.choice(self.PECAS)]\n        self.x = (10-len(self.peca[0]))//2\n        self.y = 0\n        if not self.cabe(self.peca, self.x, self.y):\n            self.fim = True\n\n    def cabe(self, peca, x, y):\n        for dy, linha in enumerate(peca):\n            for dx, valor in enumerate(linha):\n                if valor and (not 0 <= x+dx < 10 or not 0 <= y+dy < 20 or self.tabuleiro[y+dy][x+dx]):\n                    return False\n        return True\n\n    def mover(self, dx):\n        if not self.fim and self.cabe(self.peca, self.x+dx, self.y):\n            self.x += dx\n\n    def girar(self):\n        if self.fim:\n            return\n        girada = [list(linha) for linha in zip(*self.peca[::-1])]\n        for ajuste in [0, -1, 1, -2, 2]:\n            if self.cabe(girada, self.x+ajuste, self.y):\n                self.peca = girada\n                self.x += ajuste\n                return\n\n    def descer(self):\n        if self.fim:\n            return\n        if self.cabe(self.peca, self.x, self.y+1):\n            self.y += 1\n            return\n        for dy, linha in enumerate(self.peca):\n            for dx, valor in enumerate(linha):\n                if valor:\n                    self.tabuleiro[self.y+dy][self.x+dx] = valor\n        restantes = [linha for linha in self.tabuleiro if not all(linha)]\n        removidas = 20-len(restantes)\n        self.tabuleiro = [[0]*10 for _ in range(removidas)] + restantes\n        self.linhas += removidas\n        self.pontos += [0, 100, 300, 500, 800][removidas]\n        self.nova_peca()\n\n    def soltar(self):\n        if self.fim:\n            return\n        while self.cabe(self.peca, self.x, self.y+1):\n            self.y += 1\n        self.descer()\n\nif __name__ == \"__main__\":\n    import asyncio\n    import ipywidgets as w\n    from IPython.display import display\n    try:\n        from google.colab import output\n        output.enable_custom_widget_manager()\n    except ImportError:\n        pass\n    if \"tarefa_tetris\" in globals():\n        tarefa_tetris.cancel()\n    jogo_tetris = Tetris()\n    tetris_rodando = False\n    painel_tetris = w.HTML()\n    cores = [\"#0f172a\", \"#22d3ee\", \"#facc15\", \"#c084fc\", \"#4ade80\", \"#fb7185\", \"#60a5fa\", \"#fb923c\"]\n\n    def desenhar_tetris():\n        j = jogo_tetris\n        quadro = [linha[:] for linha in j.tabuleiro]\n        if not j.fim:\n            for dy, linha in enumerate(j.peca):\n                for dx, valor in enumerate(linha):\n                    if valor:\n                        quadro[j.y+dy][j.x+dx] = valor\n        blocos = \"\".join(f'<rect x=\"{x*20+1}\" y=\"{y*20+1}\" width=\"18\" height=\"18\" rx=\"2\" fill=\"{cores[v]}\"/>'\n                         for y, linha in enumerate(quadro) for x, v in enumerate(linha))\n        estado = \"Fim de jogo\" if j.fim else (\"Jogando\" if tetris_rodando else \"Pausado\")\n        painel_tetris.value = f'<p><b>Tetris | Pontos: {j.pontos} | Linhas: {j.linhas}</b> | {estado}</p><svg viewBox=\"0 0 200 400\" width=\"200\" style=\"max-width:100%;background:#1e293b\">{blocos}</svg>'\n\n    def acao_tetris(acao):\n        if not tetris_rodando or jogo_tetris.fim:\n            return\n        acao()\n        desenhar_tetris()\n\n    def pausar_tetris(_):\n        global tetris_rodando\n        if not jogo_tetris.fim:\n            tetris_rodando = not tetris_rodando\n        desenhar_tetris()\n\n    def reiniciar_tetris(_):\n        global jogo_tetris, tetris_rodando\n        jogo_tetris = Tetris()\n        tetris_rodando = False\n        desenhar_tetris()\n\n    controles = []\n    for texto, acao in [(\"←\", lambda: jogo_tetris.mover(-1)), (\"Girar\", lambda: jogo_tetris.girar()),\n                         (\"→\", lambda: jogo_tetris.mover(1)), (\"↓\", lambda: jogo_tetris.descer()),\n                         (\"Soltar\", lambda: jogo_tetris.soltar())]:\n        b = w.Button(description=texto, layout=w.Layout(width=\"65px\", height=\"42px\"))\n        b.on_click(lambda _, acao=acao: acao_tetris(acao))\n        controles.append(b)\n    pausa = w.Button(description=\"Iniciar / Pausar\")\n    pausa.on_click(pausar_tetris)\n    reset = w.Button(description=\"Reiniciar\")\n    reset.on_click(reiniciar_tetris)\n\n    async def atualizar_tetris():\n        while True:\n            await asyncio.sleep(max(0.15, 0.7-jogo_tetris.linhas*0.02))\n            if tetris_rodando and not jogo_tetris.fim:\n                jogo_tetris.descer()\n                desenhar_tetris()\n\n    display(w.VBox([painel_tetris, w.HBox(controles, layout=w.Layout(flex_flow=\"row wrap\")), w.HBox([pausa, reset])]))\n    desenhar_tetris()\n    tarefa_tetris = asyncio.get_running_loop().create_task(atualizar_tetris())\n",
+        "explain": "Este é exatamente o programa montado nas etapas anteriores e usado no notebook vinculado. Depois da instalação, copie este bloco inteiro para outra célula e execute. Clique em Iniciar / Pausar e use os botões. Mantenha a sessão do Colab conectada.",
+        "colabOnly": true,
+        "interactive": true,
+        "question": "Qual regra você quer mudar no programa e como vai testar o resultado?"
       }
     ]
   },
@@ -191,36 +328,82 @@ const modules=[
     "name": "RPG textual",
     "tag": "07 • Jogos",
     "subtitle": "Escolhas e histórias",
-    "intro": "RPG interativo com botões de escolha, vida, inventário, derrota e vitória. Execute as etapas 4 e 5; encontre a chave na floresta e abra a torre. Os primeiros exemplos continuam ensinando os fundamentos. A interface abre na saída do Colab, com uma sessão conectada; estes códigos não executam dentro do site.",
+    "intro": "Aprenda a construir RPG textual com o mesmo código Python do projeto interativo. A sequência ensina estado, regras e interface. Cada trecho é parte do programa final; os recuos devem ser mantidos. A instalação vai em uma célula separada e o programa completo em outra.",
     "challenge": "Acrescente um item ao baú e faça esse item aparecer na mochila.",
     "hints": [
-      "Use uma variável escolha.",
-      "A variável escolha guarda texto: compare com \"3\", entre aspas.",
-      "Crie a lista inventario antes de usá-la e adicione o texto \"moeda\" com append."
+      "Comece pelo estado: quais valores mudam durante a execução?",
+      "Leia a regra da etapa e identifique a condição ou função responsável.",
+      "Compare o trecho com a última etapa, que reúne exatamente todas as partes. Preserve os espaços antes de cada linha."
     ],
     "steps": [
       {
-        "code": "nome = \"Aventureiro\"\nvida = 10\nprint(nome, \"tem\", vida, \"de vida\")",
-        "explain": "Uma ficha de personagem pode ser feita só com duas variáveis."
-      },
-      {
-        "code": "inventario = [\"mapa\", \"espada\"]\nprint(\"Itens:\", inventario)",
-        "explain": "A lista funciona como mochila do herói."
-      },
-      {
-        "code": "inventario = [\"mapa\", \"espada\"]\nescolha = \"1\"\nif escolha == \"1\":\n    print(\"Você entrou na floresta.\")\nelif escolha == \"2\":\n    print(\"Você voltou à cidade.\")\nelse:\n    print(\"Escolha novamente.\")\nprint(\"Itens:\", inventario)",
-        "explain": "O exemplo cria seu próprio inventário e não depende da etapa anterior. Altere escolha para \"1\" ou \"2\" para explorar os caminhos. Depois acrescente a opção \"3\" do desafio."
-      },
-      {
+        "title": "Preparar o Colab",
         "code": "%pip install -q \"ipywidgets>=8.1,<9\"",
-        "explain": "Preparação: execute esta célula no Google Colab. Se houver pedido de reinício, reinicie a sessão e execute a etapa seguinte. Esta instalação é comum aos quatro projetos.",
-        "colabOnly": true
+        "explain": "Execute esta instalação em uma célula separada do Colab. Os próximos trechos pertencem ao mesmo programa: copie em ordem, mantendo os recuos, para uma única célula. Execute depois de reunir todas as partes, ou copie a última etapa, que já contém o código completo.",
+        "colabOnly": true,
+        "question": "Em qual célula a instalação deve ser executada?"
       },
       {
-        "code": "class Aventura:\n    def __init__(self):\n        self.local = \"cidade\"\n        self.vida = 10\n        self.inventario = []\n        self.fim = False\n        self.mensagem = \"Encontre a chave na floresta e abra o portão da torre.\"\n\n    def escolher(self, acao):\n        if acao == \"reiniciar\":\n            self.__init__()\n            return\n        if self.fim:\n            return\n        if self.local == \"cidade\":\n            if acao == \"floresta\":\n                self.local = \"floresta\"\n                self.mensagem = \"Há um baú sob uma árvore e uma trilha perigosa.\"\n            elif acao == \"descansar\":\n                self.vida = 10\n                self.mensagem = \"Você descansou. Vida recuperada!\"\n        elif self.local == \"floresta\":\n            if acao == \"bau\":\n                if \"chave\" not in self.inventario:\n                    self.inventario.append(\"chave\")\n                    self.mensagem = \"Você encontrou a chave da torre!\"\n                else:\n                    self.mensagem = \"O baú está vazio; a chave já está na mochila.\"\n            elif acao == \"trilha\":\n                self.vida = max(0, self.vida-3)\n                self.mensagem = \"Espinhos! Você perdeu 3 pontos de vida.\"\n                if self.vida == 0:\n                    self.fim = True\n                    self.mensagem = \"Sua aventura terminou. Clique em Reiniciar.\"\n            elif acao == \"torre\":\n                self.local = \"torre\"\n                self.mensagem = \"Um portão trancado protege o livro do conhecimento.\"\n            elif acao == \"cidade\":\n                self.local = \"cidade\"\n                self.mensagem = \"Você retornou à cidade.\"\n        elif self.local == \"torre\":\n            if acao == \"abrir\":\n                if \"chave\" in self.inventario:\n                    self.fim = True\n                    self.mensagem = \"Vitória! Você abriu o portão e recuperou o livro do conhecimento.\"\n                else:\n                    self.mensagem = \"Você precisa encontrar a chave na floresta.\"\n            elif acao == \"floresta\":\n                self.local = \"floresta\"\n                self.mensagem = \"Você voltou à floresta.\"\n\n    def opcoes(self):\n        if self.fim:\n            return []\n        return {\"cidade\": [(\"Entrar na floresta\", \"floresta\"), (\"Descansar\", \"descansar\")],\n                \"floresta\": [(\"Abrir baú\", \"bau\"), (\"Explorar trilha\", \"trilha\"), (\"Ir à torre\", \"torre\"), (\"Voltar à cidade\", \"cidade\")],\n                \"torre\": [(\"Abrir portão\", \"abrir\"), (\"Voltar à floresta\", \"floresta\")]}[self.local]\n\nif __name__ == \"__main__\":\n    import html\n    import ipywidgets as w\n    from IPython.display import display\n    try:\n        from google.colab import output\n        output.enable_custom_widget_manager()\n    except ImportError:\n        pass\n    aventura = Aventura()\n    painel_rpg = w.HTML()\n    escolhas_rpg = w.VBox()\n\n    def jogar_rpg(acao):\n        aventura.escolher(acao)\n        desenhar_rpg()\n\n    def desenhar_rpg():\n        a = aventura\n        painel_rpg.value = f'<h3>RPG — O livro do conhecimento</h3><p><b>Local:</b> {a.local} | <b>Vida:</b> {a.vida}/10</p><p><b>Mochila:</b> {html.escape(\", \".join(a.inventario) or \"vazia\")}</p><p>{html.escape(a.mensagem)}</p>'\n        botoes = []\n        for texto, acao in a.opcoes() + [(\"Reiniciar\", \"reiniciar\")]:\n            b = w.Button(description=texto, layout=w.Layout(width=\"220px\", height=\"40px\"))\n            b.on_click(lambda _, acao=acao: jogar_rpg(acao))\n            botoes.append(b)\n        escolhas_rpg.children = tuple(botoes)\n\n    display(w.VBox([painel_rpg, escolhas_rpg]))\n    desenhar_rpg()\n",
-        "explain": "RPG interativo com botões de escolha, vida, inventário, derrota e vitória. Execute as etapas 4 e 5; encontre a chave na floresta e abra a torre. Não use um arquivo .py no terminal para esta interface: ela depende do ambiente de notebook e, nos dois jogos de tabuleiro, do loop assíncrono do Colab.",
+        "title": "Guardar o estado da aventura",
+        "code": "class Aventura:\n    def __init__(self):\n        self.local = \"cidade\"\n        self.vida = 10\n        self.inventario = []\n        self.fim = False\n        self.mensagem = \"Encontre a chave na floresta e abra o portão da torre.\"\n\n",
+        "explain": "A classe Aventura guarda local, vida, inventário, fim e mensagem. A missão é encontrar a chave e abrir a torre. Esses valores mudam a cada escolha. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
         "colabOnly": true,
-        "interactive": true
+        "fragment": true,
+        "question": "Quais informações precisam permanecer entre duas escolhas?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Criar caminhos, consequências e vitória",
+        "code": "    def escolher(self, acao):\n        if acao == \"reiniciar\":\n            self.__init__()\n            return\n        if self.fim:\n            return\n        if self.local == \"cidade\":\n            if acao == \"floresta\":\n                self.local = \"floresta\"\n                self.mensagem = \"Há um baú sob uma árvore e uma trilha perigosa.\"\n            elif acao == \"descansar\":\n                self.vida = 10\n                self.mensagem = \"Você descansou. Vida recuperada!\"\n        elif self.local == \"floresta\":\n            if acao == \"bau\":\n                if \"chave\" not in self.inventario:\n                    self.inventario.append(\"chave\")\n                    self.mensagem = \"Você encontrou a chave da torre!\"\n                else:\n                    self.mensagem = \"O baú está vazio; a chave já está na mochila.\"\n            elif acao == \"trilha\":\n                self.vida = max(0, self.vida-3)\n                self.mensagem = \"Espinhos! Você perdeu 3 pontos de vida.\"\n                if self.vida == 0:\n                    self.fim = True\n                    self.mensagem = \"Sua aventura terminou. Clique em Reiniciar.\"\n            elif acao == \"torre\":\n                self.local = \"torre\"\n                self.mensagem = \"Um portão trancado protege o livro do conhecimento.\"\n            elif acao == \"cidade\":\n                self.local = \"cidade\"\n                self.mensagem = \"Você retornou à cidade.\"\n        elif self.local == \"torre\":\n            if acao == \"abrir\":\n                if \"chave\" in self.inventario:\n                    self.fim = True\n                    self.mensagem = \"Vitória! Você abriu o portão e recuperou o livro do conhecimento.\"\n                else:\n                    self.mensagem = \"Você precisa encontrar a chave na floresta.\"\n            elif acao == \"floresta\":\n                self.local = \"floresta\"\n                self.mensagem = \"Você voltou à floresta.\"\n\n",
+        "explain": "escolher recebe o nome da ação. Primeiro trata reinício e fim de jogo. Depois verifica o local: cidade permite descansar; floresta oferece baú, trilha e torre; torre exige a chave. O baú não duplica a chave, vida nunca fica negativa e abrir com chave encerra com vitória. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "Por que a mesma ação precisa ser interpretada junto com o local atual?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Oferecer somente escolhas válidas",
+        "code": "    def opcoes(self):\n        if self.fim:\n            return []\n        return {\"cidade\": [(\"Entrar na floresta\", \"floresta\"), (\"Descansar\", \"descansar\")],\n                \"floresta\": [(\"Abrir baú\", \"bau\"), (\"Explorar trilha\", \"trilha\"), (\"Ir à torre\", \"torre\"), (\"Voltar à cidade\", \"cidade\")],\n                \"torre\": [(\"Abrir portão\", \"abrir\"), (\"Voltar à floresta\", \"floresta\")]}[self.local]\n\n",
+        "explain": "opcoes retorna pares de texto e ação para o local atual. Uma partida encerrada não oferece movimentos. Separar os rótulos das ações permite mudar o texto dos botões sem alterar as regras. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "Qual diferença existe entre o rótulo Abrir baú e a ação bau?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Criar a interface do RPG",
+        "code": "if __name__ == \"__main__\":\n    import html\n    import ipywidgets as w\n    from IPython.display import display\n    try:\n        from google.colab import output\n        output.enable_custom_widget_manager()\n    except ImportError:\n        pass\n    aventura = Aventura()\n    painel_rpg = w.HTML()\n    escolhas_rpg = w.VBox()\n\n",
+        "explain": "ipywidgets fornece o painel e a lista de botões. html.escape protege textos inseridos no painel. Instanciamos Aventura e criamos os widgets vazios que serão preenchidos pela função de desenho. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "Para que serve html.escape ao mostrar um texto em HTML?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Conectar as escolhas à tela",
+        "code": "    def jogar_rpg(acao):\n        aventura.escolher(acao)\n        desenhar_rpg()\n\n    def desenhar_rpg():\n        a = aventura\n        painel_rpg.value = f'<h3>RPG — O livro do conhecimento</h3><p><b>Local:</b> {a.local} | <b>Vida:</b> {a.vida}/10</p><p><b>Mochila:</b> {html.escape(\", \".join(a.inventario) or \"vazia\")}</p><p>{html.escape(a.mensagem)}</p>'\n        botoes = []\n        for texto, acao in a.opcoes() + [(\"Reiniciar\", \"reiniciar\")]:\n            b = w.Button(description=texto, layout=w.Layout(width=\"220px\", height=\"40px\"))\n            b.on_click(lambda _, acao=acao: jogar_rpg(acao))\n            botoes.append(b)\n        escolhas_rpg.children = tuple(botoes)\n\n",
+        "explain": "jogar_rpg aplica a ação e chama desenhar_rpg. O desenho mostra estado e mensagem e recria os botões das opções atuais. acao=acao preserva a ação certa de cada botão no laço. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "Por que reconstruir os botões depois de mudar de local?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Mostrar a aventura e começar",
+        "code": "    display(w.VBox([painel_rpg, escolhas_rpg]))\n    desenhar_rpg()\n",
+        "explain": "display apresenta painel e escolhas na saída do Colab. desenhar_rpg preenche a tela inicial. Aqui não precisamos de temporizador: o jogo avança quando o jogador escolhe uma ação. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "O que faz este RPG avançar para o próximo estado?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Código completo: executar e testar",
+        "code": "class Aventura:\n    def __init__(self):\n        self.local = \"cidade\"\n        self.vida = 10\n        self.inventario = []\n        self.fim = False\n        self.mensagem = \"Encontre a chave na floresta e abra o portão da torre.\"\n\n    def escolher(self, acao):\n        if acao == \"reiniciar\":\n            self.__init__()\n            return\n        if self.fim:\n            return\n        if self.local == \"cidade\":\n            if acao == \"floresta\":\n                self.local = \"floresta\"\n                self.mensagem = \"Há um baú sob uma árvore e uma trilha perigosa.\"\n            elif acao == \"descansar\":\n                self.vida = 10\n                self.mensagem = \"Você descansou. Vida recuperada!\"\n        elif self.local == \"floresta\":\n            if acao == \"bau\":\n                if \"chave\" not in self.inventario:\n                    self.inventario.append(\"chave\")\n                    self.mensagem = \"Você encontrou a chave da torre!\"\n                else:\n                    self.mensagem = \"O baú está vazio; a chave já está na mochila.\"\n            elif acao == \"trilha\":\n                self.vida = max(0, self.vida-3)\n                self.mensagem = \"Espinhos! Você perdeu 3 pontos de vida.\"\n                if self.vida == 0:\n                    self.fim = True\n                    self.mensagem = \"Sua aventura terminou. Clique em Reiniciar.\"\n            elif acao == \"torre\":\n                self.local = \"torre\"\n                self.mensagem = \"Um portão trancado protege o livro do conhecimento.\"\n            elif acao == \"cidade\":\n                self.local = \"cidade\"\n                self.mensagem = \"Você retornou à cidade.\"\n        elif self.local == \"torre\":\n            if acao == \"abrir\":\n                if \"chave\" in self.inventario:\n                    self.fim = True\n                    self.mensagem = \"Vitória! Você abriu o portão e recuperou o livro do conhecimento.\"\n                else:\n                    self.mensagem = \"Você precisa encontrar a chave na floresta.\"\n            elif acao == \"floresta\":\n                self.local = \"floresta\"\n                self.mensagem = \"Você voltou à floresta.\"\n\n    def opcoes(self):\n        if self.fim:\n            return []\n        return {\"cidade\": [(\"Entrar na floresta\", \"floresta\"), (\"Descansar\", \"descansar\")],\n                \"floresta\": [(\"Abrir baú\", \"bau\"), (\"Explorar trilha\", \"trilha\"), (\"Ir à torre\", \"torre\"), (\"Voltar à cidade\", \"cidade\")],\n                \"torre\": [(\"Abrir portão\", \"abrir\"), (\"Voltar à floresta\", \"floresta\")]}[self.local]\n\nif __name__ == \"__main__\":\n    import html\n    import ipywidgets as w\n    from IPython.display import display\n    try:\n        from google.colab import output\n        output.enable_custom_widget_manager()\n    except ImportError:\n        pass\n    aventura = Aventura()\n    painel_rpg = w.HTML()\n    escolhas_rpg = w.VBox()\n\n    def jogar_rpg(acao):\n        aventura.escolher(acao)\n        desenhar_rpg()\n\n    def desenhar_rpg():\n        a = aventura\n        painel_rpg.value = f'<h3>RPG — O livro do conhecimento</h3><p><b>Local:</b> {a.local} | <b>Vida:</b> {a.vida}/10</p><p><b>Mochila:</b> {html.escape(\", \".join(a.inventario) or \"vazia\")}</p><p>{html.escape(a.mensagem)}</p>'\n        botoes = []\n        for texto, acao in a.opcoes() + [(\"Reiniciar\", \"reiniciar\")]:\n            b = w.Button(description=texto, layout=w.Layout(width=\"220px\", height=\"40px\"))\n            b.on_click(lambda _, acao=acao: jogar_rpg(acao))\n            botoes.append(b)\n        escolhas_rpg.children = tuple(botoes)\n\n    display(w.VBox([painel_rpg, escolhas_rpg]))\n    desenhar_rpg()\n",
+        "explain": "Este é exatamente o programa montado nas etapas anteriores e usado no notebook vinculado. Depois da instalação, copie este bloco inteiro para outra célula e execute. Use os botões e a caixa de mensagem, quando disponível. Mantenha a sessão do Colab conectada.",
+        "colabOnly": true,
+        "interactive": true,
+        "question": "Qual regra você quer mudar no programa e como vai testar o resultado?"
       }
     ]
   },
@@ -229,36 +412,91 @@ const modules=[
     "name": "Bot clássico ELIZA",
     "tag": "08 • IA sem LLM",
     "subtitle": "Palavras-chave, regras e menus",
-    "intro": "ELIZA didática com conversa interativa, padrões de frases e reflexão de pronomes. Execute as etapas 4 e 5, digite uma mensagem e clique em Enviar. Os primeiros exemplos continuam ensinando os fundamentos. A interface abre na saída do Colab, com uma sessão conectada; estes códigos não executam dentro do site.",
+    "intro": "Aprenda a construir Bot clássico ELIZA com o mesmo código Python do projeto interativo. A sequência ensina estado, regras e interface. Cada trecho é parte do programa final; os recuos devem ser mantidos. A instalação vai em uma célula separada e o programa completo em outra.",
     "challenge": "Acrescente uma regra para escola e teste com duas frases.",
     "hints": [
-      "Converta o texto para minúsculas com lower().",
-      "Use in para procurar um texto dentro de outro. A palavra procurada precisa de aspas.",
-      "Coloque a regra mais específica antes da resposta padrão."
+      "Comece pelo estado: quais valores mudam durante a execução?",
+      "Leia a regra da etapa e identifique a condição ou função responsável.",
+      "Compare o trecho com a última etapa, que reúne exatamente todas as partes. Preserve os espaços antes de cada linha."
     ],
     "steps": [
       {
-        "code": "frase = \"Oi professor\"\npalavras = frase.lower().split()\nif \"oi\" in palavras:\n    print(\"Olá! Vamos estudar Python?\")",
-        "explain": "lower converte para minúsculas; split separa palavras por espaços. Procurar \"oi\" na lista evita confundir a saudação com parte da palavra \"coisa\". Neste primeiro exemplo, use palavras sem pontuação."
-      },
-      {
-        "code": "import re\n\ndef responder(frase):\n    palavras = re.findall(r\"\\w+\", frase.lower())\n    if \"lista\" in palavras:\n        return \"Use [ ] para criar uma lista.\"\n    if \"oi\" in palavras:\n        return \"Olá, estudante!\"\n    return \"Me conte mais.\"\n\nprint(responder(\"como criar lista?\"))\nprint(responder(\"Oi!\"))\nprint(responder(\"coisa\"))",
-        "explain": "re é um módulo da biblioteca padrão: não precisa de pip. Ele separa palavras mesmo com pontuação. A função responde a \"Oi!\", mas não confunde \"coisa\" com \"oi\"."
-      },
-      {
-        "code": "import re\n\ndef bot(frase):\n    palavras = re.findall(r\"\\w+\", frase.lower())\n    if \"erro\" in palavras:\n        return \"Leia a última linha do erro.\"\n    if \"python\" in palavras:\n        return \"Python é uma linguagem de programação.\"\n    return \"Quer estudar listas ou jogos?\"\n\nperguntas = [\"O que é Python?\", \"Deu erro\"]\nfor pergunta in perguntas:\n    print(\"Você:\", pergunta)\n    print(\"Bot:\", bot(pergunta))",
-        "explain": "Cada pergunta passa pela função. As regras reconhecem palavras completas, ignorando maiúsculas e pontuação. Este é um bot didático inspirado em regras clássicas, não a implementação original de ELIZA."
-      },
-      {
+        "title": "Preparar o Colab",
         "code": "%pip install -q \"ipywidgets>=8.1,<9\"",
-        "explain": "Preparação: execute esta célula no Google Colab. Se houver pedido de reinício, reinicie a sessão e execute a etapa seguinte. Esta instalação é comum aos quatro projetos.",
-        "colabOnly": true
+        "explain": "Execute esta instalação em uma célula separada do Colab. Os próximos trechos pertencem ao mesmo programa: copie em ordem, mantendo os recuos, para uma única célula. Execute depois de reunir todas as partes, ou copie a última etapa, que já contém o código completo.",
+        "colabOnly": true,
+        "question": "Em qual célula a instalação deve ser executada?"
       },
       {
-        "code": "import re\nimport unicodedata\n\ndef normalizar(texto):\n    return \"\".join(c for c in unicodedata.normalize(\"NFD\", texto.lower()) if not unicodedata.combining(c))\n\ndef refletir(texto):\n    trocas = {\"eu\": \"você\", \"meu\": \"seu\", \"minha\": \"sua\", \"meus\": \"seus\", \"minhas\": \"suas\",\n              \"sou\": \"é\", \"estou\": \"está\", \"tenho\": \"tem\", \"voce\": \"eu\", \"seu\": \"meu\", \"sua\": \"minha\"}\n    return re.sub(r\"\\b\\w+\\b\", lambda m: trocas.get(normalizar(m.group()), m.group()), texto)\n\nclass Eliza:\n    def __init__(self):\n        self.encerrada = False\n        self.turno = 0\n\n    def responder(self, texto):\n        if self.encerrada:\n            return \"Conversa encerrada. Clique em Nova conversa.\"\n        texto = texto.strip()\n        if not texto:\n            return \"Escreva uma frase para começarmos.\"\n        n = normalizar(texto)\n        if n in [\"sair\", \"tchau\", \"adeus\"]:\n            self.encerrada = True\n            return \"Até mais! Obrigada pela conversa.\"\n        if re.search(r\"\\b(oi|ola)\\b\", n):\n            return \"Olá! Sou uma ELIZA didática, um programa de regras. Sobre o que quer conversar?\"\n        for padrao, resposta in [\n            (r\"\\beu preciso (.+)\", \"Por que você precisa {trecho}?\"),\n            (r\"\\beu sinto (.+)\", \"O que faz você sentir {trecho}?\"),\n            (r\"\\beu estou (.+)\", \"Há quanto tempo você está {trecho}?\"),\n            (r\"\\beu sou (.+)\", \"O que significa para você ser {trecho}?\"),\n            (r\"\\bporque (.+)\", \"Essa é a única razão: {trecho}?\"),\n        ]:\n            achado = re.search(padrao, n)\n            if achado:\n                # A normalização mantém os índices das letras portuguesas usuais.\n                trecho = texto[achado.start(1):achado.end(1)].rstrip(\".!?\")\n                trecho = refletir(trecho)\n                if \"precisa {trecho}\" in resposta and not re.match(r\"^(de|do|da|dos|das)\\b\", normalizar(trecho)):\n                    trecho = \"de \" + trecho\n                return resposta.format(trecho=trecho)\n        if re.search(r\"\\b(mae|pai|familia|irmao|irma)\\b\", n):\n            return \"Pode me contar mais sobre sua família?\"\n        if re.search(r\"\\b(python|programacao|codigo)\\b\", n):\n            return \"Que parte da programação você está aprendendo?\"\n        respostas = [\"Pode dar um exemplo?\", \"O que você pensa sobre isso?\", \"Conte um pouco mais.\"]\n        resposta = respostas[self.turno % len(respostas)]\n        self.turno += 1\n        return resposta\n\nif __name__ == \"__main__\":\n    import html\n    import ipywidgets as w\n    from IPython.display import display\n    try:\n        from google.colab import output\n        output.enable_custom_widget_manager()\n    except ImportError:\n        pass\n    eliza = Eliza()\n    historico_eliza = []\n    conversa_eliza = w.HTML()\n    entrada_eliza = w.Textarea(description=\"Você:\", placeholder=\"Digite sua mensagem…\", layout=w.Layout(width=\"95%\"))\n    enviar_eliza = w.Button(description=\"Enviar\")\n    nova_eliza = w.Button(description=\"Nova conversa\")\n\n    def atualizar_eliza():\n        conversa_eliza.value = '<h3>ELIZA didática</h3><p>Bot por regras inspirado em ELIZA. Não é uma LLM nem um serviço de aconselhamento.</p><div style=\"max-height:300px;overflow:auto\">' + \"\".join(\n            f'<p><b>{autor}:</b> {html.escape(texto)}</p>' for autor, texto in historico_eliza[-60:]) + '</div>'\n\n    def enviar_mensagem(_):\n        texto = entrada_eliza.value.strip()\n        if not texto:\n            return\n        historico_eliza.append((\"Você\", texto))\n        historico_eliza.append((\"ELIZA\", eliza.responder(texto)))\n        entrada_eliza.value = \"\"\n        atualizar_eliza()\n\n    def nova_conversa(_):\n        global eliza\n        eliza = Eliza()\n        historico_eliza.clear()\n        historico_eliza.append((\"ELIZA\", \"Olá! Digite uma frase. Para encerrar, escreva sair.\"))\n        entrada_eliza.value = \"\"\n        atualizar_eliza()\n\n    enviar_eliza.on_click(enviar_mensagem)\n    nova_eliza.on_click(nova_conversa)\n    display(w.VBox([conversa_eliza, entrada_eliza, w.HBox([enviar_eliza, nova_eliza])]))\n    nova_conversa(None)\n",
-        "explain": "ELIZA didática com conversa interativa, padrões de frases e reflexão de pronomes. Execute as etapas 4 e 5, digite uma mensagem e clique em Enviar. Não use um arquivo .py no terminal para esta interface: ela depende do ambiente de notebook e, nos dois jogos de tabuleiro, do loop assíncrono do Colab.",
+        "title": "Normalizar e refletir as palavras",
+        "code": "import re\nimport unicodedata\n\ndef normalizar(texto):\n    return \"\".join(c for c in unicodedata.normalize(\"NFD\", texto.lower()) if not unicodedata.combining(c))\n\ndef refletir(texto):\n    trocas = {\"eu\": \"você\", \"meu\": \"seu\", \"minha\": \"sua\", \"meus\": \"seus\", \"minhas\": \"suas\",\n              \"sou\": \"é\", \"estou\": \"está\", \"tenho\": \"tem\", \"voce\": \"eu\", \"seu\": \"meu\", \"sua\": \"minha\"}\n    return re.sub(r\"\\b\\w+\\b\", lambda m: trocas.get(normalizar(m.group()), m.group()), texto)\n\n",
+        "explain": "re encontra padrões; unicodedata ajuda a comparar mensagens sem diferença de acentos ou maiúsculas. refletir troca palavras completas: minha vira sua e eu vira você. re.sub faz uma única passagem para não trocar de volta palavras recém-alteradas. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
         "colabOnly": true,
-        "interactive": true
+        "fragment": true,
+        "question": "Por que trocar palavras completas em vez de partes das palavras?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Criar uma sessão de conversa",
+        "code": "class Eliza:\n    def __init__(self):\n        self.encerrada = False\n        self.turno = 0\n\n",
+        "explain": "A classe guarda se a conversa acabou e um contador para alternar respostas genéricas. Cada Nova conversa cria uma instância com estado novo. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "O que deve ser apagado quando uma nova conversa começa?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Reconhecer frases e construir respostas",
+        "code": "    def responder(self, texto):\n        if self.encerrada:\n            return \"Conversa encerrada. Clique em Nova conversa.\"\n        texto = texto.strip()\n        if not texto:\n            return \"Escreva uma frase para começarmos.\"\n        n = normalizar(texto)\n        if n in [\"sair\", \"tchau\", \"adeus\"]:\n            self.encerrada = True\n            return \"Até mais! Obrigada pela conversa.\"\n        if re.search(r\"\\b(oi|ola)\\b\", n):\n            return \"Olá! Sou uma ELIZA didática, um programa de regras. Sobre o que quer conversar?\"\n        for padrao, resposta in [\n            (r\"\\beu preciso (.+)\", \"Por que você precisa {trecho}?\"),\n            (r\"\\beu sinto (.+)\", \"O que faz você sentir {trecho}?\"),\n            (r\"\\beu estou (.+)\", \"Há quanto tempo você está {trecho}?\"),\n            (r\"\\beu sou (.+)\", \"O que significa para você ser {trecho}?\"),\n            (r\"\\bporque (.+)\", \"Essa é a única razão: {trecho}?\"),\n        ]:\n            achado = re.search(padrao, n)\n            if achado:\n                # A normalização mantém os índices das letras portuguesas usuais.\n                trecho = texto[achado.start(1):achado.end(1)].rstrip(\".!?\")\n                trecho = refletir(trecho)\n                if \"precisa {trecho}\" in resposta and not re.match(r\"^(de|do|da|dos|das)\\b\", normalizar(trecho)):\n                    trecho = \"de \" + trecho\n                return resposta.format(trecho=trecho)\n        if re.search(r\"\\b(mae|pai|familia|irmao|irma)\\b\", n):\n            return \"Pode me contar mais sobre sua família?\"\n        if re.search(r\"\\b(python|programacao|codigo)\\b\", n):\n            return \"Que parte da programação você está aprendendo?\"\n        respostas = [\"Pode dar um exemplo?\", \"O que você pensa sobre isso?\", \"Conte um pouco mais.\"]\n        resposta = respostas[self.turno % len(respostas)]\n        self.turno += 1\n        return resposta\n\n",
+        "explain": "responder trata mensagem vazia, despedida e saudação. Depois procura padrões como eu estou e eu preciso. O grupo (.+) captura o restante da frase; refletir adapta pronomes antes de montar a resposta. Regras de família e programação vêm depois; por último alternamos respostas genéricas. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "Por que a resposta genérica deve ficar depois das regras específicas?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Preparar a caixa de conversa",
+        "code": "if __name__ == \"__main__\":\n    import html\n    import ipywidgets as w\n    from IPython.display import display\n    try:\n        from google.colab import output\n        output.enable_custom_widget_manager()\n    except ImportError:\n        pass\n    eliza = Eliza()\n    historico_eliza = []\n    conversa_eliza = w.HTML()\n    entrada_eliza = w.Textarea(description=\"Você:\", placeholder=\"Digite sua mensagem…\", layout=w.Layout(width=\"95%\"))\n    enviar_eliza = w.Button(description=\"Enviar\")\n    nova_eliza = w.Button(description=\"Nova conversa\")\n\n",
+        "explain": "Criamos a instância Eliza, a lista de histórico, o painel HTML, a caixa de texto e os botões. O modelo é local e baseado em regras; não recebe treinamento nem usa API. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "Qual é a diferença entre o estado de Eliza e a lista historico_eliza?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Mostrar mensagens com segurança",
+        "code": "    def atualizar_eliza():\n        conversa_eliza.value = '<h3>ELIZA didática</h3><p>Bot por regras inspirado em ELIZA. Não é uma LLM nem um serviço de aconselhamento.</p><div style=\"max-height:300px;overflow:auto\">' + \"\".join(\n            f'<p><b>{autor}:</b> {html.escape(texto)}</p>' for autor, texto in historico_eliza[-60:]) + '</div>'\n\n",
+        "explain": "atualizar_eliza transforma as últimas mensagens em parágrafos e usa html.escape para mostrar a entrada como texto. O painel tem limite de altura e rolagem. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "Por que uma mensagem contendo <script> deve aparecer como texto?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Enviar e reiniciar a conversa",
+        "code": "    def enviar_mensagem(_):\n        texto = entrada_eliza.value.strip()\n        if not texto:\n            return\n        historico_eliza.append((\"Você\", texto))\n        historico_eliza.append((\"ELIZA\", eliza.responder(texto)))\n        entrada_eliza.value = \"\"\n        atualizar_eliza()\n\n    def nova_conversa(_):\n        global eliza\n        eliza = Eliza()\n        historico_eliza.clear()\n        historico_eliza.append((\"ELIZA\", \"Olá! Digite uma frase. Para encerrar, escreva sair.\"))\n        entrada_eliza.value = \"\"\n        atualizar_eliza()\n\n",
+        "explain": "enviar_mensagem lê o texto, registra usuário e resposta, limpa a caixa e atualiza a tela. nova_conversa cria outra Eliza e limpa o histórico. Cada operação é acionada por um botão. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "Por que atualizar a tela só depois de registrar a resposta?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Ativar os eventos e apresentar o chat",
+        "code": "    enviar_eliza.on_click(enviar_mensagem)\n    nova_eliza.on_click(nova_conversa)\n    display(w.VBox([conversa_eliza, entrada_eliza, w.HBox([enviar_eliza, nova_eliza])]))\n    nova_conversa(None)\n",
+        "explain": "on_click conecta os botões às funções. display coloca os widgets na saída; nova_conversa prepara a primeira mensagem. Digite uma frase e clique em Enviar; sair encerra a conversa. Este é um trecho do programa completo: acrescente depois da parte anterior, preservando os espaços. Não execute este fragmento isoladamente.",
+        "colabOnly": true,
+        "fragment": true,
+        "question": "Qual função será chamada quando você clicar em Enviar?",
+        "exercise": "Localize no trecho as variáveis e funções citadas na explicação. Explique a regra antes de alterar o código."
+      },
+      {
+        "title": "Código completo: executar e testar",
+        "code": "import re\nimport unicodedata\n\ndef normalizar(texto):\n    return \"\".join(c for c in unicodedata.normalize(\"NFD\", texto.lower()) if not unicodedata.combining(c))\n\ndef refletir(texto):\n    trocas = {\"eu\": \"você\", \"meu\": \"seu\", \"minha\": \"sua\", \"meus\": \"seus\", \"minhas\": \"suas\",\n              \"sou\": \"é\", \"estou\": \"está\", \"tenho\": \"tem\", \"voce\": \"eu\", \"seu\": \"meu\", \"sua\": \"minha\"}\n    return re.sub(r\"\\b\\w+\\b\", lambda m: trocas.get(normalizar(m.group()), m.group()), texto)\n\nclass Eliza:\n    def __init__(self):\n        self.encerrada = False\n        self.turno = 0\n\n    def responder(self, texto):\n        if self.encerrada:\n            return \"Conversa encerrada. Clique em Nova conversa.\"\n        texto = texto.strip()\n        if not texto:\n            return \"Escreva uma frase para começarmos.\"\n        n = normalizar(texto)\n        if n in [\"sair\", \"tchau\", \"adeus\"]:\n            self.encerrada = True\n            return \"Até mais! Obrigada pela conversa.\"\n        if re.search(r\"\\b(oi|ola)\\b\", n):\n            return \"Olá! Sou uma ELIZA didática, um programa de regras. Sobre o que quer conversar?\"\n        for padrao, resposta in [\n            (r\"\\beu preciso (.+)\", \"Por que você precisa {trecho}?\"),\n            (r\"\\beu sinto (.+)\", \"O que faz você sentir {trecho}?\"),\n            (r\"\\beu estou (.+)\", \"Há quanto tempo você está {trecho}?\"),\n            (r\"\\beu sou (.+)\", \"O que significa para você ser {trecho}?\"),\n            (r\"\\bporque (.+)\", \"Essa é a única razão: {trecho}?\"),\n        ]:\n            achado = re.search(padrao, n)\n            if achado:\n                # A normalização mantém os índices das letras portuguesas usuais.\n                trecho = texto[achado.start(1):achado.end(1)].rstrip(\".!?\")\n                trecho = refletir(trecho)\n                if \"precisa {trecho}\" in resposta and not re.match(r\"^(de|do|da|dos|das)\\b\", normalizar(trecho)):\n                    trecho = \"de \" + trecho\n                return resposta.format(trecho=trecho)\n        if re.search(r\"\\b(mae|pai|familia|irmao|irma)\\b\", n):\n            return \"Pode me contar mais sobre sua família?\"\n        if re.search(r\"\\b(python|programacao|codigo)\\b\", n):\n            return \"Que parte da programação você está aprendendo?\"\n        respostas = [\"Pode dar um exemplo?\", \"O que você pensa sobre isso?\", \"Conte um pouco mais.\"]\n        resposta = respostas[self.turno % len(respostas)]\n        self.turno += 1\n        return resposta\n\nif __name__ == \"__main__\":\n    import html\n    import ipywidgets as w\n    from IPython.display import display\n    try:\n        from google.colab import output\n        output.enable_custom_widget_manager()\n    except ImportError:\n        pass\n    eliza = Eliza()\n    historico_eliza = []\n    conversa_eliza = w.HTML()\n    entrada_eliza = w.Textarea(description=\"Você:\", placeholder=\"Digite sua mensagem…\", layout=w.Layout(width=\"95%\"))\n    enviar_eliza = w.Button(description=\"Enviar\")\n    nova_eliza = w.Button(description=\"Nova conversa\")\n\n    def atualizar_eliza():\n        conversa_eliza.value = '<h3>ELIZA didática</h3><p>Bot por regras inspirado em ELIZA. Não é uma LLM nem um serviço de aconselhamento.</p><div style=\"max-height:300px;overflow:auto\">' + \"\".join(\n            f'<p><b>{autor}:</b> {html.escape(texto)}</p>' for autor, texto in historico_eliza[-60:]) + '</div>'\n\n    def enviar_mensagem(_):\n        texto = entrada_eliza.value.strip()\n        if not texto:\n            return\n        historico_eliza.append((\"Você\", texto))\n        historico_eliza.append((\"ELIZA\", eliza.responder(texto)))\n        entrada_eliza.value = \"\"\n        atualizar_eliza()\n\n    def nova_conversa(_):\n        global eliza\n        eliza = Eliza()\n        historico_eliza.clear()\n        historico_eliza.append((\"ELIZA\", \"Olá! Digite uma frase. Para encerrar, escreva sair.\"))\n        entrada_eliza.value = \"\"\n        atualizar_eliza()\n\n    enviar_eliza.on_click(enviar_mensagem)\n    nova_eliza.on_click(nova_conversa)\n    display(w.VBox([conversa_eliza, entrada_eliza, w.HBox([enviar_eliza, nova_eliza])]))\n    nova_conversa(None)\n",
+        "explain": "Este é exatamente o programa montado nas etapas anteriores e usado no notebook vinculado. Depois da instalação, copie este bloco inteiro para outra célula e execute. Use os botões e a caixa de mensagem, quando disponível. Mantenha a sessão do Colab conectada.",
+        "colabOnly": true,
+        "interactive": true,
+        "question": "Qual regra você quer mudar no programa e como vai testar o resultado?"
       }
     ]
   },

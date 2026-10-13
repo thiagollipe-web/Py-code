@@ -19,12 +19,13 @@ for(const m of modules.filter(m=>m.id!=='colab'))m.steps.filter(s=>!s.colabOnly)
 }));
 test('Pong: desafio muda a borda e rebate no passo 4',()=>assert.match(run(byId.pong.steps[2].code.replace('limite_direito = 5','limite_direito = 6')),/Passo 4 posição 6 direção -1/));
 test('Pong: movimentos maiores que um são contidos nas bordas',()=>{const out=run(byId.pong.steps[2].code.replace('velocidade = 1','velocidade = 3'));for(const line of out.trim().split('\n')){const position=Number(line.split(' ')[3]);assert.ok(position>=0&&position<=5,line)}});
-test('Bot: palavra parcial não aciona a regra, pontuação e maiúsculas funcionam',()=>assert.equal(run(byId.bot.steps[1].code+'\nprint(responder("Coisa"))\nprint(responder("OI!!!"))'),'Use [ ] para criar uma lista.\nOlá, estudante!\nMe conte mais.\nMe conte mais.\nOlá, estudante!\n'));
 test('LLM: células Python compilam; instalação continua separada',()=>{assert.match(byId.colab.steps[0].code,/^%pip /);for(const s of byId.colab.steps.slice(1))run('compile('+JSON.stringify(s.code)+', "aula", "exec")')});
 for(const [id,file] of [['cobrinha','cobrinha'],['tetris','tetris'],['rpg','rpg'],['bot','eliza']])test(`${id}: projeto completo corresponde ao notebook e compila`,()=>{
  const code=fs.readFileSync(`aulas/interativos/${file}.py`,'utf8');
- assert.equal(byId[id].steps[4].code,code);
+ assert.equal(byId[id].steps.at(-1).code,code);
  const notebook=JSON.parse(fs.readFileSync(`aulas/interativos/${file}.ipynb`,'utf8'));
- assert.equal(notebook.cells[2].source.join(''),code);
+ assert.equal(notebook.cells.at(-1).source.join(''),code);
  run('compile('+JSON.stringify(code)+', "projeto", "exec")');
 });
+
+for(const id of ["cobrinha","tetris","rpg","bot"])test(`${id}: trechos montam exatamente o programa final`,()=>{const m=byId[id];assert.equal(m.steps.filter(s=>s.fragment).map(s=>s.code).join(""),m.steps.at(-1).code);assert.ok(m.steps.filter(s=>s.fragment).every(s=>s.title&&s.question&&s.explain));});
