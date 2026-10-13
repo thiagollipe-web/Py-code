@@ -1,5 +1,5 @@
-const CACHE='py-code-v40';
-const APP_SHELL=['./','./index.html','./academia.css?v=40','./academia.js?v=40','./curriculo.js?v=40','./tutor.js?v=40','./manifest.webmanifest','./assets/py-mentor.svg'];
+const CACHE='py-code-v41';
+const APP_SHELL=['./','./index.html','./academia.css?v=41','./academia.js?v=41','./curriculo.js?v=41','./tutor.js?v=41','./manifest.webmanifest','./assets/py-mentor.svg'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(APP_SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('py-code-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',event=>{
