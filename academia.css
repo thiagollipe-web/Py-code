@@ -18,3 +18,5 @@
 }
 
 .sidebar nav a{display:block;padding:12px 10px;border-radius:8px;text-decoration:none;font-size:12px;color:var(--green)}.sidebar nav a:hover{background:var(--mint)}@media(min-width:881px){.topbar{flex-wrap:wrap;padding:10px 0}.trails-toggle{background:var(--mint);border-color:#cce0d3;color:var(--green)}}
+
+.game-panel{margin:25px 0;padding:20px;background:#f0f6f2;border:1px solid #cce0d3;border-radius:14px}.game-panel canvas{max-width:100%;height:auto;display:block;margin:12px 0}.game-panel [hidden]{display:none!important}#gameControls{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}#gameChatLog{max-height:300px;overflow:auto}#gameChatForm{display:flex;flex-wrap:wrap;gap:10px}#gameChatInput{min-width:0;flex:1;padding:12px}.practice #playHere{margin-bottom:10px}

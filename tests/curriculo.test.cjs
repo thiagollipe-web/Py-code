@@ -29,3 +29,4 @@ for(const [id,file] of [['cobrinha','cobrinha'],['tetris','tetris'],['rpg','rpg'
 });
 
 for(const id of ["cobrinha","tetris","rpg","bot"])test(`${id}: trechos montam exatamente o programa final`,()=>{const m=byId[id];assert.equal(m.steps.filter(s=>s.fragment).map(s=>s.code).join(""),m.steps.at(-1).code);assert.ok(m.steps.filter(s=>s.fragment).every(s=>s.title&&s.question&&s.explain));});
+test('jogos do site usam as mesmas classes Python das aulas',()=>{const w={};vm.runInNewContext(fs.readFileSync('games-data.js','utf8'),{window:w});for(const [id,file] of [['cobrinha','cobrinha'],['tetris','tetris'],['rpg','rpg'],['bot','eliza']])assert.equal(w.PyCodeGameSources[id],fs.readFileSync(`aulas/interativos/${file}.py`,'utf8').split('if __name__')[0]);});

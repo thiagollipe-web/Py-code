@@ -27,6 +27,8 @@ jobs:
           node --check tutor.js
           node --check curriculo.js
           node --check sw.js
+          node --check games.js
+          node --check games-data.js
           node --test tests/*.test.cjs
           python3 -m unittest discover -s tests -p "test_*.py"
           python3 -m json.tool manifest.webmanifest >/dev/null
@@ -34,7 +36,7 @@ jobs:
       - name: Prepare site
         run: |
           mkdir -p _site
-          cp index.html academia.css academia.js curriculo.js tutor.js sw.js manifest.webmanifest _site/
+          cp index.html academia.css academia.js curriculo.js tutor.js sw.js games.js games-data.js manifest.webmanifest _site/
           cp -R assets _site/assets
 
       - name: Configure Pages

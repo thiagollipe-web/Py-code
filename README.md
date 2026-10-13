@@ -1,12 +1,12 @@
 # Py-Code · Aprenda com a Py
 
-Site responsivo de aulas guiadas de Python, com a Py, uma cobrinha professora em um popup acessível. A prática acontece no Google Colab: a página não contém editor nem executor Python e não baixa Pyodide.
+Site responsivo de aulas guiadas de Python, com a Py, uma cobrinha professora em um popup acessível. A prática acontece no Google Colab: Cobrinha, Tetris, RPG e ELIZA também executam no próprio site: o botão Jogar aqui no site carrega Python com Pyodide e usa as mesmas classes dos notebooks. O primeiro carregamento precisa de internet.
 
 ## Aprendizagem
 
 Nove trilhas: primeiros comandos, listas, cálculos, lógica de Cobrinha, Pong, Tetris, RPG textual, bot de regras inspirado em ELIZA e introdução a uma LLM pequena no Colab. Os exemplos iniciais ensinam a lógica textual. Cobrinha, Tetris, RPG e ELIZA também têm projetos completos interativos para executar no Colab, com botões e widgets. Na aula, acompanhe as etapas de construção e use “Abrir projeto jogável no Colab”, execute a instalação e depois a célula completa. Cobrinha e Tetris precisam de uma sessão conectada para atualização automática. Exemplos de fundamentos e construção dos projetos com os mesmos trechos Python usados na versão completa. Cada etapa explica as regras e propõe uma pergunta; a última reúne o programa executável.
 
-A Py é um tutor local determinístico, **não uma LLM**. Usa contexto da aula, conceitos, perguntas de compreensão e pistas sobre erros colados do Colab. Não executa nem valida código, não compreende qualquer pergunta e não fornece avaliação automática das reflexões. As etapas são marcadas pelo aluno, e progresso e reflexões ficam apenas neste navegador. O chat fica em memória e não é enviado a um servidor.
+A Py é um tutor local determinístico, **não uma LLM**. Usa contexto da aula, conceitos, perguntas de compreensão e pistas sobre erros colados do Colab. O tutor não executa nem valida código, não compreende qualquer pergunta e não fornece avaliação automática das reflexões. As etapas são marcadas pelo aluno, e progresso e reflexões ficam apenas neste navegador. O chat fica em memória e não é enviado a um servidor.
 
 ## Executar e verificar
 
@@ -21,3 +21,7 @@ Site: https://thiagollipe-web.github.io/Py-code/
 ## Sincronizar as aulas dos projetos
 
 `node scripts/sync-project-lessons.cjs` extrai os trechos dos arquivos em `aulas/interativos/` e atualiza as aulas e notebooks. Os fragmentos são partes consecutivas do mesmo programa, com os recuos preservados. A instalação vai em uma célula separada; o programa completo vai em outra.
+
+## Jogar no site
+
+Selecione Cobrinha, Tetris, RPG ou ELIZA na lateral e clique em Jogar aqui no site. Aguarde Python carregar. Cobrinha e Tetris começam pausados; clique em Iniciar e use os controles. RPG usa escolhas e ELIZA usa a caixa de mensagem. O Canvas e os botões são a interface JavaScript; estado, regras e respostas são calculados pelas mesmas classes Python ensinadas nas aulas. Pyodide 0.27.7 é carregado sob demanda do CDN oficial. A execução dos jogos sem conexão não é garantida.

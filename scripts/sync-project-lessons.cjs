@@ -62,3 +62,5 @@ const cells=[];const md=t=>cells.push({cell_type:'markdown',metadata:{},source:[
 md('# Py-Code — programação passo a passo\nProfessor Thiago Fillipe Soares');
 for(const m of modules){md('## '+m.name+'\n'+m.intro);for(const [i,s] of m.steps.entries()){md('### '+(s.title||('Etapa '+(i+1)))+'\n'+s.explain);if(s.fragment)md('```python\n'+s.code+'\n```');else cells.push({cell_type:'code',metadata:{},source:s.code.split(/(?<=\n)/),execution_count:null,outputs:[]});}md('### Desafio\n'+m.challenge);}
 fs.writeFileSync('aulas/Py_Code_Aulas_Corrigidas.ipynb',JSON.stringify({cells,metadata:{kernelspec:{display_name:'Python 3',language:'python',name:'python3'}},nbformat:4,nbformat_minor:4},null,2));
+const sources=Object.fromEntries(Object.entries(plans).map(([id,p])=>[id,fs.readFileSync('aulas/interativos/'+p.file+'.py','utf8').split('if __name__')[0]]));
+fs.writeFileSync('games-data.js','window.PyCodeGameSources='+JSON.stringify(sources)+';\n');

@@ -9,4 +9,4 @@ test('declines finished homework and suggests a first decision',()=>assert.match
 test('follows up on topic and checks index comprehension',()=>{const t=create();t.respond('explique índice');assert.match(t.respond('2'),/Isso!/)});
 test('no false header warning for colon in string',()=>assert.equal(window.PyCodeTutor.diagnose('print("if voce")'),null));
 test('detects missing header colon as a hint',()=>assert.match(create().respond('if pontos > 2\n    print(pontos)'),/dois pontos/));
-test('no executor or worker referenced in entry point',()=>{const html=fs.readFileSync('index.html','utf8'),app=fs.readFileSync('academia.js','utf8');assert.doesNotMatch(html+app,/new Worker|pyodide|id="code"|id="run"/)});
+test('site loads game runtime without legacy worker',()=>{const html=fs.readFileSync('index.html','utf8'),app=fs.readFileSync('academia.js','utf8');assert.doesNotMatch(html+app,/new Worker|id="code"|id="run"/);assert.match(html,/games.js/);assert.match(app,/PyCodeGames.open/)});
