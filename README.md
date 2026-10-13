@@ -4,7 +4,7 @@ Site responsivo de aulas guiadas de Python, com a Py, uma cobrinha professora em
 
 ## Aprendizagem
 
-Nove trilhas: primeiros comandos, listas, cálculos, lógica de Cobrinha, Pong, Tetris, RPG textual, bot de regras inspirado em ELIZA e introdução a uma LLM pequena no Colab. Os jogos são exercícios textuais, não jogos gráficos completos. Exemplos curtos, explicações por linha, pistas graduais e desafios que o aluno constrói.
+Nove trilhas: primeiros comandos, listas, cálculos, lógica de Cobrinha, Pong, Tetris, RPG textual, bot de regras inspirado em ELIZA e introdução a uma LLM pequena no Colab. Os exemplos iniciais ensinam a lógica textual. Cobrinha, Tetris, RPG e ELIZA também têm projetos completos interativos para executar no Colab, com botões e widgets. Na aula, use “Abrir projeto jogável no Colab”, execute a instalação e depois a célula completa. Cobrinha e Tetris precisam de uma sessão conectada para atualização automática. Exemplos curtos, explicações por linha, pistas graduais e desafios que o aluno constrói.
 
 A Py é um tutor local determinístico, **não uma LLM**. Usa contexto da aula, conceitos, perguntas de compreensão e pistas sobre erros colados do Colab. Não executa nem valida código, não compreende qualquer pergunta e não fornece avaliação automática das reflexões. As etapas são marcadas pelo aluno, e progresso e reflexões ficam apenas neste navegador. O chat fica em memória e não é enviado a um servidor.
 

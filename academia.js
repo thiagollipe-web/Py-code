@@ -22,9 +22,12 @@ function navigation(){
 }
 function render(){
  const mod=catalog.byId[active],s=mod.steps[step];tutor.setLesson(active,step);$('lessonTitle').textContent=mod.name;$('lessonTag').textContent=mod.tag;$('lessonCounter').textContent='Etapa '+(step+1)+' de '+mod.steps.length;$('intro').textContent=mod.intro;$('explain').textContent=s.explain;$('exampleCode').textContent=s.code;$('challenge').textContent=mod.challenge;$('chatContext').textContent='Estudando: '+mod.name+' · etapa '+(step+1);$('checkQuestion').textContent='Explique o objetivo desta etapa e preveja o resultado antes de executar no Colab.';$('reflection').value=typeof drafts[active+':'+step]==='string'?drafts[active+':'+step]:'';
+ const projetos={cobrinha:'cobrinha',tetris:'tetris',rpg:'rpg',bot:'eliza'};
+ const projeto=projetos[active];$('interactiveColab').hidden=!projeto;
+ if(projeto)$('interactiveColab').href='https://colab.research.google.com/github/thiagollipe-web/Py-code/blob/main/aulas/interativos/'+projeto+'.ipynb';
  $('previous').disabled=step===0;$('next').textContent=step===mod.steps.length-1?'Marcar trilha como concluída ✓':'Entendi, próximo passo →';$('lessonStatus').textContent=done[active+':'+step]===true?'Você marcou esta etapa como entendida.':'';
  $('stepTabs').replaceChildren();mod.steps.forEach((_,i)=>{const b=document.createElement('button');b.type='button';b.textContent='0'+(i+1)+(done[active+':'+i]===true?' ✓':'');b.className=i===step?'active':'';b.setAttribute('aria-label','Etapa '+(i+1));b.setAttribute('aria-current',i===step?'step':'false');b.onclick=()=>{step=i;render();save()};$('stepTabs').append(b)});
- $('lineNotes').replaceChildren();s.code.split('\n').forEach((line,i)=>{if(!line.trim())return;const row=document.createElement('div');row.className='line-note';const number=document.createElement('span');number.textContent=String(i+1).padStart(2,'0');row.append(number,document.createTextNode(window.PyCodeTutor.explainLine(line)));$('lineNotes').append(row)});
+ $('lineNotes').replaceChildren();(s.interactive?[]:s.code.split('\n')).forEach((line,i)=>{if(!line.trim())return;const row=document.createElement('div');row.className='line-note';const number=document.createElement('span');number.textContent=String(i+1).padStart(2,'0');row.append(number,document.createTextNode(window.PyCodeTutor.explainLine(line)));$('lineNotes').append(row)});
  navigation();$('continue').textContent=Object.keys(done).length?'Continuar minha jornada →':'Começar a aprender →';
 }
 function scrollLesson(){$('lesson').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});$('lesson').focus({preventScroll:true})}
