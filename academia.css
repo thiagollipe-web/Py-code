@@ -6,3 +6,13 @@
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;scroll-behavior:auto!important}}
 
 .step-tabs{flex-wrap:wrap;gap:8px}.step-tabs button{white-space:normal;text-align:left;max-width:100%;line-height:1.5}#stageTitle{font-size:18px;line-height:1.4;margin:12px 0}#executionNote{line-height:1.7}
+
+/* Trilhas na lateral; em telas pequenas o menu abre pela esquerda. */
+.trails-toggle{display:none}.trails-backdrop{position:fixed;inset:0;border:0;background:#172a3266;z-index:39}.sidebar{overscroll-behavior:contain}.sidebar nav{flex-shrink:0}
+@media(max-width:880px){
+ .sidebar{position:fixed;left:0;top:0;bottom:0;width:min(290px,85vw);height:100dvh;padding:25px 18px;border-right:1px solid var(--line);border-bottom:0;z-index:40;transform:translateX(-100%);visibility:hidden;transition:transform .2s,visibility .2s;overflow-y:auto}
+ body.trails-open .sidebar{transform:translateX(0);visibility:visible}
+ .sidebar .nav-caption{display:block;margin:28px 0 12px 10px}.sidebar nav{display:grid;overflow:visible;margin-top:0;gap:7px}.sidebar nav button{width:100%;min-height:44px;font-size:12px;white-space:normal;flex-shrink:1}
+ .sidebar .sidebar-tip,.sidebar .progress-card{display:block}.sidebar .progress-card{margin-top:20px;padding-top:12px}.sidebar .sidebar-tip{margin-top:20px}
+ .trails-toggle{display:inline-flex;flex-shrink:0}.topbar{flex-wrap:wrap;padding:12px 0}.topbar>span{flex:1}.topbar #openBot{margin-left:auto}body.trails-open{overflow:hidden}
+}

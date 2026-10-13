@@ -35,7 +35,12 @@ function render(){
  navigation();$('continue').textContent=Object.keys(done).length?'Continuar minha jornada →':'Começar a aprender →';
 }
 function scrollLesson(){$('lesson').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});$('lesson').focus({preventScroll:true})}
-function select(id){active=id;step=0;render();save();bot('Vamos estudar '+catalog.byId[id].name+'. '+catalog.byId[id].steps[0].explain+' Quer uma explicação ou uma pista?');scrollLesson()}
+function select(id){closeTrails();active=id;step=0;render();save();bot('Vamos estudar '+catalog.byId[id].name+'. '+catalog.byId[id].steps[0].explain+' Quer uma explicação ou uma pista?');scrollLesson()}
+function closeTrails(){const wasOpen=document.body.classList.contains('trails-open');document.body.classList.remove('trails-open');$('toggleTrails').setAttribute('aria-expanded','false');$('trailsBackdrop').hidden=true;if(wasOpen)$('toggleTrails').focus()}
+$('toggleTrails').onclick=()=>{const open=!document.body.classList.contains('trails-open');document.body.classList.toggle('trails-open',open);$('toggleTrails').setAttribute('aria-expanded',String(open));$('trailsBackdrop').hidden=!open;if(open)$('nav').querySelector('button.active')?.focus()};
+$('trailsBackdrop').onclick=closeTrails;
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeTrails()});
+const trailsMedia=matchMedia('(max-width:880px)');trailsMedia.addEventListener('change',closeTrails);
 $('continue').onclick=scrollLesson;$('openBot').onclick=openBot;$('botFab').onclick=openBot;$('closeBot').onclick=closeBot;
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('assistant').hidden)closeBot()});
 $('previous').onclick=()=>{if(step>0){step--;render();save()}};
